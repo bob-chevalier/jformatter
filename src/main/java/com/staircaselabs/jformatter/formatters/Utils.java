@@ -11,6 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
+import com.staircaselabs.jformatter.core.CommentTokenizer;
+import com.staircaselabs.jformatter.core.TextToken;
+import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.tools.javac.parser.JavaTokenizer;
 import com.sun.tools.javac.parser.Scanner;
 import com.sun.tools.javac.parser.ScannerFactory;
@@ -19,10 +22,6 @@ import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
 import com.sun.tools.javac.parser.Tokens.Token;
 import com.sun.tools.javac.parser.Tokens.TokenKind;
 import com.sun.tools.javac.util.Context;
-
-import com.staircaselabs.jformatter.core.CommentTokenizer;
-import com.staircaselabs.jformatter.core.TextToken;
-import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
 public final class Utils {
 
@@ -82,6 +81,13 @@ public final class Utils {
         return IntStream.range( startPos, stopPos )
                 .filter( i -> !excluded.contains( tokens.get( i ).getType() ) )
                 .reduce( (a, b) -> b );
+    }
+
+    public static String getLinebreak( List<TextToken> tokens ) {
+        OptionalInt linebreakIdx = findIndexByType( tokens, 0, TokenType.NEWLINE );
+        return linebreakIdx.isPresent()
+                ? tokens.get( linebreakIdx.getAsInt() ).getText()
+                : DEFAULT_LINEBREAK;
     }
 
     public static String tokensToText( List<TextToken> tokens ) {

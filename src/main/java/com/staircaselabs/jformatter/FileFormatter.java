@@ -24,6 +24,7 @@ public class FileFormatter implements Callable<Boolean> {
         originalText = workingText = readFileToString( path );
 
         workingText = HeaderFormatter.format( workingText );
+        System.out.println( workingText );
 
         //TODO why even return anything here?  it will either succeed or throw
         return true;
