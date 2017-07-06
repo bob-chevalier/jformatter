@@ -1,7 +1,6 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.formatters.HeaderFormatter;
@@ -21,9 +20,16 @@ public class TestHeaderFormatter {
 
     @Test
     public void shouldRemoveExtraWhitespace() throws IOException, FormatException {
-        String text = Helper.readFileToString( "src/test/data/header_formatter/HeaderNoSpaces.java" );
+        String text = Helper.readFileToString( "src/test/data/header_formatter/HeaderExtraWhitespace.java" );
         String newText = HeaderFormatter.format( text );
-        assertEquals( expectedWithHeader, newText );
+        assertThat( newText ).isEqualTo( expectedWithHeader );
+    }
+
+    @Test
+    public void shouldAddNewlinesAfter() throws IOException, FormatException {
+        String text = Helper.readFileToString( "src/test/data/header_formatter/HeaderNoNewlines.java" );
+        String newText = HeaderFormatter.format( text );
+        assertThat( newText ).isEqualTo( expectedWithHeader );
     }
 
 }

@@ -5,6 +5,8 @@ java_library(
         "@junit4//jar",
         "@org_junit_platform_commons//jar",
         "@org_junit_jupiter_api//jar",
+        "@com_google_truth//jar",
+        "@com_google_guava//jar",
         "//src/main/java/com/staircaselabs/jformatter/core:core",
         "//src/main/java/com/staircaselabs/jformatter/formatters:formatters",
     ],
