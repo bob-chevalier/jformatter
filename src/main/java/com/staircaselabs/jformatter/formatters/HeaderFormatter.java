@@ -8,18 +8,15 @@ import static com.staircaselabs.jformatter.formatters.Utils.getLinebreak;
 import static com.staircaselabs.jformatter.formatters.Utils.isComment;
 import static com.staircaselabs.jformatter.formatters.Utils.tokenizeText;
 import static com.staircaselabs.jformatter.formatters.Utils.tokensToText;
-
-import java.util.Collections;
 import java.util.List;
 
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.TextToken;
-import com.sun.tools.javac.parser.Tokens.TokenKind;
 
 public class HeaderFormatter {
 
     public static String format( String text ) throws FormatException {
-        List<TextToken> tokens = tokenizeText( text, Collections.<TokenKind>emptySet() );
+        List<TextToken> tokens = tokenizeText( text );
 
         // find index of the first token in header, excluding leading whitespace and newlines
         int startIdx = findIndexByTypeExclusion( tokens, 0, WHITESPACE_OR_NEWLINE )
@@ -38,8 +35,9 @@ public class HeaderFormatter {
             // find an existing linebreak in the file so that inserted newlines have the same format
             String newline = getLinebreak( tokens );
 
-            // rebuild text, ensuring that first line of code is preceded by a newline
+            // rebuild text, ensuring that first line of code is preceded by two newlines
             return tokensToText( tokens.subList( startIdx, stopIdx + 1 ) )
+                    + newline
                     + newline
                     + tokensToText( tokens.subList( codeIdx, tokens.size() ) );
         } else {

@@ -2,11 +2,9 @@ package com.staircaselabs.jformatter.formatters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -40,14 +38,6 @@ public final class Utils {
             TokenType.WHITESPACE,
             TokenType.NEWLINE
     };
-
-    public static final Set<TokenKind> CLASS_START = new HashSet<>(
-            Arrays.asList(
-                    TokenKind.CLASS,
-                    TokenKind.INTERFACE,
-                    TokenKind.ENUM
-            )
-    );
 
     public static OptionalInt findIndexByType(
             List<TextToken> tokens,
@@ -100,7 +90,7 @@ public final class Utils {
                 || token.getType() == TokenType.COMMENT_LINE;
     }
 
-    public static List<TextToken> tokenizeText( String text, Set<TokenKind> stopTokens ) {
+    public static List<TextToken> tokenizeText( String text ) {
         char[] chars = text.toCharArray();
         ScannerFactory scannerFactory = ScannerFactory.instance( new Context() );
         CommentTokenizer tokenizer = new CommentTokenizer( scannerFactory, chars, chars.length );
@@ -111,9 +101,6 @@ public final class Utils {
         do {
             scanner.nextToken();
             Token rawToken = scanner.token();
-            if( stopTokens.contains( rawToken.kind ) ) {
-                break;
-            }
 
             // check for comments
             if( rawToken.comments != null ) {
@@ -158,8 +145,12 @@ public final class Utils {
                     )
             );
             lastPos = rawToken.endPos;
-
         } while( scanner.token().kind != TokenKind.EOF );
+
+        // check for newline at end of file
+        if( lastPos < text.length() ) {
+            tokens.add( new TextToken( text.substring( lastPos, text.length() ), TokenType.NEWLINE, lastPos, text.length() ) );
+        }
 
         return tokens;
     }
@@ -232,43 +223,6 @@ public final class Utils {
             return null;
         }
     }
-
-//    public static Optional<TextToken> findNextTokenByType(
-//            List<TextToken> tokens,
-//            int startPos,
-//            final Set<TokenType> types
-//    ) {
-//        for( int idx = startPos; idx < tokens.size(); idx++ ) {
-//            TextToken token = tokens.get( idx );
-//            if( types.contains( token.getType() ) ) {
-//                return Optional.of( token );
-//            }
-//        }
-//        return Optional.empty();
-//    }
-
-
-//    protected Optional<TextToken> findPrevTokenByType(
-//            List<TextToken> tokens,
-//            int startPos,
-//            final Set<TokenType> types
-//    ) {
-//        for( int idx = startPos; idx < tokens.size(); idx++ ) {
-//            TextToken token = tokens.get( idx );
-//            if( types.contains( token.getType() ) ) {
-//                return Optional.of( token );
-//            }
-//        }
-//        return Optional.empty();
-//    }
-
-//    private String readFileToString( Path path ) {
-//        try {
-//            return new String( Files.readAllBytes( path ), UTF_8 );
-//        } catch( IOException e ) {
-//            throw new RuntimeException( path + " could not be read. "  + e.getMessage() );
-//        }
-//    }
 
     private static class PublicScanner extends Scanner {
         protected PublicScanner( ScannerFactory scannerFactory, JavaTokenizer tokenizer ) {

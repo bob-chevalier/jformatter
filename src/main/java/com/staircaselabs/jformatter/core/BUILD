@@ -5,6 +5,6 @@ java_library(
     visibility = [
         "//src/main/java/com/staircaselabs/jformatter:__pkg__",
         "//src/main/java/com/staircaselabs/jformatter/formatters:__pkg__",
-        "//src/test/java/com/staircaselabs/jformatter/core:__pkg__",
+        "//src/test/java/com/staircaselabs/jformatter/formatters:__pkg__",
     ],
 )
