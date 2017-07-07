@@ -27,3 +27,14 @@ java_test(
     ],
     data = [ "//src/test/data/header_formatter:test-inputs", ],
 )
+
+java_test(
+    name = "TestTrailingWhitespaceRemover",
+    size = "small",
+    test_class = "com.staircaselabs.jformatter.formatters.TestTrailingWhitespaceRemover",
+    runtime_deps = [
+        "@org_opentest4j//jar",
+        ":formatters",
+    ],
+    data = [ "//src/test/data/trailing_whitespace:test-inputs", ],
+)

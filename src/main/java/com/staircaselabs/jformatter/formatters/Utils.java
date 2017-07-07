@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import com.staircaselabs.jformatter.core.CommentTokenizer;
+import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.tools.javac.parser.JavaTokenizer;
@@ -46,7 +47,7 @@ public final class Utils {
     ) {
         List<TokenType> included = Arrays.asList( types );
         return IntStream.range( startPos, tokens.size() )
-                .filter( i -> included.contains( tokens.get( i ).getType() ) )
+                .filter( i -> included.contains( tokens.get( i ).type ) )
                 .findFirst();
     }
 
@@ -57,7 +58,7 @@ public final class Utils {
     ) {
         List<TokenType> excluded = Arrays.asList( types );
         return IntStream.range( startPos, tokens.size() )
-                .filter( i -> !excluded.contains( tokens.get( i ).getType() ) )
+                .filter( i -> !excluded.contains( tokens.get( i ).type) )
                 .findFirst();
     }
 
@@ -69,7 +70,7 @@ public final class Utils {
     ) {
         List<TokenType> excluded = Arrays.asList( types );
         return IntStream.range( startPos, stopPos )
-                .filter( i -> !excluded.contains( tokens.get( i ).getType() ) )
+                .filter( i -> !excluded.contains( tokens.get( i ).type ) )
                 .reduce( (a, b) -> b );
     }
 
@@ -85,12 +86,12 @@ public final class Utils {
     }
 
     public static boolean isComment( TextToken token ) {
-        return token.getType() == TokenType.COMMENT_BLOCK 
-                || token.getType() == TokenType.COMMENT_JAVADOC
-                || token.getType() == TokenType.COMMENT_LINE;
+        return token.type == TokenType.COMMENT_BLOCK 
+                || token.type == TokenType.COMMENT_JAVADOC
+                || token.type  == TokenType.COMMENT_LINE;
     }
 
-    public static List<TextToken> tokenizeText( String text ) {
+    public static List<TextToken> tokenizeText( String text ) throws FormatException {
         char[] chars = text.toCharArray();
         ScannerFactory scannerFactory = ScannerFactory.instance( new Context() );
         CommentTokenizer tokenizer = new CommentTokenizer( scannerFactory, chars, chars.length );
@@ -147,9 +148,16 @@ public final class Utils {
             lastPos = rawToken.endPos;
         } while( scanner.token().kind != TokenKind.EOF );
 
-        // check for newline at end of file
+        // check for trailing newline after end-of-file token
         if( lastPos < text.length() ) {
-            tokens.add( new TextToken( text.substring( lastPos, text.length() ), TokenType.NEWLINE, lastPos, text.length() ) );
+            tokens.add(
+                    new TextToken(
+                            text.substring( lastPos, text.length() ),
+                            TokenType.NEWLINE,
+                            lastPos,
+                            text.length()
+                    )
+            );
         }
 
         return tokens;
@@ -205,12 +213,15 @@ public final class Utils {
         switch( kind ) {
         case IMPORT:
             return TokenType.IMPORT;
+        case EOF:
+            return TokenType.EOF;
         default:
             return TokenType.OTHER;
         }
     }
 
-    protected static TokenType tokenTypeFromCommentStyle( CommentStyle style ) {
+    protected static TokenType tokenTypeFromCommentStyle( CommentStyle style )
+            throws FormatException {
         switch( style ) {
         case LINE:
             return TokenType.COMMENT_LINE;
@@ -219,8 +230,7 @@ public final class Utils {
         case JAVADOC:
             return TokenType.COMMENT_JAVADOC;
         default:
-            //TODO throw an exception here?
-            return null;
+            throw new FormatException( "Unexpected CommentStyle: " + style );
         }
     }
 

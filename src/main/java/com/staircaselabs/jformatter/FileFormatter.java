@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.formatters.HeaderFormatter;
+import com.staircaselabs.jformatter.formatters.TrailingWhitespaceRemover;
 
 public class FileFormatter implements Callable<Boolean> {
     private final Path path;
@@ -24,7 +25,8 @@ public class FileFormatter implements Callable<Boolean> {
         originalText = workingText = readFileToString( path );
 
         workingText = HeaderFormatter.format( workingText );
-        System.out.println( workingText );
+        workingText = TrailingWhitespaceRemover.format( workingText );
+//        System.out.println( workingText );
 
         //TODO why even return anything here?  it will either succeed or throw
         return true;
