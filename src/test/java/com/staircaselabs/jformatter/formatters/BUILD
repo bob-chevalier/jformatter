@@ -38,3 +38,14 @@ java_test(
     ],
     data = [ "//src/test/data/trailing_whitespace:test-inputs", ],
 )
+
+java_test(
+    name = "TestUnusedImportsRemover",
+    size = "small",
+    test_class = "com.staircaselabs.jformatter.formatters.TestUnusedImportsRemover",
+    runtime_deps = [
+        "@org_opentest4j//jar",
+        ":formatters",
+    ],
+    data = [ "//src/test/data/unused_imports:test-inputs", ],
+)
