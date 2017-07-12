@@ -26,6 +26,8 @@ public class TextToken {
         IMPORT,
         NEWLINE,
         OTHER,
+        SEMICOLON,
+        STATIC,
         WHITESPACE
     }
 

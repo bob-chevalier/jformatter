@@ -7,7 +7,7 @@ import static com.staircaselabs.jformatter.formatters.Utils.findLastIndexByTypeE
 import static com.staircaselabs.jformatter.formatters.Utils.getLinebreak;
 import static com.staircaselabs.jformatter.formatters.Utils.isComment;
 import static com.staircaselabs.jformatter.formatters.Utils.tokenizeText;
-import static com.staircaselabs.jformatter.formatters.Utils.tokensToText;
+import static com.staircaselabs.jformatter.formatters.Utils.stringifyTokens;
 import java.util.List;
 
 import com.staircaselabs.jformatter.core.FormatException;
@@ -36,13 +36,13 @@ public class HeaderFormatter {
             String newline = getLinebreak( tokens );
 
             // rebuild text, ensuring that first line of code is preceded by two newlines
-            return tokensToText( tokens.subList( startIdx, stopIdx + 1 ) )
+            return stringifyTokens( tokens, startIdx, stopIdx )
                     + newline
                     + newline
-                    + tokensToText( tokens.subList( codeIdx, tokens.size() ) );
+                    + stringifyTokens( tokens, codeIdx, (tokens.size() - 1) );
         } else {
             // there is no header so just return original text as-is, excluding any leading whitespace and newlines
-            return tokensToText( tokens.subList( startIdx, tokens.size() ) );
+            return stringifyTokens( tokens, startIdx, (tokens.size() - 1) );
 
             //TODO potentially allow for the option of inserting a pre-defined header
         }

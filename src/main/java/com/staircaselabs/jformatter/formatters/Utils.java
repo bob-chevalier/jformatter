@@ -42,34 +42,52 @@ public final class Utils {
 
     public static OptionalInt findIndexByType(
             List<TextToken> tokens,
-            int startPos,
+            int startInclusive,
+            int endExclusive,
             TokenType... types
     ) {
         List<TokenType> included = Arrays.asList( types );
-        return IntStream.range( startPos, tokens.size() )
+        return IntStream.range( startInclusive, endExclusive )
                 .filter( i -> included.contains( tokens.get( i ).type ) )
+                .findFirst();
+    }
+
+    public static OptionalInt findIndexByType(
+            List<TextToken> tokens,
+            int startInclusive,
+            TokenType... types
+    ) {
+        return findIndexByType( tokens, startInclusive, tokens.size(), types );
+    }
+
+    public static OptionalInt findIndexByTypeExclusion(
+            List<TextToken> tokens,
+            int startInclusive,
+            int endExclusive,
+            TokenType... types
+    ) {
+        List<TokenType> excluded = Arrays.asList( types );
+        return IntStream.range( startInclusive, endExclusive )
+                .filter( i -> !excluded.contains( tokens.get( i ).type) )
                 .findFirst();
     }
 
     public static OptionalInt findIndexByTypeExclusion(
             List<TextToken> tokens,
-            int startPos,
+            int startInclusive,
             TokenType... types
     ) {
-        List<TokenType> excluded = Arrays.asList( types );
-        return IntStream.range( startPos, tokens.size() )
-                .filter( i -> !excluded.contains( tokens.get( i ).type) )
-                .findFirst();
+        return findIndexByTypeExclusion( tokens, startInclusive, tokens.size(), types );
     }
 
     public static OptionalInt findLastIndexByTypeExclusion(
             List<TextToken> tokens,
-            int startPos,
-            int stopPos,
+            int startInclusive,
+            int stopExclusive,
             TokenType... types
     ) {
         List<TokenType> excluded = Arrays.asList( types );
-        return IntStream.range( startPos, stopPos )
+        return IntStream.range( startInclusive, stopExclusive )
                 .filter( i -> !excluded.contains( tokens.get( i ).type ) )
                 .reduce( (a, b) -> b );
     }
@@ -81,8 +99,18 @@ public final class Utils {
                 : DEFAULT_LINEBREAK;
     }
 
-    public static String tokensToText( List<TextToken> tokens ) {
-        return tokens.stream().map( TextToken::getText ).reduce( "", String::concat );
+    public static String stringifyTokens( List<TextToken> tokens ) {
+        return stringifyTokens( tokens, 0, (tokens.size() - 1) );
+    }
+
+    public static String stringifyTokens( List<TextToken> tokens, int startInclusive ) {
+        return stringifyTokens( tokens, startInclusive, (tokens.size() - 1) );
+    }
+
+    public static String stringifyTokens( List<TextToken> tokens, int startInclusive, int endInclusive ) {
+        return IntStream.rangeClosed( startInclusive, endInclusive )
+                .mapToObj( i -> tokens.get( i ).getText() )
+                .reduce( "", String::concat );
     }
 
     public static boolean isComment( TextToken token ) {
@@ -215,6 +243,10 @@ public final class Utils {
             return TokenType.IMPORT;
         case EOF:
             return TokenType.EOF;
+        case SEMI:
+            return TokenType.SEMICOLON;
+        case STATIC:
+            return TokenType.STATIC;
         default:
             return TokenType.OTHER;
         }

@@ -7,11 +7,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.staircaselabs.jformatter.core.FormatException;
+
 public final class Helper {
 
     public static String readFileToString( String filepath ) throws IOException {
         Path path = Paths.get( filepath );
         return new String( Files.readAllBytes( path ), UTF_8 );
+    }
+
+    public static void outputToFile( String text, String absoluteOutputPath ) throws IOException {
+        Path path = Paths.get( absoluteOutputPath );;
+        Files.write( path, text.getBytes( UTF_8 ) );
     }
 
 }

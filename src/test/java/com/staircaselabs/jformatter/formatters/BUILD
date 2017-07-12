@@ -49,3 +49,14 @@ java_test(
     ],
     data = [ "//src/test/data/unused_imports:test-inputs", ],
 )
+
+java_test(
+    name = "TestImportsSorter",
+    size = "small",
+    test_class = "com.staircaselabs.jformatter.formatters.TestImportsSorter",
+    runtime_deps = [
+        "@org_opentest4j//jar",
+        ":formatters",
+    ],
+    data = [ "//src/test/data/imports_sorter:test-inputs", ],
+)

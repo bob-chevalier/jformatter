@@ -12,8 +12,10 @@ import javax.tools.JavaFileObject;
  */
 public final class FormatException extends Exception {
 
+    private static final long serialVersionUID = 1L;
+
     public FormatException( String msg ) {
-        this( DiagnosticInfo.create( msg ) );
+        super( msg );
     }
 
     public FormatException( DiagnosticInfo... infos ) {

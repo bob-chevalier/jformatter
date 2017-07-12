@@ -2,7 +2,7 @@ package com.staircaselabs.jformatter.formatters;
 
 import static com.staircaselabs.jformatter.formatters.Utils.findIndexByType;
 import static com.staircaselabs.jformatter.formatters.Utils.tokenizeText;
-import static com.staircaselabs.jformatter.formatters.Utils.tokensToText;
+import static com.staircaselabs.jformatter.formatters.Utils.stringifyTokens;
 
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.TextToken;
@@ -35,7 +35,7 @@ public class TrailingWhitespaceRemover {
                 .sorted( Comparator.reverseOrder() )
                 .forEach( i -> tokens.remove( i.intValue() ) );
 
-        return tokensToText( tokens );
+        return stringifyTokens( tokens );
     }
 
 }
