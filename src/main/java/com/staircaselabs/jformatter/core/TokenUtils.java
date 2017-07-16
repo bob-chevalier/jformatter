@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.formatters;
+package com.staircaselabs.jformatter.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,10 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
-import com.staircaselabs.jformatter.core.CommentTokenizer;
-import com.staircaselabs.jformatter.core.FormatException;
-import com.staircaselabs.jformatter.core.TextToken;
-import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.tools.javac.parser.JavaTokenizer;
 import com.sun.tools.javac.parser.Scanner;
 import com.sun.tools.javac.parser.ScannerFactory;
@@ -21,24 +17,12 @@ import com.sun.tools.javac.parser.Tokens.Comment.CommentStyle;
 import com.sun.tools.javac.parser.Tokens.Token;
 import com.sun.tools.javac.parser.Tokens.TokenKind;
 import com.sun.tools.javac.util.Context;
+import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
-public final class Utils {
+public final class TokenUtils {
 
     public static final String DEFAULT_LINEBREAK = "\n";
     public static final Pattern LINEBREAK_PATTERN = Pattern.compile( "\\R" );
-
-    public static final TokenType[] WHITESPACE_OR_NEWLINE = {
-            TokenType.WHITESPACE,
-            TokenType.NEWLINE
-    };
-
-    public static final TokenType[] COMMENTS_WHITESPACE_OR_NEWLINE = {
-            TokenType.COMMENT_BLOCK,
-            TokenType.COMMENT_JAVADOC,
-            TokenType.COMMENT_LINE,
-            TokenType.WHITESPACE,
-            TokenType.NEWLINE
-    };
 
     public static OptionalInt findIndexByType(
             List<TextToken> tokens,

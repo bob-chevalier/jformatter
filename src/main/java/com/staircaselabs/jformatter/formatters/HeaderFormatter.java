@@ -1,19 +1,31 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.formatters.Utils.COMMENTS_WHITESPACE_OR_NEWLINE;
-import static com.staircaselabs.jformatter.formatters.Utils.WHITESPACE_OR_NEWLINE;
-import static com.staircaselabs.jformatter.formatters.Utils.findIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.formatters.Utils.findLastIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.formatters.Utils.getLinebreak;
-import static com.staircaselabs.jformatter.formatters.Utils.isComment;
-import static com.staircaselabs.jformatter.formatters.Utils.tokenizeText;
-import static com.staircaselabs.jformatter.formatters.Utils.stringifyTokens;
+import static com.staircaselabs.jformatter.core.TokenUtils.findIndexByTypeExclusion;
+import static com.staircaselabs.jformatter.core.TokenUtils.findLastIndexByTypeExclusion;
+import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
+import static com.staircaselabs.jformatter.core.TokenUtils.isComment;
+import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
+import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 import java.util.List;
 
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.TextToken;
+import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
 public class HeaderFormatter {
+
+    private static final TokenType[] WHITESPACE_OR_NEWLINE = {
+            TokenType.WHITESPACE,
+            TokenType.NEWLINE
+    };
+
+    private static final TokenType[] COMMENTS_WHITESPACE_OR_NEWLINE = {
+            TokenType.COMMENT_BLOCK,
+            TokenType.COMMENT_JAVADOC,
+            TokenType.COMMENT_LINE,
+            TokenType.WHITESPACE,
+            TokenType.NEWLINE
+    };
 
     public static String format( String text ) throws FormatException {
         List<TextToken> tokens = tokenizeText( text );

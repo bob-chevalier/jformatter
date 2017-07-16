@@ -60,3 +60,14 @@ java_test(
     ],
     data = [ "//src/test/data/imports_sorter:test-inputs", ],
 )
+
+java_test(
+    name = "TestCurlyBraceFormatter",
+    size = "small",
+    test_class = "com.staircaselabs.jformatter.formatters.TestCurlyBraceFormatter",
+    runtime_deps = [
+        "@org_opentest4j//jar",
+        ":formatters",
+    ],
+    data = [ "//src/test/data/curly_braces:test-inputs", ],
+)

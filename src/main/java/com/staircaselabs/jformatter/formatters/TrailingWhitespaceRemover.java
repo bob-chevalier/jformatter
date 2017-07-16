@@ -1,8 +1,8 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.formatters.Utils.findIndexByType;
-import static com.staircaselabs.jformatter.formatters.Utils.tokenizeText;
-import static com.staircaselabs.jformatter.formatters.Utils.stringifyTokens;
+import static com.staircaselabs.jformatter.core.TokenUtils.findIndexByType;
+import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
+import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.TextToken;

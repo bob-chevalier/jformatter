@@ -1,12 +1,12 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.formatters.Utils.findIndexByType;
-import static com.staircaselabs.jformatter.formatters.Utils.findIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.formatters.Utils.findLastIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.formatters.Utils.getLinebreak;
-import static com.staircaselabs.jformatter.formatters.Utils.isComment;
-import static com.staircaselabs.jformatter.formatters.Utils.tokenizeText;
-import static com.staircaselabs.jformatter.formatters.Utils.stringifyTokens;
+import static com.staircaselabs.jformatter.core.TokenUtils.findIndexByType;
+import static com.staircaselabs.jformatter.core.TokenUtils.findIndexByTypeExclusion;
+import static com.staircaselabs.jformatter.core.TokenUtils.findLastIndexByTypeExclusion;
+import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
+import static com.staircaselabs.jformatter.core.TokenUtils.isComment;
+import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
+import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 
 import java.util.List;
 import java.util.OptionalInt;
