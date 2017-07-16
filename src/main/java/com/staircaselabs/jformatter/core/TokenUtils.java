@@ -21,8 +21,8 @@ import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
 public final class TokenUtils {
 
-    public static final String DEFAULT_LINEBREAK = "\n";
-    public static final Pattern LINEBREAK_PATTERN = Pattern.compile( "\\R" );
+    private static final String DEFAULT_LINEBREAK = "\n";
+    private static final Pattern LINEBREAK_PATTERN = Pattern.compile( "\\R" );
 
     public static OptionalInt findIndexByType(
             List<TextToken> tokens,
