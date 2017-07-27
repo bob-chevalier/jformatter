@@ -1,9 +1,9 @@
 package com.staircaselabs.jformatter.formatters;
 
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
-import static com.staircaselabs.jformatter.core.TokenUtils.findIndexByType;
-import static com.staircaselabs.jformatter.core.TokenUtils.findIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.core.TokenUtils.findLastIndexByTypeExclusion;
+import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByType;
+import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByTypeExclusion;
+import static com.staircaselabs.jformatter.core.TokenUtils.findPrevIndexByTypeExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
 import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
@@ -283,7 +283,7 @@ public class LeftBraceCuddler {
             int endIdx = input.getTokenIndexFromPosition( tree.getEndPosition( input.endPosTable ) );
 
             // find first opening curly brace
-            OptionalInt optionalBraceIdx = findIndexByType( input.tokens, startIdx, (endIdx + 1), TokenType.BRACE_OPEN );
+            OptionalInt optionalBraceIdx = findNextIndexByType( input.tokens, startIdx, (endIdx + 1), TokenType.BRACE_OPEN );
             if( !optionalBraceIdx.isPresent() ) {
                 // this tree doesn't contain an opening brace so there's nothing to do
                 return Optional.empty();
@@ -291,12 +291,12 @@ public class LeftBraceCuddler {
             int braceIdx = optionalBraceIdx.getAsInt();
 
             // find first non-whitespace, non-newline token before opening brace
-            int parentStatement = findLastIndexByTypeExclusion( input.tokens, braceIdx, WS_OR_NEWLINE )
+            int parentStatement = findPrevIndexByTypeExclusion( input.tokens, braceIdx, WS_OR_NEWLINE )
                     .orElseThrow( () -> new RuntimeException(
                             "Missing parent statement: " + id ) );
 
             // find the next non-whitespace, non-comment token following the opening brace
-            int trailingCodeOrNewline = findIndexByTypeExclusion( input.tokens, (braceIdx + 1), WS_OR_COMMENT )
+            int trailingCodeOrNewline = findNextIndexByTypeExclusion( input.tokens, (braceIdx + 1), WS_OR_COMMENT )
                     .orElseThrow( () -> new RuntimeException(
                             "Opening brace not closed: " + id ) );
 

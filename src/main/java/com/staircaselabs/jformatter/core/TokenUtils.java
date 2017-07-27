@@ -24,7 +24,7 @@ public final class TokenUtils {
     private static final String DEFAULT_LINEBREAK = "\n";
     private static final Pattern LINEBREAK_PATTERN = Pattern.compile( "\\R" );
 
-    public static OptionalInt findIndexByType(
+    public static OptionalInt findNextIndexByType(
             List<TextToken> tokens,
             int startInclusive,
             int endExclusive,
@@ -36,15 +36,15 @@ public final class TokenUtils {
                 .findFirst();
     }
 
-    public static OptionalInt findIndexByType(
+    public static OptionalInt findNextIndexByType(
             List<TextToken> tokens,
             int startInclusive,
             TokenType... types
     ) {
-        return findIndexByType( tokens, startInclusive, tokens.size(), types );
+        return findNextIndexByType( tokens, startInclusive, tokens.size(), types );
     }
 
-    public static OptionalInt findIndexByTypeExclusion(
+    public static OptionalInt findNextIndexByTypeExclusion(
             List<TextToken> tokens,
             int startInclusive,
             int endExclusive,
@@ -56,15 +56,15 @@ public final class TokenUtils {
                 .findFirst();
     }
 
-    public static OptionalInt findIndexByTypeExclusion(
+    public static OptionalInt findNextIndexByTypeExclusion(
             List<TextToken> tokens,
             int startInclusive,
             TokenType... types
     ) {
-        return findIndexByTypeExclusion( tokens, startInclusive, tokens.size(), types );
+        return findNextIndexByTypeExclusion( tokens, startInclusive, tokens.size(), types );
     }
 
-    public static OptionalInt findLastIndexByTypeExclusion(
+    public static OptionalInt findPrevIndexByTypeExclusion(
             List<TextToken> tokens,
             int startInclusive,
             int stopExclusive,
@@ -76,16 +76,16 @@ public final class TokenUtils {
                 .reduce( (a, b) -> b );
     }
 
-    public static OptionalInt findLastIndexByTypeExclusion(
+    public static OptionalInt findPrevIndexByTypeExclusion(
             List<TextToken> tokens,
             int stopExclusive,
             TokenType... types
     ) {
-	return findLastIndexByTypeExclusion( tokens, 0, stopExclusive, types );
+	return findPrevIndexByTypeExclusion( tokens, 0, stopExclusive, types );
     }
 
     public static String getLinebreak( List<TextToken> tokens ) {
-        OptionalInt linebreakIdx = findIndexByType( tokens, 0, TokenType.NEWLINE );
+        OptionalInt linebreakIdx = findNextIndexByType( tokens, 0, TokenType.NEWLINE );
         return linebreakIdx.isPresent()
                 ? tokens.get( linebreakIdx.getAsInt() ).getText()
                 : DEFAULT_LINEBREAK;

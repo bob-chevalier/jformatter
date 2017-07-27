@@ -1,6 +1,6 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.core.TokenUtils.findIndexByType;
+import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByType;
 import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 
@@ -18,7 +18,7 @@ public class TrailingWhitespaceRemover {
         List<Integer> indexesToRemove = new ArrayList<>();
 
         // find first whitespace token
-        int idx = findIndexByType( tokens, 0, TokenType.WHITESPACE ).orElse( -1 );
+        int idx = findNextIndexByType( tokens, 0, TokenType.WHITESPACE ).orElse( -1 );
         while( idx != -1 && idx < (tokens.size() - 1) ) {
             // check whether whitespace token is followed by a newline or EOF
             TokenType nextTokenType = tokens.get( idx + 1 ).type;
@@ -27,7 +27,7 @@ public class TrailingWhitespaceRemover {
             }
 
             // find next whitespace token
-            idx = findIndexByType( tokens, (idx + 1), TokenType.WHITESPACE ).orElse( -1 );
+            idx = findNextIndexByType( tokens, (idx + 1), TokenType.WHITESPACE ).orElse( -1 );
         }
 
         // we need to remove the tokens in reverse order to preserve the integrity of the indexes
