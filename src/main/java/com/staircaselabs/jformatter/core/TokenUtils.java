@@ -76,6 +76,14 @@ public final class TokenUtils {
                 .reduce( (a, b) -> b );
     }
 
+    public static OptionalInt findLastIndexByTypeExclusion(
+            List<TextToken> tokens,
+            int stopExclusive,
+            TokenType... types
+    ) {
+	return findLastIndexByTypeExclusion( tokens, 0, stopExclusive, types );
+    }
+
     public static String getLinebreak( List<TextToken> tokens ) {
         OptionalInt linebreakIdx = findIndexByType( tokens, 0, TokenType.NEWLINE );
         return linebreakIdx.isPresent()
@@ -154,7 +162,8 @@ public final class TokenUtils {
                             text.substring( rawToken.pos, rawToken.endPos ),
                             tokenTypeFromTokenKind( rawToken.kind ),
                             rawToken.pos,
-                            rawToken.pos + rawToken.endPos
+//                            rawToken.pos + rawToken.endPos
+                            rawToken.endPos
                     )
             );
             lastPos = rawToken.endPos;
@@ -225,8 +234,14 @@ public final class TokenUtils {
         switch( kind ) {
         case IMPORT:
             return TokenType.IMPORT;
+        case ELSE:
+            return TokenType.ELSE;
         case EOF:
             return TokenType.EOF;
+        case FINALLY:
+            return TokenType.FINALLY;
+        case LBRACE:
+            return TokenType.BRACE_OPEN;
         case SEMI:
             return TokenType.SEMICOLON;
         case STATIC:

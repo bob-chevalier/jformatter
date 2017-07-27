@@ -19,10 +19,13 @@ public class TextToken {
     }
 
     public enum TokenType {
+	BRACE_OPEN,
         COMMENT_LINE,
         COMMENT_BLOCK,
         COMMENT_JAVADOC,
+        ELSE,
         EOF,
+        FINALLY,
         IMPORT,
         NEWLINE,
         OTHER,

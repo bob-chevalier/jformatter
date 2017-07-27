@@ -62,12 +62,12 @@ java_test(
 )
 
 java_test(
-    name = "TestCurlyBraceFormatter",
+    name = "TestLeftBraceCuddler",
     size = "small",
-    test_class = "com.staircaselabs.jformatter.formatters.TestCurlyBraceFormatter",
+    test_class = "com.staircaselabs.jformatter.formatters.TestLeftBraceCuddler",
     runtime_deps = [
         "@org_opentest4j//jar",
         ":formatters",
     ],
-    data = [ "//src/test/data/curly_braces:test-inputs", ],
+    data = [ "//src/test/data/cuddle_left:test-inputs", ],
 )
