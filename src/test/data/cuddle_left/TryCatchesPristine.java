@@ -21,4 +21,21 @@ public class SomeClass {
         }
     }
 
+    private void doTryCatchWithComments() {
+        try {
+ // first comment
+        // second comment
+         // third comment
+            System.out.println( "try" );
+        } 
+        // catching some exception
+        catch( RuntimeException ex ) {
+            throw ex;
+        } 
+        finally
+        {
+            System.out.println( "finally" );
+        }
+    }
+
 }

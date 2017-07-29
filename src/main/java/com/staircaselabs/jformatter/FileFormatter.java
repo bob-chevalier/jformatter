@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.formatters.LeftBraceCuddler;
 import com.staircaselabs.jformatter.formatters.HeaderFormatter;
+import com.staircaselabs.jformatter.formatters.ImportsSorter;
 import com.staircaselabs.jformatter.formatters.TrailingWhitespaceRemover;
 import com.staircaselabs.jformatter.formatters.UnusedImportsRemover;
 
@@ -29,10 +30,10 @@ public class FileFormatter implements Callable<Boolean> {
 //        workingText = HeaderFormatter.format( workingText );
 //        workingText = TrailingWhitespaceRemover.format( workingText );
 //        workingText = UnusedImportsRemover.format( workingText );
+//        workingText = ImportsSorter.format( workingText );
         workingText = LeftBraceCuddler.format( workingText );
 
-
-//        System.out.println( workingText );
+        System.out.println( workingText );
 
         //TODO why even return anything here?  it will either succeed or throw
         return true;

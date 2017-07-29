@@ -48,13 +48,13 @@ public class HeaderFormatter {
             String newline = getLinebreak( tokens );
 
             // rebuild text, ensuring that first line of code is preceded by two newlines
-            return stringifyTokens( tokens, startIdx, stopIdx )
+            return stringifyTokens( tokens, startIdx, (stopIdx + 1) )
                     + newline
                     + newline
-                    + stringifyTokens( tokens, codeIdx, (tokens.size() - 1) );
+                    + stringifyTokens( tokens, codeIdx );
         } else {
             // there is no header so just return original text as-is, excluding any leading whitespace and newlines
-            return stringifyTokens( tokens, startIdx, (tokens.size() - 1) );
+            return stringifyTokens( tokens, startIdx );
 
             //TODO potentially allow for the option of inserting a pre-defined header
         }

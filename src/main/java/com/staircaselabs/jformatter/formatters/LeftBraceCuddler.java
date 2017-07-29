@@ -20,6 +20,7 @@ import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Replacement;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.staircaselabs.jformatter.core.TokenUtils;
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.CaseTree;
 import com.sun.source.tree.CatchTree;
@@ -53,6 +54,14 @@ public class LeftBraceCuddler {
             TokenType.WHITESPACE,
             TokenType.COMMENT_BLOCK,
             TokenType.COMMENT_LINE
+    };
+
+    private static final TokenType[] WS_NEWLINE_OR_COMMENT = {
+            TokenType.WHITESPACE,
+            TokenType.COMMENT_BLOCK,
+            TokenType.COMMENT_JAVADOC,
+            TokenType.COMMENT_LINE,
+            TokenType.NEWLINE
     };
 
     public static String format( String text ) throws FormatException {
@@ -290,8 +299,8 @@ public class LeftBraceCuddler {
             }
             int braceIdx = optionalBraceIdx.getAsInt();
 
-            // find first non-whitespace, non-newline token before opening brace
-            int parentStatement = findPrevIndexByTypeExclusion( input.tokens, braceIdx, WS_OR_NEWLINE )
+            // find first non-whitespace, non-newline, non-comment token before opening brace
+            int parentStatement = findPrevIndexByTypeExclusion( input.tokens, braceIdx, WS_NEWLINE_OR_COMMENT )
                     .orElseThrow( () -> new RuntimeException(
                             "Missing parent statement: " + id ) );
 
@@ -301,35 +310,54 @@ public class LeftBraceCuddler {
                             "Opening brace not closed: " + id ) );
 
             // we expect to have exactly one whitespace token between end of parent statement and opening brace
-            boolean removeLeadingText = !isSingleWhitespace( input.tokens, parentStatement, parentStatement );
+            boolean removeLeadingText = !isSingleWhitespace( input.tokens, (parentStatement + 1), braceIdx );
 
             // we expect a trailing newline before any actual code statements
             TextToken trailingToken = input.tokens.get( trailingCodeOrNewline );
-            boolean insertTrailingNewline = trailingToken.type != TokenType.NEWLINE;
+            boolean isMissingTrailingNewline = trailingToken.type != TokenType.NEWLINE;
 
-            if( removeLeadingText || insertTrailingNewline ) {
+            if( removeLeadingText || isMissingTrailingNewline ) {
                 StringBuilder sb = new StringBuilder();
-                sb.append( " " ); // insert a single space before brace
-                sb.append( stringifyTokens( input.tokens, braceIdx, (trailingCodeOrNewline - 1) ) );
+                sb.append( " {" ); // insert a single space before the left brace
+                if( containsComments( input.tokens, (parentStatement + 1), braceIdx ) ) {
+                    // comments appear between parentStatement and brace, so move them below brace
+                    sb.append( newline );
+                    sb.append( stringifyTokens( input.tokens, (parentStatement + 1), braceIdx ) );
+                }
+
+                // append any trailing comments or whitespace before a newline
+                sb.append( stringifyTokens( input.tokens, (braceIdx + 1), trailingCodeOrNewline ) );
                 sb.append( newline );
 
-                TextToken firstToken = input.tokens.get( parentStatement + 1 );
-                TextToken lastToken = insertTrailingNewline
+                TextToken firstTokenToReplace = input.tokens.get( parentStatement + 1 );
+                TextToken lastTokenToReplace = isMissingTrailingNewline
                     ? input.tokens.get( trailingCodeOrNewline - 1 )
                     : input.tokens.get( trailingCodeOrNewline );
-                return Optional.of( new Replacement( firstToken.start, lastToken.end, sb.toString() ) );
+                return Optional.of(
+                        new Replacement(
+                                firstTokenToReplace.start,
+                                lastTokenToReplace.end,
+                                sb.toString()
+                        )
+                );
             } else {
                 return Optional.empty();
             }
         }
 
-        private boolean isSingleWhitespace( List<TextToken> tokens, int startIdx, int endIdx ) {
-            if( endIdx - startIdx != 1 ) {
+        private boolean isSingleWhitespace( List<TextToken> tokens, int startInclusive, int endExclusive ) {
+            if( endExclusive - startInclusive != 1 ) {
                 return false;
             } else {
-                TextToken token = tokens.get( startIdx + 1 );
+                TextToken token = tokens.get( startInclusive );
                 return (token.type == TokenType.WHITESPACE && (token.end - token.start) == 1 );
             }
+        }
+
+        private boolean containsComments( List<TextToken> tokens, int startInclusive, int endExclusive ) {
+            return tokens.subList( startInclusive, endExclusive )
+                    .stream()
+                    .anyMatch( TokenUtils::isComment );
         }
 
     }

@@ -92,15 +92,15 @@ public final class TokenUtils {
     }
 
     public static String stringifyTokens( List<TextToken> tokens ) {
-        return stringifyTokens( tokens, 0, (tokens.size() - 1) );
+        return stringifyTokens( tokens, 0, tokens.size() );
     }
 
     public static String stringifyTokens( List<TextToken> tokens, int startInclusive ) {
-        return stringifyTokens( tokens, startInclusive, (tokens.size() - 1) );
+        return stringifyTokens( tokens, startInclusive, tokens.size() );
     }
 
-    public static String stringifyTokens( List<TextToken> tokens, int startInclusive, int endInclusive ) {
-        return IntStream.rangeClosed( startInclusive, endInclusive )
+    public static String stringifyTokens( List<TextToken> tokens, int startInclusive, int endExclusive ) {
+        return IntStream.range( startInclusive, endExclusive )
                 .mapToObj( i -> tokens.get( i ).getText() )
                 .reduce( "", String::concat );
     }
