@@ -11,8 +11,11 @@ public class SomeClass {
     private void doCompoundIfElse( int value ) {
         if( value == 1 ) {
             System.out.println( "incorrect compound if" );
-        }
+        } // comment 1
         else if( value == 2 ) {
+ // comment 2
+         // comment 3
+            // comment 4
             System.out.println( "incorrect compound else-if" );
         }
         else {
@@ -59,7 +62,8 @@ public class SomeClass {
         if( true )
             System.out.println( "it's true" );
         // comment line
-        else
+        else // comment B
+            // comment C
             System.out.println( "it's not true" );
     }
 

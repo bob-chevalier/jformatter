@@ -19,7 +19,8 @@ public class TextToken {
     }
 
     public enum TokenType {
-	BRACE_OPEN,
+        BRACE_LEFT,
+        BRACE_RIGHT,
         COMMENT_LINE,
         COMMENT_BLOCK,
         COMMENT_JAVADOC,

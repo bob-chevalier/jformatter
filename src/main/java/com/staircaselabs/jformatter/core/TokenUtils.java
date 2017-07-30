@@ -256,7 +256,9 @@ public final class TokenUtils {
         case FINALLY:
             return TokenType.FINALLY;
         case LBRACE:
-            return TokenType.BRACE_OPEN;
+            return TokenType.BRACE_LEFT;
+        case RBRACE:
+            return TokenType.BRACE_RIGHT;
         case SEMI:
             return TokenType.SEMICOLON;
         case STATIC:

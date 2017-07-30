@@ -169,7 +169,7 @@ public class LeftBraceCuddler {
         }
 
         @Override
-        public NavigableSet<Replacement> visitIf( IfTree node, Input input ){
+        public NavigableSet<Replacement> visitIf( IfTree node, Input input ) {
             NavigableSet<Replacement> replacements =
                 new TreeSet<>( Comparator.comparingInt( Replacement::getStart ) );
 
@@ -290,11 +290,11 @@ public class LeftBraceCuddler {
 
         private Optional<Replacement> cuddleLeftBrace( Input input, JCTree tree, String id ) {
             // find indices of tokens that correspond to first and last characters in tree
-            int startIdx = input.getTokenIndexFromPosition( tree.getStartPosition() );
-            int endIdx = input.getTokenIndexFromPosition( tree.getEndPosition( input.endPosTable ) );
+            int startIdx = input.getFirstTokenIndex( tree );
+            int endIdx = input.getLastTokenIndex( tree );
 
             // find first opening curly brace
-            OptionalInt optionalBraceIdx = findNextIndexByType( input.tokens, startIdx, (endIdx + 1), TokenType.BRACE_OPEN );
+            OptionalInt optionalBraceIdx = findNextIndexByType( input.tokens, startIdx, (endIdx + 1), TokenType.BRACE_LEFT );
             if( !optionalBraceIdx.isPresent() ) {
                 // this tree doesn't contain an opening brace so there's nothing to do
                 return Optional.empty();

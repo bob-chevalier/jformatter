@@ -6,6 +6,7 @@ import java.util.TreeMap;
 
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.tools.javac.tree.EndPosTable;
+import com.sun.tools.javac.tree.JCTree;
 
 public class Input {
 
@@ -22,6 +23,14 @@ public class Input {
             positionToIndexMap.put( token.start, idx );
         }
         }
+    }
+
+    public int getFirstTokenIndex( JCTree tree ) {
+        return getTokenIndexFromPosition( tree.getStartPosition() );
+    }
+
+    public int getLastTokenIndex( JCTree tree ) {
+        return getTokenIndexFromPosition( tree.getEndPosition( endPosTable ) );
     }
 
     public int getTokenIndexFromPosition( int charPosition ) {
