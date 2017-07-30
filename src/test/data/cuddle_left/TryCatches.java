@@ -16,9 +16,9 @@ public class SomeClass {
         catch( RuntimeException ex ) 
         {
             throw ex;
-        } 
-        finally
-        {
+        } // comment a
+        finally // comment b
+        { // comment c
             System.out.println( "finally" );
         }
     }
@@ -29,9 +29,10 @@ public class SomeClass {
         { // third comment
             System.out.println( "try" );
         } 
-        // catching some exception
-        catch( RuntimeException ex ) 
-        {
+        // comment 01
+        catch( RuntimeException ex ) // comment 02
+        { // comment 03
+            // comment 04
             throw ex;
         } 
         finally
