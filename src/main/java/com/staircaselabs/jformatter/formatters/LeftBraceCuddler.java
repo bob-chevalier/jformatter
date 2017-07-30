@@ -1,10 +1,12 @@
 package com.staircaselabs.jformatter.formatters;
 
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
+import static com.staircaselabs.jformatter.core.TokenUtils.containsComments;
 import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByType;
 import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByTypeExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.findPrevIndexByTypeExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
+import static com.staircaselabs.jformatter.core.TokenUtils.isSingleWhitespace;
 import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 
@@ -343,21 +345,6 @@ public class LeftBraceCuddler {
             } else {
                 return Optional.empty();
             }
-        }
-
-        private boolean isSingleWhitespace( List<TextToken> tokens, int startInclusive, int endExclusive ) {
-            if( endExclusive - startInclusive != 1 ) {
-                return false;
-            } else {
-                TextToken token = tokens.get( startInclusive );
-                return (token.type == TokenType.WHITESPACE && (token.end - token.start) == 1 );
-            }
-        }
-
-        private boolean containsComments( List<TextToken> tokens, int startInclusive, int endExclusive ) {
-            return tokens.subList( startInclusive, endExclusive )
-                    .stream()
-                    .anyMatch( TokenUtils::isComment );
         }
 
     }

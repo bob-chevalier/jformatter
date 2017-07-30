@@ -24,6 +24,12 @@ public final class TokenUtils {
     private static final String DEFAULT_LINEBREAK = "\n";
     private static final Pattern LINEBREAK_PATTERN = Pattern.compile( "\\R" );
 
+    public static boolean containsComments( List<TextToken> tokens, int startInclusive, int endExclusive ) {
+        return tokens.subList( startInclusive, endExclusive )
+                .stream()
+                .anyMatch( TokenUtils::isComment );
+    }
+
     public static OptionalInt findNextIndexByType(
             List<TextToken> tokens,
             int startInclusive,
@@ -91,6 +97,21 @@ public final class TokenUtils {
                 : DEFAULT_LINEBREAK;
     }
 
+    public static boolean isComment( TextToken token ) {
+        return token.type == TokenType.COMMENT_BLOCK 
+                || token.type == TokenType.COMMENT_JAVADOC
+                || token.type  == TokenType.COMMENT_LINE;
+    }
+
+    public static boolean isSingleWhitespace( List<TextToken> tokens, int startInclusive, int endExclusive ) {
+        if( endExclusive - startInclusive != 1 ) {
+            return false;
+        } else {
+            TextToken token = tokens.get( startInclusive );
+            return (token.type == TokenType.WHITESPACE && (token.end - token.start) == 1 );
+        }
+    }
+
     public static String stringifyTokens( List<TextToken> tokens ) {
         return stringifyTokens( tokens, 0, tokens.size() );
     }
@@ -103,12 +124,6 @@ public final class TokenUtils {
         return IntStream.range( startInclusive, endExclusive )
                 .mapToObj( i -> tokens.get( i ).getText() )
                 .reduce( "", String::concat );
-    }
-
-    public static boolean isComment( TextToken token ) {
-        return token.type == TokenType.COMMENT_BLOCK 
-                || token.type == TokenType.COMMENT_JAVADOC
-                || token.type  == TokenType.COMMENT_LINE;
     }
 
     public static List<TextToken> tokenizeText( String text ) throws FormatException {
