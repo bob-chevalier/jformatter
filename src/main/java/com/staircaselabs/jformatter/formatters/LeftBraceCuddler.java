@@ -1,28 +1,21 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
 import static com.staircaselabs.jformatter.core.TokenUtils.containsComments;
 import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByType;
 import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByTypeExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.findPrevIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
 import static com.staircaselabs.jformatter.core.TokenUtils.isSingleWhitespace;
 import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
-import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.TreeSet;
 
-import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.core.FormatScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Replacement;
+import com.staircaselabs.jformatter.core.ScanningFormatter;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
-import com.staircaselabs.jformatter.core.TokenUtils;
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.CaseTree;
 import com.sun.source.tree.CatchTree;
@@ -37,76 +30,37 @@ import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.SwitchTree;
 import com.sun.source.tree.SynchronizedTree;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.TreeVisitor;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TryTree;
 import com.sun.source.tree.WhileLoopTree;
-import com.sun.source.util.TreeScanner;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
-public class LeftBraceCuddler {
+public class LeftBraceCuddler extends ScanningFormatter {
 
-    private static final TokenType[] WS_OR_NEWLINE = {
-            TokenType.WHITESPACE,
-            TokenType.NEWLINE
-    };
-
-    private static final TokenType[] WS_OR_COMMENT = {
-            TokenType.WHITESPACE,
-            TokenType.COMMENT_BLOCK,
-            TokenType.COMMENT_LINE
-    };
-
-    private static final TokenType[] WS_NEWLINE_OR_COMMENT = {
-            TokenType.WHITESPACE,
-            TokenType.COMMENT_BLOCK,
-            TokenType.COMMENT_JAVADOC,
-            TokenType.COMMENT_LINE,
-            TokenType.NEWLINE
-    };
-
-    public static String format( String text ) throws FormatException {
-        List<TextToken> tokens = tokenizeText( text );
-        JCCompilationUnit unit = getCompilationUnit( text );
-        Input input = new Input( tokens, unit.endPositions );
-
-        String newline = getLinebreak( tokens );
-        CuddleLeftBracesScanner scanner = new CuddleLeftBracesScanner( newline );
-        try {
-            scanner.scan( unit, input );
-
-            // apply replacements in reverse order to maintain character position integrity
-            StringBuilder sb = new StringBuilder( text );
-            for( Replacement replacement : scanner.getReplacements().descendingSet() ) {
-                replacement.apply( sb );
-            }
-            return sb.toString();
-        } catch( Throwable throwable ) {
-            //TODO include stacktrace or diagnostic info?
-            throwable.printStackTrace();
-            throw new FormatException( throwable.getMessage() );
-        }
+    public LeftBraceCuddler() {
+        super( new LeftBraceCuddlerScanner() );
     }
 
-    private static class CuddleLeftBracesScanner extends TreeScanner<Void, Input> {
+    private static class LeftBraceCuddlerScanner extends FormatScanner {
 
-        private String newline;
-        private NavigableSet<Replacement> replacements =
-                new TreeSet<>( Comparator.comparingInt( Replacement::getStart ) );
+        private static final TokenType[] WS_OR_COMMENT = {
+                TokenType.WHITESPACE,
+                TokenType.COMMENT_BLOCK,
+                TokenType.COMMENT_LINE
+        };
 
-        public CuddleLeftBracesScanner( String newline ) {
-            this.newline = newline;
-        }
-
-        public NavigableSet<Replacement> getReplacements() {
-            return replacements;
-        }
+        private static final TokenType[] WS_NEWLINE_OR_COMMENT = {
+                TokenType.WHITESPACE,
+                TokenType.COMMENT_BLOCK,
+                TokenType.COMMENT_JAVADOC,
+                TokenType.COMMENT_LINE,
+                TokenType.NEWLINE
+        };
 
         @Override
         public Void visitBlock( BlockTree node, Input input ) {
             if( node.isStatic() ) {
-                cuddleLeftBrace( input, (JCTree)node, node.getKind().toString() ).ifPresent( replacements::add );
+                cuddleLeftBrace( input, (JCTree)node, node.getKind().toString() ).ifPresent( this::addReplacement );
             }
 
             // cuddle braces contained in block statements
@@ -120,7 +74,7 @@ public class LeftBraceCuddler {
         @Override
         public Void visitCase( CaseTree node, Input input ) {
             // cuddle opening brace of case statement
-            cuddleLeftBrace( input, (JCTree)node, node.getKind().toString() ).ifPresent( replacements::add );
+            cuddleLeftBrace( input, (JCTree)node, node.getKind().toString() ).ifPresent( this::addReplacement );
 
             // cuddle braces contained in case statements
             for( StatementTree statement : node.getStatements() ) {
@@ -138,7 +92,7 @@ public class LeftBraceCuddler {
         @Override
         public Void visitClass( ClassTree node, Input input ) {
             // cuddle opening brace of class
-            cuddleLeftBrace( input, (JCTree)node, node.getSimpleName().toString() ).ifPresent( replacements::add );
+            cuddleLeftBrace( input, (JCTree)node, node.getSimpleName().toString() ).ifPresent( this::addReplacement );
 
             // cuddle braces contained in class methods
             for( Tree member : node.getMembers() ) {
@@ -172,13 +126,13 @@ public class LeftBraceCuddler {
         public Void visitIf( IfTree node, Input input ) {
             // cuddle opening brace of then statement
             StatementTree thenStatement = node.getThenStatement();
-            cuddleLeftBrace( input, (JCTree)thenStatement, thenStatement.getKind().toString() ).ifPresent( replacements::add );
+            cuddleLeftBrace( input, (JCTree)thenStatement, thenStatement.getKind().toString() ).ifPresent( this::addReplacement );
 
             StatementTree elseStatement = node.getElseStatement();
             if( elseStatement != null ) {
                 if( elseStatement.getKind() == Kind.BLOCK ) {
                     // cuddle opening brace of else statement
-                    cuddleLeftBrace( input, (JCTree)elseStatement, elseStatement.getKind().toString() ).ifPresent( replacements::add );
+                    cuddleLeftBrace( input, (JCTree)elseStatement, elseStatement.getKind().toString() ).ifPresent( this::addReplacement );
                 } else {
                     // cuddle braces of remaining conditional statements
                     scan( node.getElseStatement(), input );
@@ -191,7 +145,7 @@ public class LeftBraceCuddler {
         @Override
         public Void visitLambdaExpression( LambdaExpressionTree node, Input input ) {
             // cuddle opening brace of lambda
-            cuddleLeftBrace( input, (JCTree)node, node.getKind().toString() ).ifPresent( replacements::add );
+            cuddleLeftBrace( input, (JCTree)node, node.getKind().toString() ).ifPresent( this::addReplacement );
 
             // cuddle braces contained within lambda body
             scan( node.getBody(), input );
@@ -202,7 +156,7 @@ public class LeftBraceCuddler {
         @Override
         public Void visitMethod( MethodTree node, Input input ) {
             // cuddle opening brace of method
-            cuddleLeftBrace( input, (JCTree)node, node.getName().toString() ).ifPresent( replacements::add );
+            cuddleLeftBrace( input, (JCTree)node, node.getName().toString() ).ifPresent( this::addReplacement );
 
             // cuddle braces contained within method body
             scan( node.getBody(), input );
@@ -213,7 +167,7 @@ public class LeftBraceCuddler {
         @Override
         public Void visitSwitch( SwitchTree node, Input input ) {
             // cuddle opening brace of case statement
-            cuddleLeftBrace( input, (JCTree)node, node.getKind().toString() ).ifPresent( replacements::add );
+            cuddleLeftBrace( input, (JCTree)node, node.getKind().toString() ).ifPresent( this::addReplacement );
 
             // cuddle braces contained in case statements
             for( CaseTree statement : node.getCases() ) {
@@ -254,7 +208,7 @@ public class LeftBraceCuddler {
 
         private Void cuddleLoopBrace( Input input, JCTree tree, StatementTree loopBody ) {
             // cuddle opening brace of for loop
-            cuddleLeftBrace( input, tree, tree.getKind().toString() ).ifPresent( replacements::add );
+            cuddleLeftBrace( input, tree, tree.getKind().toString() ).ifPresent( this::addReplacement );
 
             // cuddle braces contained within loop's body
             scan( loopBody, input );
@@ -264,7 +218,7 @@ public class LeftBraceCuddler {
 
         private Void cuddleBlockContainer( Input input, JCTree tree, BlockTree block ) {
             // cuddle opening brace of block container
-            cuddleLeftBrace( input, tree, tree.getKind().toString() ).ifPresent( replacements::add );
+            cuddleLeftBrace( input, tree, tree.getKind().toString() ).ifPresent( this::addReplacement );
 
             // cuddle braces contained within block
             scan( block, input );
@@ -307,13 +261,13 @@ public class LeftBraceCuddler {
                 sb.append( " {" ); // insert a single space before the left brace
                 if( containsComments( input.tokens, (parentStatement + 1), braceIdx ) ) {
                     // comments appear between parentStatement and brace, so move them below brace
-                    sb.append( newline );
+                    sb.append( input.newline );
                     sb.append( stringifyTokens( input.tokens, (parentStatement + 1), braceIdx ) );
                 }
 
                 // append any trailing comments or whitespace before a newline
                 sb.append( stringifyTokens( input.tokens, (braceIdx + 1), trailingCodeOrNewline ) );
-                sb.append( newline );
+                sb.append( input.newline );
 
                 TextToken firstTokenToReplace = input.tokens.get( parentStatement + 1 );
                 TextToken lastTokenToReplace = isMissingTrailingNewline
