@@ -62,6 +62,17 @@ java_test(
 )
 
 java_test(
+    name = "TestBraceInserter",
+    size = "small",
+    test_class = "com.staircaselabs.jformatter.formatters.TestBraceInserter",
+    runtime_deps = [
+        "@org_opentest4j//jar",
+        ":formatters",
+    ],
+    data = [ "//src/test/data/brace_inserter:test-inputs", ],
+)
+
+java_test(
     name = "TestLeftBraceCuddler",
     size = "small",
     test_class = "com.staircaselabs.jformatter.formatters.TestLeftBraceCuddler",
@@ -71,3 +82,14 @@ java_test(
     ],
     data = [ "//src/test/data/cuddle_left:test-inputs", ],
 )
+
+#java_test(
+#    name = "TestRightBraceCuddler",
+#    size = "small",
+#    test_class = "com.staircaselabs.jformatter.formatters.TestRightBraceCuddler",
+#    runtime_deps = [
+#        "@org_opentest4j//jar",
+#        ":formatters",
+#    ],
+#    data = [ "//src/test/data/cuddle_right:test-inputs", ],
+#)

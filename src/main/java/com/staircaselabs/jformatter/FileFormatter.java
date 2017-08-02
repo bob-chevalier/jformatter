@@ -7,9 +7,11 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.formatters.BraceInserter;
 import com.staircaselabs.jformatter.formatters.LeftBraceCuddler;
 import com.staircaselabs.jformatter.formatters.HeaderFormatter;
 import com.staircaselabs.jformatter.formatters.ImportsSorter;
+import com.staircaselabs.jformatter.formatters.RightBraceCuddler;
 import com.staircaselabs.jformatter.formatters.TrailingWhitespaceRemover;
 import com.staircaselabs.jformatter.formatters.UnusedImportsRemover;
 
@@ -31,7 +33,10 @@ public class FileFormatter implements Callable<Boolean> {
 //        workingText = TrailingWhitespaceRemover.format( workingText );
 //        workingText = UnusedImportsRemover.format( workingText );
 //        workingText = ImportsSorter.format( workingText );
-        workingText = LeftBraceCuddler.format( workingText );
+        workingText = new BraceInserter().format( workingText );
+//        workingText = LeftBraceCuddler.format( workingText );
+//        workingText = RightBraceCuddler.format( workingText );
+
 
         System.out.println( workingText );
 
