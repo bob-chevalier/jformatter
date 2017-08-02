@@ -5,6 +5,8 @@ import static com.staircaselabs.jformatter.core.TokenUtils.findPrevIndexByTypeEx
 import static com.staircaselabs.jformatter.core.TokenUtils.isComment;
 import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 
+import java.util.Optional;
+
 import com.staircaselabs.jformatter.core.FormatScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Replacement;
@@ -127,7 +129,7 @@ public class BraceInserter extends ScanningFormatter {
         @Override
         public Void visitDoWhileLoop( DoWhileLoopTree node, Input input ) {
             // insert braces around for loop
-            surroundWithBraces( input, (JCTree)node.getStatement() );
+            surroundWithBraces( input, (JCTree)node.getStatement() ).ifPresent( this::addReplacement );
 
             // insert braces into blocks contained within loop's body
             return scan( node.getStatement(), input );
@@ -136,7 +138,7 @@ public class BraceInserter extends ScanningFormatter {
         @Override
         public Void visitEnhancedForLoop( EnhancedForLoopTree node, Input input ) {
             // insert braces around for loop
-            surroundWithBraces( input, (JCTree)node.getStatement() );
+            surroundWithBraces( input, (JCTree)node.getStatement() ).ifPresent( this::addReplacement );
 
             // insert braces into blocks contained within loop's body
             return scan( node.getStatement(), input );
@@ -145,7 +147,7 @@ public class BraceInserter extends ScanningFormatter {
         @Override
         public Void visitForLoop( ForLoopTree node, Input input ) {
             // insert braces around for loop
-            surroundWithBraces( input, (JCTree)node.getStatement() );
+            surroundWithBraces( input, (JCTree)node.getStatement() ).ifPresent( this::addReplacement );
 
             // insert braces into blocks contained within loop's body
             return scan( node.getStatement(), input );
@@ -154,7 +156,7 @@ public class BraceInserter extends ScanningFormatter {
         @Override
         public Void visitIf( IfTree node, Input input ) {
             // ensure that then-statement is surrounded by curly braces
-            surroundWithBraces( input, (JCTree)node.getThenStatement() );
+            surroundWithBraces( input, (JCTree)node.getThenStatement() ).ifPresent( this::addReplacement );
 
             StatementTree elseStatement = node.getElseStatement();
             if( elseStatement != null ) {
@@ -163,7 +165,7 @@ public class BraceInserter extends ScanningFormatter {
                     scan( node.getElseStatement(), input );
                 } else {
                     // this must be the final else-statement
-                    surroundWithBraces( input, (JCTree)elseStatement );
+                    surroundWithBraces( input, (JCTree)elseStatement ).ifPresent( this::addReplacement );
                 }
             }
 
@@ -185,7 +187,7 @@ public class BraceInserter extends ScanningFormatter {
 
         @Override
         public Void visitSynchronized( SynchronizedTree node, Input input ) {
-            surroundWithBraces( input, (JCTree)node.getBlock() );
+            surroundWithBraces( input, (JCTree)node.getBlock() ).ifPresent( this::addReplacement );
      
             return scan( node.getBlock(), input );
 //            return null;
@@ -231,7 +233,7 @@ public class BraceInserter extends ScanningFormatter {
 //            return null;
 //        }
 
-        private void surroundWithBraces( Input input, JCTree tree ) {
+        private Optional<Replacement> surroundWithBraces( Input input, JCTree tree ) {
             // get token indices corresponding to the bounds of the tree
             int treeStartIdx = input.getFirstTokenIndex( tree );
             int treeEndIdx = input.getLastTokenIndex( tree );
@@ -272,13 +274,15 @@ public class BraceInserter extends ScanningFormatter {
                 sb.append( "}" );
                 sb.append( input.newline );
 
-                addReplacement(
+                return Optional.of(
                         new Replacement(
                                 firstTokenToReplace.start,
                                 lastTokenToReplace.end,
                                 sb.toString()
                         )
                 );
+            } else {
+                return Optional.empty();
             }
         }
 
