@@ -1,9 +1,5 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.core.TokenUtils.containsComments;
-import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByType;
-import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.core.TokenUtils.findPrevIndexByTypeExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.isComment;
 import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 
@@ -239,7 +235,7 @@ public class LeftBraceCuddler extends ScanningFormatter {
             int endIdx = input.getLastTokenIndex( tree );
 
             // find first opening curly brace
-            OptionalInt optionalBraceIdx = findNextIndexByType( input.tokens, startIdx, (endIdx + 1), TokenType.BRACE_LEFT );
+            OptionalInt optionalBraceIdx = input.findNext( startIdx, (endIdx + 1), TokenType.BRACE_LEFT );
             if( !optionalBraceIdx.isPresent() ) {
                 // this tree doesn't contain an opening brace so there's nothing to do
                 return Optional.empty();
@@ -248,22 +244,22 @@ public class LeftBraceCuddler extends ScanningFormatter {
 
             // find first non-whitespace, non-newline, non-comment token before opening brace
             //TODO make these throw FormatException with line/column info
-            int parentIdx = findPrevIndexByTypeExclusion( input.tokens, braceIdx, WS_NEWLINE_OR_COMMENT )
+            int parentIdx = input.findPrevByExclusion( braceIdx, WS_NEWLINE_OR_COMMENT )
                     .orElseThrow( () -> new RuntimeException(
                             "Missing parent statement: " + tree.getKind().toString() ) );
 
             StringBuilder sb = new StringBuilder( " {" );
             sb.append( input.newline );
 
-            if( containsComments( input.tokens, (parentIdx + 1), braceIdx ) ) {
-                int commentIdx = findNextIndexByType( input.tokens, (parentIdx + 1), braceIdx, COMMENT ).getAsInt();
+            if( input.containsComments( (parentIdx + 1), braceIdx ) ) {
+                int commentIdx = input.findNext( (parentIdx + 1), braceIdx, COMMENT ).getAsInt();
                 int nextNewlineIdx =
-                        findNextIndexByType( input.tokens, (parentIdx + 1), braceIdx, TokenType.NEWLINE )
+                        input.findNext( (parentIdx + 1), braceIdx, TokenType.NEWLINE )
                         .getAsInt();
 
                 // trim trailing whitespace
                 int lastNonWhitespaceIdx =
-                        findPrevIndexByTypeExclusion( input.tokens, braceIdx, TokenType.WHITESPACE ).getAsInt();
+                        input.findPrevByExclusion( braceIdx, TokenType.WHITESPACE ).getAsInt();
 
                 if( nextNewlineIdx < commentIdx ) {
                     sb.append( stringifyTokens( input.tokens, (nextNewlineIdx + 1), (lastNonWhitespaceIdx + 1) ) );
@@ -273,14 +269,14 @@ public class LeftBraceCuddler extends ScanningFormatter {
             }
 
             // find first non-whitespace token after brace
-            int firstNonWS = findNextIndexByTypeExclusion( input.tokens, (braceIdx + 1), TokenType.WHITESPACE ).getAsInt();
+            int firstNonWS = input.findNextByExclusion( (braceIdx + 1), TokenType.WHITESPACE ).getAsInt();
             int lastToReplace;
             if( input.tokens.get( firstNonWS ).type == TokenType.NEWLINE ) {
                 // skip leading newline since we already added one
                 lastToReplace = firstNonWS;
             } else if( isComment( input.tokens.get( firstNonWS ) ) ) {
                 // append up to and including next newline
-                int nextNewline = findNextIndexByType( input.tokens, (firstNonWS + 1), TokenType.NEWLINE ).getAsInt();
+                int nextNewline = input.findNext( (firstNonWS + 1), TokenType.NEWLINE ).getAsInt();
                 sb.append( stringifyTokens( input.tokens, (braceIdx + 1), (nextNewline + 1) ) );
                 lastToReplace = nextNewline;
             } else {

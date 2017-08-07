@@ -1,9 +1,6 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByType;
-import static com.staircaselabs.jformatter.core.TokenUtils.findPrevIndexByTypeExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.isComment;
-import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 
 import java.util.Optional;
 
@@ -117,19 +114,19 @@ public class BraceInserter extends ScanningFormatter {
             // check if tree is surrounded by curly braces
             if( input.tokens.get( treeStartIdx ).type != TokenType.BRACE_LEFT ) {
                 // find first non-whitespace, non-newline, non-comment token before tree
-                int parentStatement = findPrevIndexByTypeExclusion( input.tokens, treeStartIdx, WS_NEWLINE_OR_COMMENT )
+                int parentStatement = input.findPrevByExclusion( treeStartIdx, WS_NEWLINE_OR_COMMENT )
                         //TODO throw FormatException with line/column numbers?
                         .orElseThrow( () -> new RuntimeException(
                                 "Missing parent statement: " + tree.getKind().toString() ) );
 
                 // make sure we preserve any comments before the tree
                 int firstToKeep =
-                        findNextIndexByType( input.tokens, (parentStatement + 1), treeStartIdx, COMMENT_OR_NEWLINE )
+                        input.findNext( (parentStatement + 1), treeStartIdx, COMMENT_OR_NEWLINE )
                         .orElse( treeStartIdx );
 
                 // make sure we preserve any inline comments following the first line of code in the tree
                 int lastToKeep =
-                        findNextIndexByType( input.tokens, treeStartIdx, TokenType.NEWLINE )
+                        input.findNext( treeStartIdx, TokenType.NEWLINE )
                         .orElse( treeEndIdx );
 
                 // determine token range to be replaced
@@ -142,7 +139,7 @@ public class BraceInserter extends ScanningFormatter {
                 if( isComment(input.tokens.get( firstToKeep ) ) ) {
                     sb.append( " " );
                 }
-                sb.append( stringifyTokens( input.tokens, firstToKeep, (lastToKeep + 1) ) );
+                sb.append( input.stringifyTokens( firstToKeep, (lastToKeep + 1) ) );
                 sb.append( "}" );
                 sb.append( input.newline );
 

@@ -1,8 +1,8 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByType;
-import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.core.TokenUtils.findPrevIndexByTypeExclusion;
+import static com.staircaselabs.jformatter.core.TokenUtils.findNext;
+import static com.staircaselabs.jformatter.core.TokenUtils.findNextByExclusion;
+import static com.staircaselabs.jformatter.core.TokenUtils.findPrevByExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
 import static com.staircaselabs.jformatter.core.TokenUtils.isComment;
 import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
@@ -42,7 +42,7 @@ public class ImportsSorter {
         List<TextToken> tokens = tokenizeText( text );
         SortedSet<Import> imports = new TreeSet<>();
 
-        OptionalInt importStart = findNextIndexByType( tokens, 0, TokenType.IMPORT );
+        OptionalInt importStart = findNext( tokens, 0, TokenType.IMPORT );
         if( !importStart.isPresent() ) {
             // there are no imports so there's nothing to do
             return text;
@@ -55,14 +55,14 @@ public class ImportsSorter {
         while( importStart.isPresent() ) {
             int semicolonPos = getNextSemicolon( tokens, importStart );
             OptionalInt staticPos =
-                    findNextIndexByType( tokens, importStart.getAsInt(), semicolonPos, TokenType.STATIC );
+                    findNext( tokens, importStart.getAsInt(), semicolonPos, TokenType.STATIC );
             int beforeNamePos = staticPos.orElse( importStart.getAsInt() ) + 1;
 
             int nameStart = getImportNameStart( tokens, beforeNamePos, semicolonPos );
             String name = stringifyTokens( tokens, nameStart, semicolonPos );
 
             // find first token past import's trailing characters (likely a newline)
-            afterImport = findNextIndexByTypeExclusion( tokens, semicolonPos + 1, IMPORT_END )
+            afterImport = findNextByExclusion( tokens, semicolonPos + 1, IMPORT_END )
                     .orElseThrow( () -> new FormatException(
                             "Unexpected text: ["
                             + stringifyTokens( tokens, semicolonPos + 1 )
@@ -75,7 +75,7 @@ public class ImportsSorter {
             imports.add( new Import( name, trailingChars, staticPos.isPresent() ) );
 
             // find the start of the next import
-            importStart = findNextIndexByType( tokens, semicolonPos, TokenType.IMPORT );
+            importStart = findNext( tokens, semicolonPos, TokenType.IMPORT );
         }
 
         // find end of text block to be replaced (consume trailing whitespace and newlines)
@@ -105,14 +105,14 @@ public class ImportsSorter {
 
     private static int getImportsBlockStart( List<TextToken> tokens, int firstImportPos ) {
         // consume leading whitespace and newlines
-        return findPrevIndexByTypeExclusion( tokens, 0, firstImportPos, WS_OR_NEWLINE )
+        return findPrevByExclusion( tokens, 0, firstImportPos, WS_OR_NEWLINE )
                 .orElse( -1 ) + 1;
     }
 
     private static int getImportsBlockEnd( List<TextToken> tokens, int afterLastImport )
             throws FormatException {
         // find next non-whitespace, non-newline token
-        return findNextIndexByTypeExclusion( tokens, afterLastImport, BLOCK_END )
+        return findNextByExclusion( tokens, afterLastImport, BLOCK_END )
                 .orElseThrow( () -> new FormatException(
                         "Couldn't find anything after imports: ["
                         + stringifyTokens( tokens, afterLastImport )
@@ -122,7 +122,7 @@ public class ImportsSorter {
 
     private static int getNextSemicolon( List<TextToken> tokens, OptionalInt importPos )
             throws FormatException {
-        return findNextIndexByType( tokens, importPos.getAsInt() + 1, TokenType.SEMICOLON )
+        return findNext( tokens, importPos.getAsInt() + 1, TokenType.SEMICOLON )
                 .orElseThrow( () -> new FormatException(
                         "Missing closing semicolon: ["
                         + stringifyTokens( tokens, importPos.getAsInt() + 1 )
@@ -132,7 +132,7 @@ public class ImportsSorter {
 
     private static int getImportNameStart( List<TextToken> tokens, int fromPos, int toPos )
             throws FormatException {
-        return findNextIndexByTypeExclusion( tokens, fromPos, toPos, TokenType.WHITESPACE )
+        return findNextByExclusion( tokens, fromPos, toPos, TokenType.WHITESPACE )
                 .orElseThrow( () -> new FormatException(
                         "No import name in: ["
                         + stringifyTokens( tokens, fromPos, toPos )

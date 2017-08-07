@@ -34,7 +34,7 @@ public final class TokenUtils {
                 .anyMatch( TokenUtils::isComment );
     }
 
-    public static OptionalInt findNextIndexByType(
+    public static OptionalInt findNext(
             List<TextToken> tokens,
             int startInclusive,
             int endExclusive,
@@ -46,15 +46,15 @@ public final class TokenUtils {
                 .findFirst();
     }
 
-    public static OptionalInt findNextIndexByType(
+    public static OptionalInt findNext(
             List<TextToken> tokens,
             int startInclusive,
             TokenType... types
     ) {
-        return findNextIndexByType( tokens, startInclusive, tokens.size(), types );
+        return findNext( tokens, startInclusive, tokens.size(), types );
     }
 
-    public static OptionalInt findNextIndexByTypeExclusion(
+    public static OptionalInt findNextByExclusion(
             List<TextToken> tokens,
             int startInclusive,
             int endExclusive,
@@ -66,15 +66,15 @@ public final class TokenUtils {
                 .findFirst();
     }
 
-    public static OptionalInt findNextIndexByTypeExclusion(
+    public static OptionalInt findNextByExclusion(
             List<TextToken> tokens,
             int startInclusive,
             TokenType... types
     ) {
-        return findNextIndexByTypeExclusion( tokens, startInclusive, tokens.size(), types );
+        return findNextByExclusion( tokens, startInclusive, tokens.size(), types );
     }
 
-    public static OptionalInt findPrevIndexByTypeExclusion(
+    public static OptionalInt findPrevByExclusion(
             List<TextToken> tokens,
             int startInclusive,
             int stopExclusive,
@@ -86,16 +86,16 @@ public final class TokenUtils {
                 .reduce( (a, b) -> b );
     }
 
-    public static OptionalInt findPrevIndexByTypeExclusion(
+    public static OptionalInt findPrevByExclusion(
             List<TextToken> tokens,
             int stopExclusive,
             TokenType... types
     ) {
-	return findPrevIndexByTypeExclusion( tokens, 0, stopExclusive, types );
+        return findPrevByExclusion( tokens, 0, stopExclusive, types );
     }
 
     public static String getLinebreak( List<TextToken> tokens ) {
-        OptionalInt linebreakIdx = findNextIndexByType( tokens, 0, TokenType.NEWLINE );
+        OptionalInt linebreakIdx = findNext( tokens, 0, TokenType.NEWLINE );
         return linebreakIdx.isPresent()
                 ? tokens.get( linebreakIdx.getAsInt() ).getText()
                 : DEFAULT_LINEBREAK;

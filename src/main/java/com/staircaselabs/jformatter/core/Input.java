@@ -4,7 +4,9 @@ import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
 
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.OptionalInt;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.tools.javac.tree.EndPosTable;
@@ -41,6 +43,46 @@ public class Input {
     public int getTokenIndexFromPosition( int charPosition ) {
         //TODO add comment explaining how this lookup works
         return positionToIndexMap.floorEntry( charPosition ).getValue();
+    }
+
+    public boolean containsComments( int startInclusive, int endExclusive ) {
+        return TokenUtils.containsComments( tokens, startInclusive, endExclusive );
+    }
+
+    public OptionalInt findNext( int startInclusive, int endExclusive, TokenType... types ) {
+        return TokenUtils.findNext( tokens, startInclusive, endExclusive, types );
+    }
+
+    public OptionalInt findNext( int startInclusive, TokenType... types ) {
+        return TokenUtils.findNext( tokens, startInclusive, types );
+    }
+
+    public OptionalInt findNextByExclusion( int startInclusive, int endExclusive, TokenType... types ) {
+        return TokenUtils.findNextByExclusion( tokens, startInclusive, endExclusive, types );
+    }
+
+    public OptionalInt findNextByExclusion( int startInclusive, TokenType... types ) {
+        return TokenUtils.findNextByExclusion( tokens, startInclusive, types );
+    }
+
+    public OptionalInt findPrevByExclusion( int startInclusive, int stopExclusive, TokenType... types ) {
+        return TokenUtils.findPrevByExclusion( tokens, startInclusive, stopExclusive, types );
+    }
+
+    public OptionalInt findPrevByExclusion( int stopExclusive, TokenType... types ) {
+        return TokenUtils.findPrevByExclusion( tokens, stopExclusive, types );
+    }
+
+    public String stringifyTokens() {
+        return TokenUtils.stringifyTokens( tokens, 0, tokens.size() );
+    }
+
+    public String stringifyTokens( int startInclusive ) {
+        return TokenUtils.stringifyTokens( tokens, startInclusive, tokens.size() );
+    }
+
+    public String stringifyTokens( int startInclusive, int endExclusive ) {
+        return TokenUtils.stringifyTokens( tokens, startInclusive, endExclusive );
     }
 
 }
