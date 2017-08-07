@@ -196,7 +196,7 @@ public class LeftBraceCuddler extends ScanningFormatter {
 
             // cuddle braces contained in finally block
             if( node.getFinallyBlock() != null ) {
-                scan( node.getFinallyBlock(), input );
+                cuddleFinallyBlock( input, node.getFinallyBlock() );
             }
 
             return null;
@@ -225,6 +225,16 @@ public class LeftBraceCuddler extends ScanningFormatter {
             scan( block, input );
 
             return null;
+        }
+
+        private void cuddleFinallyBlock( Input input, BlockTree block ) {
+            // cuddle opening brace of finally block
+            cuddleLeftBrace( input, (JCTree)block ).ifPresent( this::addReplacement );
+
+            // cuddle braces contained within finally block statements
+            for( StatementTree statement : block.getStatements() ) {
+                scan( statement, input );
+            }
         }
 
         private Optional<Replacement> cuddleLeftBrace( Input input, JCTree tree ) {
