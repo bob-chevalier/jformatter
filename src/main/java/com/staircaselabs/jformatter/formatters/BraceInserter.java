@@ -116,7 +116,6 @@ public class BraceInserter extends ScanningFormatter {
 
             // check if tree is surrounded by curly braces
             if( input.tokens.get( treeStartIdx ).type != TokenType.BRACE_LEFT ) {
-                System.out.println( "Here we go" );
                 // find first non-whitespace, non-newline, non-comment token before tree
                 int parentStatement = findPrevIndexByTypeExclusion( input.tokens, treeStartIdx, WS_NEWLINE_OR_COMMENT )
                         //TODO throw FormatException with line/column numbers?

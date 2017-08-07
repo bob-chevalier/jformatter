@@ -9,25 +9,25 @@ import java.util.List;
 public class SomeClass
 {
 
-    private void doCompoundIfElse( int value )
+    private void doUncuddledIfElseIfElse( int value )
     {
         if( value == 1 )
         {
-            System.out.println( "incorrect compound if" );
+            System.out.println( "one" );
         } // comment 1
         else if( value == 2 ) // comment 2
         { // comment 3
             // comment 4
-            System.out.println( "incorrect compound else-if" );
+            System.out.println( "two" );
         }
         else
         {
-            System.out.println( "incorrect compound else" );
+            System.out.println( "three" );
         }
 
     }
 
-    private void doConditionalExpression( boolean condition ) {
+    private void doUncuddledWhileNested( boolean condition ) {
         while( true )
         {
             if( condition )
@@ -38,41 +38,41 @@ public class SomeClass
         int count = status ? 1 : 2;
     };
 
-    private void doCorrectCompoundIfElse( int value ) {
+    private void doCuddledIfElseIfElse( int value ) {
         if( value == 5 ) {
-            System.out.println( "correct if" );
+            System.out.println( "four" );
         } else if( value == 6 ) {
-            System.out.println( "correct else-if" );
+            System.out.println( "five" );
         } else {
-            System.out.println( "correct else" );
+            System.out.println( "six" );
         }
     }
 
-    private void doIfElse( int value )
+    private void doUncuddledIfElseWithComments( int value )
     {
         if( value == 1 )
         {
-            System.out.println( "incorrect if" );
-        } // first comment
-        // second comment
+            System.out.println( "seven" );
+        } // comment 5
+        // comment 6
         else
         {
-            System.out.println( "incorrect else" );
+            System.out.println( "eight" );
         }
     }
 
     private void doUnbracedIf() {
         if( true )
-            System.out.println( "it's true" );
+            System.out.println( "nine" );
     }
 
-    private void doUnbracedCompoundIfElse() {
+    private void doUnbracedIfElseWithComments() {
         if( true )
-            System.out.println( "it's true" );
-        // comment line
-        else // comment B
-            // comment C
-            System.out.println( "it's not true" );
+            System.out.println( "ten" );
+        // comment 7
+        else // comment 8
+            // comment 9
+            System.out.println( "eleven" );
     }
 
 }

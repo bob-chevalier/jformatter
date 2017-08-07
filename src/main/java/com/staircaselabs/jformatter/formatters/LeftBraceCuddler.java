@@ -4,12 +4,13 @@ import static com.staircaselabs.jformatter.core.TokenUtils.containsComments;
 import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByType;
 import static com.staircaselabs.jformatter.core.TokenUtils.findNextIndexByTypeExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.findPrevIndexByTypeExclusion;
-import static com.staircaselabs.jformatter.core.TokenUtils.isSingleWhitespace;
+import static com.staircaselabs.jformatter.core.TokenUtils.isComment;
 import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.FormatScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Replacement;
@@ -41,12 +42,18 @@ public class LeftBraceCuddler extends ScanningFormatter {
         super( new LeftBraceCuddlerScanner() );
     }
 
+    @Override
+    public String format( String text ) throws FormatException {
+        String textWithBraces = new BraceInserter().format( text );
+        return super.format( textWithBraces );
+    }
+
     private static class LeftBraceCuddlerScanner extends FormatScanner {
 
-        private static final TokenType[] WS_OR_COMMENT = {
-                TokenType.WHITESPACE,
+        private static final TokenType[] COMMENT = {
                 TokenType.COMMENT_BLOCK,
-                TokenType.COMMENT_LINE
+                TokenType.COMMENT_LINE,
+                TokenType.COMMENT_JAVADOC
         };
 
         private static final TokenType[] WS_NEWLINE_OR_COMMENT = {
@@ -241,39 +248,51 @@ public class LeftBraceCuddler extends ScanningFormatter {
 
             // find first non-whitespace, non-newline, non-comment token before opening brace
             //TODO make these throw FormatException with line/column info
-            int parentStatement = findPrevIndexByTypeExclusion( input.tokens, braceIdx, WS_NEWLINE_OR_COMMENT )
+            int parentIdx = findPrevIndexByTypeExclusion( input.tokens, braceIdx, WS_NEWLINE_OR_COMMENT )
                     .orElseThrow( () -> new RuntimeException(
                             "Missing parent statement: " + tree.getKind().toString() ) );
 
-            // find the next non-whitespace, non-comment token following the opening brace
-            int trailingCodeOrNewline = findNextIndexByTypeExclusion( input.tokens, (braceIdx + 1), WS_OR_COMMENT )
-                    .orElseThrow( () -> new RuntimeException(
-                            "Opening brace not closed: " + tree.getKind().toString() ) );
+            StringBuilder sb = new StringBuilder( " {" );
+            sb.append( input.newline );
 
-            // we expect to have exactly one whitespace token between end of parent statement and opening brace
-            boolean removeLeadingText = !isSingleWhitespace( input.tokens, (parentStatement + 1), braceIdx );
+            if( containsComments( input.tokens, (parentIdx + 1), braceIdx ) ) {
+                int commentIdx = findNextIndexByType( input.tokens, (parentIdx + 1), braceIdx, COMMENT ).getAsInt();
+                int nextNewlineIdx =
+                        findNextIndexByType( input.tokens, (parentIdx + 1), braceIdx, TokenType.NEWLINE )
+                        .getAsInt();
 
-            // we expect a trailing newline before any actual code statements
-            TextToken trailingToken = input.tokens.get( trailingCodeOrNewline );
-            boolean isMissingTrailingNewline = trailingToken.type != TokenType.NEWLINE;
+                // trim trailing whitespace
+                int lastNonWhitespaceIdx =
+                        findPrevIndexByTypeExclusion( input.tokens, braceIdx, TokenType.WHITESPACE ).getAsInt();
 
-            if( removeLeadingText || isMissingTrailingNewline ) {
-                StringBuilder sb = new StringBuilder();
-                sb.append( " {" ); // insert a single space before the left brace
-                if( containsComments( input.tokens, (parentStatement + 1), braceIdx ) ) {
-                    // comments appear between parentStatement and brace, so move them below brace
-                    sb.append( input.newline );
-                    sb.append( stringifyTokens( input.tokens, (parentStatement + 1), braceIdx ) );
+                if( nextNewlineIdx < commentIdx ) {
+                    sb.append( stringifyTokens( input.tokens, (nextNewlineIdx + 1), (lastNonWhitespaceIdx + 1) ) );
+                } else {
+                    sb.append( stringifyTokens( input.tokens, (parentIdx + 1), (lastNonWhitespaceIdx + 1) ) );
                 }
+            }
 
-                // append any trailing comments or whitespace before a newline
-                sb.append( stringifyTokens( input.tokens, (braceIdx + 1), trailingCodeOrNewline ) );
-                sb.append( input.newline );
+            // find first non-whitespace token after brace
+            int firstNonWS = findNextIndexByTypeExclusion( input.tokens, (braceIdx + 1), TokenType.WHITESPACE ).getAsInt();
+            int lastToReplace;
+            if( input.tokens.get( firstNonWS ).type == TokenType.NEWLINE ) {
+                // skip leading newline since we already added one
+                lastToReplace = firstNonWS;
+            } else if( isComment( input.tokens.get( firstNonWS ) ) ) {
+                // append up to and including next newline
+                int nextNewline = findNextIndexByType( input.tokens, (firstNonWS + 1), TokenType.NEWLINE ).getAsInt();
+                sb.append( stringifyTokens( input.tokens, (braceIdx + 1), (nextNewline + 1) ) );
+                lastToReplace = nextNewline;
+            } else {
+                // it's not a comment or a newline so it must be actual code
+                lastToReplace = firstNonWS - 1;
+            }
 
-                TextToken firstTokenToReplace = input.tokens.get( parentStatement + 1 );
-                TextToken lastTokenToReplace = isMissingTrailingNewline
-                    ? input.tokens.get( trailingCodeOrNewline - 1 )
-                    : input.tokens.get( trailingCodeOrNewline );
+            String oldText = stringifyTokens( input.tokens, (parentIdx + 1), (lastToReplace + 1) );
+            String replacementText = sb.toString();
+            if( !replacementText.equals( oldText ) ) {
+                TextToken firstTokenToReplace = input.tokens.get( (parentIdx + 1) );
+                TextToken lastTokenToReplace = input.tokens.get( lastToReplace );
                 return Optional.of(
                         new Replacement(
                                 firstTokenToReplace.start,

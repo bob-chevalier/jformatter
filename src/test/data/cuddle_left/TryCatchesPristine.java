@@ -25,13 +25,13 @@ public class SomeClass {
         try {
  // first comment
         // second comment
-         // third comment
+ // third comment
             System.out.println( "try" );
         } 
         // comment 01
         catch( RuntimeException ex ) {
  // comment 02
-         // comment 03
+ // comment 03
             // comment 04
             throw ex;
         } 

@@ -25,6 +25,10 @@ public final class TokenUtils {
     private static final Pattern LINEBREAK_PATTERN = Pattern.compile( "\\R" );
 
     public static boolean containsComments( List<TextToken> tokens, int startInclusive, int endExclusive ) {
+        if( startInclusive >= endExclusive ) {
+            return false;
+        }
+
         return tokens.subList( startInclusive, endExclusive )
                 .stream()
                 .anyMatch( TokenUtils::isComment );
