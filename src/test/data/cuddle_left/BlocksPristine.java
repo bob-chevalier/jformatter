@@ -9,7 +9,7 @@ import java.util.List;
 public class SomeClass {
 
     static {
-        System.out.println( "Instance initializer" );
+        System.out.println( "one" );
     }
 
     int[] intArray = new int[3];
@@ -17,16 +17,19 @@ public class SomeClass {
 
     private void doCompoundStatement() {
         {
-            System.out.println( "compound statement" );
+            System.out.println( "two" );
         }
     }
 
     private void doSynchronizedBlock() {
-        System.out.println( "before synchronized block" );
+        System.out.println( "three" );
         synchronized( this ) {
-            System.out.println( "synchronized block" );
+            System.out.println( "four" );
+            for( String str : list ) {
+                System.out.println( "five" );
+            }
         }
-        System.out.println( "after synchronized block" );
+        System.out.println( "six" );
     }
 
 }

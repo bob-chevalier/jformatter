@@ -182,8 +182,6 @@ public class LeftBraceCuddler extends ScanningFormatter {
 
         @Override
         public Void visitSynchronized( SynchronizedTree node, Input input ) {
-            System.out.println( "BFC synchronized:\n");
-            System.out.println( node.toString() );
             return cuddleBlockContainer( input, (JCTree)node, node.getBlock() );
         }
 
