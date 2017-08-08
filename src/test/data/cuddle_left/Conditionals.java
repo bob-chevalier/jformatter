@@ -41,7 +41,7 @@ public class SomeClass
     private void doCuddledIfElseIfElse( int value ) {
         if( value == 5 ) {
             System.out.println( "four" );
-        } else if( value == 6 ) {
+        } else if( value == 6 ){
             System.out.println( "five" );
         } else {
             System.out.println( "six" );
@@ -73,6 +73,28 @@ public class SomeClass
         else // comment 8
             // comment 9
             System.out.println( "eleven" );
+    }
+
+    private void doUnuddledNested( int value ) {
+        if( value == 5 ) {
+            System.out.println( "twelve" );
+            if( true ) 
+            {
+                System.out.println( "thirteen" );
+            }
+        } else if( value == 6 ){
+            System.out.println( "fourteen" );
+            if( true ) 
+            {
+                System.out.println( "fifteen" );
+            }
+        } else {
+            System.out.println( "sixteen" );
+            if( true ) 
+            {
+                System.out.println( "seventeen" );
+            }
+        }
     }
 
 }

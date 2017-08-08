@@ -83,13 +83,13 @@ java_test(
     data = [ "//src/test/data/cuddle_left:test-inputs", ],
 )
 
-#java_test(
-#    name = "TestRightBraceCuddler",
-#    size = "small",
-#    test_class = "com.staircaselabs.jformatter.formatters.TestRightBraceCuddler",
-#    runtime_deps = [
-#        "@org_opentest4j//jar",
-#        ":formatters",
-#    ],
-#    data = [ "//src/test/data/cuddle_right:test-inputs", ],
-#)
+java_test(
+    name = "TestRightBraceCuddler",
+    size = "small",
+    test_class = "com.staircaselabs.jformatter.formatters.TestRightBraceCuddler",
+    runtime_deps = [
+        "@org_opentest4j//jar",
+        ":formatters",
+    ],
+    data = [ "//src/test/data/cuddle_right:test-inputs", ],
+)

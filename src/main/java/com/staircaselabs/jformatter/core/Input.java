@@ -2,6 +2,7 @@ package com.staircaselabs.jformatter.core;
 
 import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.OptionalInt;
@@ -63,6 +64,14 @@ public class Input {
 
     public OptionalInt findNextByExclusion( int startInclusive, TokenType... types ) {
         return TokenUtils.findNextByExclusion( tokens, startInclusive, types );
+    }
+
+    public OptionalInt findPrev( int startInclusive, int endExclusive, TokenType... types ) {
+        return TokenUtils.findPrev( tokens, startInclusive, endExclusive, types );
+    }
+
+    public OptionalInt findPrev( int stopExclusive, TokenType... types ) {
+        return TokenUtils.findPrev( tokens, stopExclusive, types );
     }
 
     public OptionalInt findPrevByExclusion( int startInclusive, int stopExclusive, TokenType... types ) {

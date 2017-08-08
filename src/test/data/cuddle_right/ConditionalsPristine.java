@@ -11,30 +11,21 @@ public class SomeClass {
     private void doUncuddledIfElseIfElse( int value ) {
         if( value == 1 ) {
             System.out.println( "one" );
-        } // comment 1
-        else if( value == 2 ) {
+        } else if( value == 2 ) {
+         // comment 1
  // comment 2
  // comment 3
-            // comment 4
+ // comment 4
+            // comment 5
             System.out.println( "two" );
-        }
-        else {
+        } else {
             System.out.println( "three" );
         }
 
     }
 
-    private void doUncuddledWhileNested( boolean condition ) {
-        while( true ) {
-            if( condition ) {
-                continue;
-            }
-        }
-        int count = status ? 1 : 2;
-    };
-
     private void doCuddledIfElseIfElse( int value ) {
-        if( value == 5 ) {
+        if( value == 5 ){
             System.out.println( "four" );
         } else if( value == 6 ) {
             System.out.println( "five" );
@@ -43,49 +34,58 @@ public class SomeClass {
         }
     }
 
-    private void doUncuddledIfElseWithComments( int value ) {
+    private void doUncuddledIfElseIfWithComments( int value ) {
         if( value == 1 ) {
             System.out.println( "seven" );
-        } // comment 5
-        // comment 6
-        else {
+        } else if( value == 2 ){
+         // comment 1
+  // comment 2
             System.out.println( "eight" );
         }
     }
 
-    private void doUnbracedIf() {
-        if( true ) {
+    private void doUncuddledIfElseWithComments( int value ) {
+        if( value == 1 ) {
             System.out.println( "nine" );
-}
+        } else {
+         // comment 5
+        // comment 6
+            System.out.println( "ten" );
+        }
     }
 
     private void doUnbracedIfElseWithComments() {
         if( true ) {
-            System.out.println( "ten" );
-}
+            System.out.println( "eleven" );
+} else {        
         // comment 7
-        else {
  // comment 8
             // comment 9
-            System.out.println( "eleven" );
+            System.out.println( "twelve" );
 }
     }
 
-    private void doUnuddledNested( int value ) {
-        if( value == 5 ) {
-            System.out.println( "twelve" );
+    private void doUncuddledNested( int value ) {
+        if( value == 1 ) {
+            System.out.println( "thirteen" );
             if( true ) {
-                System.out.println( "thirteen" );
-            }
-        } else if( value == 6 ) {
-            System.out.println( "fourteen" );
-            if( true ) {
+                System.out.println( "fourteen" );
+            } else {
                 System.out.println( "fifteen" );
             }
-        } else {
+        } else if( value == 2 ) {
             System.out.println( "sixteen" );
             if( true ) {
                 System.out.println( "seventeen" );
+            } else {
+                System.out.println( "eighteen" );
+            }
+        } else {
+            System.out.println( "nineteen" );
+            if( true ) {
+                System.out.println( "twenty" );
+            } else {
+                System.out.println( "twentyone" );
             }
         }
     }

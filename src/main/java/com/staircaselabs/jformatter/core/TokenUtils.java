@@ -74,6 +74,26 @@ public final class TokenUtils {
         return findNextByExclusion( tokens, startInclusive, tokens.size(), types );
     }
 
+    public static OptionalInt findPrev(
+            List<TextToken> tokens,
+            int startInclusive,
+            int endExclusive,
+            TokenType... types
+    ) {
+        List<TokenType> included = Arrays.asList( types );
+        return IntStream.range( startInclusive, endExclusive )
+                .filter( i -> included.contains( tokens.get( i ).type ) )
+                .reduce( (a, b) -> b );
+    }
+
+    public static OptionalInt findPrev(
+            List<TextToken> tokens,
+            int stopExclusive,
+            TokenType... types
+    ) {
+        return findPrev( tokens, 0, stopExclusive, types );
+    }
+
     public static OptionalInt findPrevByExclusion(
             List<TextToken> tokens,
             int startInclusive,
@@ -251,14 +271,16 @@ public final class TokenUtils {
 
     protected static TokenType tokenTypeFromTokenKind( TokenKind kind ) {
         switch( kind ) {
-        case IMPORT:
-            return TokenType.IMPORT;
+        case CATCH:
+            return TokenType.CATCH;
         case ELSE:
             return TokenType.ELSE;
         case EOF:
             return TokenType.EOF;
         case FINALLY:
             return TokenType.FINALLY;
+        case IMPORT:
+            return TokenType.IMPORT;
         case LBRACE:
             return TokenType.BRACE_LEFT;
         case RBRACE:
@@ -267,6 +289,8 @@ public final class TokenUtils {
             return TokenType.SEMICOLON;
         case STATIC:
             return TokenType.STATIC;
+        case WHILE:
+            return TokenType.WHILE;
         default:
             return TokenType.OTHER;
         }

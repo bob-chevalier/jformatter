@@ -85,14 +85,24 @@ public class BraceInserter extends ScanningFormatter {
             // ensure that then-statement is surrounded by curly braces
             surroundWithBraces( input, (JCTree)node.getThenStatement() ).ifPresent( this::addReplacement );
 
+            if( node.getThenStatement().getKind() == Kind.BLOCK ) {
+                // cuddle statements within then-block
+                scan( (BlockTree)node.getThenStatement(), input );
+            }
+
             StatementTree elseStatement = node.getElseStatement();
             if( elseStatement != null ) {
                 if( elseStatement.getKind() == Kind.IF ) {
-                    // there are more if-statements to process
+                    // call visitIf on everything after else-if statement
                     scan( node.getElseStatement(), input );
                 } else {
                     // this must be the final else-statement
                     surroundWithBraces( input, (JCTree)elseStatement ).ifPresent( this::addReplacement );
+
+                    if( elseStatement.getKind() == Kind.BLOCK ) {
+                        // cuddle statements within else-block
+                        scan( (BlockTree)elseStatement, input );
+                    }
                 }
             }
 

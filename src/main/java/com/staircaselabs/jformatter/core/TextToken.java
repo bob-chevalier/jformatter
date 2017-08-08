@@ -21,6 +21,7 @@ public class TextToken {
     public enum TokenType {
         BRACE_LEFT,
         BRACE_RIGHT,
+        CATCH,
         COMMENT_LINE,
         COMMENT_BLOCK,
         COMMENT_JAVADOC,
@@ -32,6 +33,7 @@ public class TextToken {
         OTHER,
         SEMICOLON,
         STATIC,
+        WHILE,
         WHITESPACE
     }
 

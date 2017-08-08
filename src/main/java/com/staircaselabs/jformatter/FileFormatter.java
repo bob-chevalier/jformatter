@@ -34,8 +34,8 @@ public class FileFormatter implements Callable<Boolean> {
 //        workingText = UnusedImportsRemover.format( workingText );
 //        workingText = ImportsSorter.format( workingText );
 //        workingText = new BraceInserter().format( workingText );
-        workingText = new LeftBraceCuddler().format( workingText );
-//        workingText = RightBraceCuddler.format( workingText );
+//        workingText = new LeftBraceCuddler().format( workingText );
+        workingText = new RightBraceCuddler().format( workingText );
 
 
         System.out.println( workingText );

@@ -128,17 +128,26 @@ public class LeftBraceCuddler extends ScanningFormatter {
         @Override
         public Void visitIf( IfTree node, Input input ) {
             // cuddle opening brace of then statement
-            StatementTree thenStatement = node.getThenStatement();
-            cuddleLeftBrace( input, (JCTree)thenStatement ).ifPresent( this::addReplacement );
+            cuddleLeftBrace( input, (JCTree)node.getThenStatement() ).ifPresent( this::addReplacement );
+
+            if( node.getThenStatement().getKind() == Kind.BLOCK ) {
+                // cuddle statements within then-block
+                scan( (BlockTree)node.getThenStatement(), input );
+            }
 
             StatementTree elseStatement = node.getElseStatement();
             if( elseStatement != null ) {
-                if( elseStatement.getKind() == Kind.BLOCK ) {
+                if( elseStatement.getKind() == Kind.IF ) {
+                    // call visitIf on everything after else-if statement
+                    scan( elseStatement, input );
+                } else {
                     // cuddle opening brace of else statement
                     cuddleLeftBrace( input, (JCTree)elseStatement ).ifPresent( this::addReplacement );
-                } else {
-                    // cuddle braces of remaining conditional statements
-                    scan( node.getElseStatement(), input );
+
+                    if( elseStatement.getKind() == Kind.BLOCK ) {
+                        // cuddle statements within else-block
+                        scan( (BlockTree)elseStatement, input );
+                    }
                 }
             }
 
@@ -196,7 +205,7 @@ public class LeftBraceCuddler extends ScanningFormatter {
 
             // cuddle braces contained in finally block
             if( node.getFinallyBlock() != null ) {
-                cuddleFinallyBlock( input, node.getFinallyBlock() );
+                cuddleBlockContainer( input, (JCTree)node.getFinallyBlock(), node.getFinallyBlock() );
             }
 
             return null;
@@ -212,9 +221,7 @@ public class LeftBraceCuddler extends ScanningFormatter {
             cuddleLeftBrace( input, tree ).ifPresent( this::addReplacement );
 
             // cuddle braces contained within loop's body
-            scan( loopBody, input );
-
-            return null;
+            return scan( loopBody, input );
         }
 
         private Void cuddleBlockContainer( Input input, JCTree tree, BlockTree block ) {
@@ -222,19 +229,7 @@ public class LeftBraceCuddler extends ScanningFormatter {
             cuddleLeftBrace( input, tree ).ifPresent( this::addReplacement );
 
             // cuddle braces contained within block
-            scan( block, input );
-
-            return null;
-        }
-
-        private void cuddleFinallyBlock( Input input, BlockTree block ) {
-            // cuddle opening brace of finally block
-            cuddleLeftBrace( input, (JCTree)block ).ifPresent( this::addReplacement );
-
-            // cuddle braces contained within finally block statements
-            for( StatementTree statement : block.getStatements() ) {
-                scan( statement, input );
-            }
+            return scan( block, input );
         }
 
         private Optional<Replacement> cuddleLeftBrace( Input input, JCTree tree ) {
