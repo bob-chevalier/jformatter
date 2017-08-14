@@ -83,6 +83,13 @@ public class SpaceFormatter extends ScanningFormatter {
                 TokenType.WHITESPACE,
                 TokenType.NEWLINE
         };
+        private static final TokenType[] WS_NEWLINE_OR_COMMENT = {
+                TokenType.WHITESPACE,
+                TokenType.NEWLINE,
+                TokenType.COMMENT_BLOCK,
+                TokenType.COMMENT_JAVADOC,
+                TokenType.COMMENT_LINE
+        };
         private static final TokenType[] WS_NEWLINE_COMMENT_OR_BRACKET = {
                 TokenType.WHITESPACE,
                 TokenType.NEWLINE,
@@ -224,6 +231,19 @@ public class SpaceFormatter extends ScanningFormatter {
         @Override
         public Void visitBinary( BinaryTree node, Input input ) {
             System.out.println( "======visitBinary======" );
+            StringBuilder sb = new StringBuilder();
+            sb.append( input.stringifyTree( (JCTree)node.getLeftOperand() ) );
+            sb.append( SPACE );
+
+            // find token that represents the operation
+            int leftOperand = input.getLastTokenIndex( (JCTree)node.getLeftOperand() );
+            int operator = input.findNextByExclusion( (leftOperand + 1), WS_NEWLINE_OR_COMMENT ).getAsInt();
+            sb.append( input.tokens.get( operator ).getText() );
+
+            sb.append( SPACE );
+            sb.append( input.stringifyTree( (JCTree)node.getRightOperand() ) );
+            createReplacement( input, (JCTree)node, sb ).ifPresent( this::addReplacement );
+
             return super.visitBinary( node, input );
         }
 
@@ -255,6 +275,7 @@ public class SpaceFormatter extends ScanningFormatter {
         public Void visitClass( ClassTree node, Input input ) {
             System.out.println( "======visitClass======" );
             //TODO put variables and methods in alphabetical/static order (Do this in a separate formatter: one for members and one for methods?)
+            //TODO handle parenthesized in PaddingFormatter
 //            for( Tree member : node.getMembers() ) {
 //                System.out.println( "member: " + member.getKind() + "\n" + member );
 //            }
@@ -462,6 +483,7 @@ public class SpaceFormatter extends ScanningFormatter {
             System.out.println( "======visitNewArray======" );
 //            printTree( (JCTree)node, input );
             //TODO what about top-level annotations?
+            //TODO can we use getKind() here instead of checking for null initializers?
             if( node.getInitializers() != null ) {
                 // check first initializer for a left-brace because we only want
                 // to process the innermost initializers (only relevant for matrices)
@@ -619,6 +641,15 @@ public class SpaceFormatter extends ScanningFormatter {
         @Override
         public Void visitUnary(UnaryTree node, Input input ) {
             System.out.println( "======visitUnary======" );
+            printTree( (JCTree)node, input );
+            StringBuilder sb = new StringBuilder();
+
+            // unary operator should be the first token in the tree
+            int operator = input.getFirstTokenIndex( (JCTree)node );
+            sb.append( input.tokens.get( operator ).getText() );
+            sb.append( input.stringifyTree( (JCTree)node.getExpression() ) );
+            createReplacement( input, (JCTree)node, sb ).ifPresent( this::addReplacement );
+
             return super.visitUnary( node, input );
         }
 

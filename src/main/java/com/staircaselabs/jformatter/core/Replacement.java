@@ -2,9 +2,9 @@ package com.staircaselabs.jformatter.core;
 
 public class Replacement {
 
-    public int startInclusive;
-    public int endExclusive;
-    public String newText;
+    private int startInclusive;
+    private int endExclusive;
+    private String newText;
 
     public Replacement( int startInclusive, int endExclusive, String newText ) {
         this.startInclusive = startInclusive;
@@ -14,6 +14,14 @@ public class Replacement {
 
     public int getStart() {
         return startInclusive;
+    }
+
+    public int getEnd() {
+        return endExclusive;
+    }
+
+    public String getNewText() {
+        return newText;
     }
 
     public void apply( StringBuilder builder ) throws FormatException {

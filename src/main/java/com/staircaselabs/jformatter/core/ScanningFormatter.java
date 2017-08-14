@@ -36,9 +36,9 @@ public class ScanningFormatter {
                 for( Replacement replacement : scanner.getReplacements().descendingSet() ) {
                     // we must ensure that replacements don't overlap, if we detect an overlapping
                     // replacement, we skip it and re-scan text after applying other replacements
-                    if( replacement.endExclusive < minReplacementPos ) {
+                    if( replacement.getEnd() < minReplacementPos ) {
                         replacement.apply( sb );
-                        minReplacementPos = replacement.startInclusive;
+                        minReplacementPos = replacement.getStart();
                     } else {
                         moreReplacements = true;
                     }

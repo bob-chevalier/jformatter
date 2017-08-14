@@ -1,5 +1,7 @@
 package com.staircaselabs.jformatter.core;
 
+import static java.util.Comparator.comparingInt;
+
 import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -22,8 +24,12 @@ public class FormatScanner extends TreeScanner<Void, Input> {
         }
     }
 
-    private NavigableSet<Replacement> replacements =
-            new TreeSet<>( Comparator.comparingInt( Replacement::getStart ) );
+    // keep replacements sorted using a custom comparator
+    private NavigableSet<Replacement> replacements = new TreeSet<>(
+            Comparator.comparingInt( Replacement::getStart )
+                    .thenComparingInt( Replacement::getEnd )
+                    .thenComparing( Replacement::getNewText )
+    );
 
     public NavigableSet<Replacement> getReplacements() {
         return replacements;
@@ -48,6 +54,7 @@ public class FormatScanner extends TreeScanner<Void, Input> {
         if( !newText.equals( oldText ) ) {
             TextToken firstTokenToReplace = input.tokens.get( startIdxInclusive );
             TextToken lastTokenToReplace = input.tokens.get( (endIdxExclusive - 1) );
+
             return Optional.of(
                     new Replacement(
                             firstTokenToReplace.start,

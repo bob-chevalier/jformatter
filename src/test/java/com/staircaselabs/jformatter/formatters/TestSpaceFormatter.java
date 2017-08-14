@@ -13,11 +13,13 @@ import org.junit.Test;
 public class TestSpaceFormatter {
 
     private static String arraysExpected;
+    private static String binaryAndUnaryExpected;
     private SpaceFormatter formatter;
 
     @BeforeClass
     public static void loadExpectedOutputs() throws IOException {
         arraysExpected = Helper.readFileToString( "src/test/data/space/ArraysPristine.java" );
+        binaryAndUnaryExpected = Helper.readFileToString( "src/test/data/space/BinaryAndUnaryPristine.java" );
     }
 
     @Before
@@ -30,6 +32,13 @@ public class TestSpaceFormatter {
         String text = Helper.readFileToString( "src/test/data/space/Arrays.java" );
         String newText = formatter.format( text );
         assertThat( newText ).isEqualTo( arraysExpected );
+    }
+
+    @Test
+    public void shouldSpaceBinaryAndUnary() throws IOException, FormatException {
+        String text = Helper.readFileToString( "src/test/data/space/BinaryAndUnary.java" );
+        String newText = formatter.format( text );
+        assertThat( newText ).isEqualTo( binaryAndUnaryExpected );
     }
 
 }
