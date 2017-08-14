@@ -26,7 +26,6 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.SwitchTree;
 import com.sun.source.tree.SynchronizedTree;
-import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TryTree;
 import com.sun.source.tree.WhileLoopTree;
@@ -65,171 +64,98 @@ public class LeftBraceCuddler extends ScanningFormatter {
             if( node.isStatic() ) {
                 cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
             }
-
-            // cuddle braces contained in block statements
-            for( StatementTree statement : node.getStatements() ) {
-                scan( statement, input );
-            }
-
-            return null;
+            return super.visitBlock( node, input );
         }
 
         @Override
         public Void visitCase( CaseTree node, Input input ) {
-            // cuddle opening brace of case statement
             cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
-
-            // cuddle braces contained in case statements
-            for( StatementTree statement : node.getStatements() ) {
-                scan( statement, input );
-            }
-
-            return null;
+            return super.visitCase( node, input );
         }
 
         @Override
         public Void visitCatch( CatchTree node, Input input ) {
-            return cuddleBlockContainer( input, (JCTree)node, node.getBlock() );
+            cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
+            return super.visitCatch( node, input );
         }
 
         @Override
         public Void visitClass( ClassTree node, Input input ) {
-            // cuddle opening brace of class
             cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
-
-            // cuddle braces contained in class methods
-            for( Tree member : node.getMembers() ) {
-                //TODO should we just scan all members?
-                if(  member.getKind() == Kind.CLASS
-                        || member.getKind() == Kind.BLOCK
-                        || member.getKind() == Kind.METHOD ) {
-                    scan( member, input );
-                }
-            }
-
-            return null;
+            return super.visitClass( node, input );
         }
 
         @Override
         public Void visitDoWhileLoop( DoWhileLoopTree node, Input input ) {
-            return cuddleLoopBrace( input, (JCTree)node, node.getStatement() );
+            cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
+            return super.visitDoWhileLoop( node, input );
         }
 
         @Override
         public Void visitEnhancedForLoop( EnhancedForLoopTree node, Input input ) {
-            return cuddleLoopBrace( input, (JCTree)node, node.getStatement() );
+            cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
+            return super.visitEnhancedForLoop( node, input );
         }
 
         @Override
         public Void visitForLoop( ForLoopTree node, Input input ) {
-            return cuddleLoopBrace( input, (JCTree)node, node.getStatement() );
+            cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
+            return super.visitForLoop( node, input );
         }
 
         @Override
         public Void visitIf( IfTree node, Input input ) {
-            // cuddle opening brace of then statement
             cuddleLeftBrace( input, (JCTree)node.getThenStatement() ).ifPresent( this::addReplacement );
 
-            if( node.getThenStatement().getKind() == Kind.BLOCK ) {
-                // cuddle statements within then-block
-                scan( (BlockTree)node.getThenStatement(), input );
-            }
-
             StatementTree elseStatement = node.getElseStatement();
-            if( elseStatement != null ) {
-                if( elseStatement.getKind() == Kind.IF ) {
-                    // call visitIf on everything after else-if statement
-                    scan( elseStatement, input );
-                } else {
-                    // cuddle opening brace of else statement
-                    cuddleLeftBrace( input, (JCTree)elseStatement ).ifPresent( this::addReplacement );
-
-                    if( elseStatement.getKind() == Kind.BLOCK ) {
-                        // cuddle statements within else-block
-                        scan( (BlockTree)elseStatement, input );
-                    }
-                }
+            if( elseStatement != null && elseStatement.getKind() != Kind.IF ) {
+                // cuddle final else-statement brace
+                cuddleLeftBrace( input, (JCTree)elseStatement ).ifPresent( this::addReplacement );
             }
 
-            return null;
+            return super.visitIf( node, input );
         }
 
         @Override
         public Void visitLambdaExpression( LambdaExpressionTree node, Input input ) {
-            // cuddle opening brace of lambda
             cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
-
-            // cuddle braces contained within lambda body
-            scan( node.getBody(), input );
-
-            return null;
+            return super.visitLambdaExpression( node, input );
         }
 
         @Override
         public Void visitMethod( MethodTree node, Input input ) {
-            // cuddle opening brace of method
             cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
-
-            // cuddle braces contained within method body
-            scan( node.getBody(), input );
-
-            return null;
+            return super.visitMethod( node, input );
         }
 
         @Override
         public Void visitSwitch( SwitchTree node, Input input ) {
-            // cuddle opening brace of case statement
             cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
-
-            // cuddle braces contained in case statements
-            for( CaseTree statement : node.getCases() ) {
-                scan( statement, input );
-            }
-
-            return null;
+            return super.visitSwitch( node, input );
         }
 
         @Override
         public Void visitSynchronized( SynchronizedTree node, Input input ) {
-            return cuddleBlockContainer( input, (JCTree)node, node.getBlock() );
+            cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
+            return super.visitSynchronized( node, input );
         }
 
         @Override
         public Void visitTry( TryTree node, Input input ) {
-            cuddleBlockContainer( input, (JCTree)node, node.getBlock() );
+            cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
 
-            // cuddle braces contained in each catch block
-            for( CatchTree catchTree : node.getCatches() ) {
-                scan( catchTree, input );
-            }
-
-            // cuddle braces contained in finally block
             if( node.getFinallyBlock() != null ) {
-                cuddleBlockContainer( input, (JCTree)node.getFinallyBlock(), node.getFinallyBlock() );
+                // cuddle finally block opening brace
+                cuddleLeftBrace( input, (JCTree)node.getFinallyBlock() ).ifPresent( this::addReplacement );
             }
 
-            return null;
+            return super.visitTry( node, input );
         }
 
         @Override
         public Void visitWhileLoop( WhileLoopTree node, Input input ) {
-            return cuddleLoopBrace( input, (JCTree)node, node.getStatement() );
-        }
-
-        private Void cuddleLoopBrace( Input input, JCTree tree, StatementTree loopBody ) {
-            // cuddle opening brace of for loop
-            cuddleLeftBrace( input, tree ).ifPresent( this::addReplacement );
-
-            // cuddle braces contained within loop's body
-            return scan( loopBody, input );
-        }
-
-        private Void cuddleBlockContainer( Input input, JCTree tree, BlockTree block ) {
-            // cuddle opening brace of block container
-            cuddleLeftBrace( input, tree ).ifPresent( this::addReplacement );
-
-            // cuddle braces contained within block
-            return scan( block, input );
+            cuddleLeftBrace( input, (JCTree)node ).ifPresent( this::addReplacement );
+            return super.visitWhileLoop( node, input );
         }
 
         private Optional<Replacement> cuddleLeftBrace( Input input, JCTree tree ) {
@@ -238,7 +164,7 @@ public class LeftBraceCuddler extends ScanningFormatter {
             int endIdx = input.getLastTokenIndex( tree );
 
             // find first opening curly brace
-            OptionalInt optionalBraceIdx = input.findNext( startIdx, (endIdx + 1), TokenType.BRACE_LEFT );
+            OptionalInt optionalBraceIdx = input.findNext( startIdx, (endIdx + 1), TokenType.LEFT_BRACE );
             if( !optionalBraceIdx.isPresent() ) {
                 // this tree doesn't contain an opening brace so there's nothing to do
                 return Optional.empty();
@@ -287,21 +213,7 @@ public class LeftBraceCuddler extends ScanningFormatter {
                 lastToReplace = firstNonWS - 1;
             }
 
-            String oldText = stringifyTokens( input.tokens, (parentIdx + 1), (lastToReplace + 1) );
-            String replacementText = sb.toString();
-            if( !replacementText.equals( oldText ) ) {
-                TextToken firstTokenToReplace = input.tokens.get( (parentIdx + 1) );
-                TextToken lastTokenToReplace = input.tokens.get( lastToReplace );
-                return Optional.of(
-                        new Replacement(
-                                firstTokenToReplace.start,
-                                lastTokenToReplace.end,
-                                sb.toString()
-                        )
-                );
-            } else {
-                return Optional.empty();
-            }
+            return createReplacement( input, (parentIdx + 1), (lastToReplace + 1), sb );
         }
 
     }

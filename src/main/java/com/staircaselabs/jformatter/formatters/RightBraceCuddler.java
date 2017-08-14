@@ -9,7 +9,6 @@ import com.staircaselabs.jformatter.core.Replacement;
 import com.staircaselabs.jformatter.core.ScanningFormatter;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
-import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.CatchTree;
 import com.sun.source.tree.DoWhileLoopTree;
 import com.sun.source.tree.IfTree;
@@ -36,29 +35,19 @@ public class RightBraceCuddler extends ScanningFormatter {
         public Void visitCatch( CatchTree node, Input input ) {
             int catchStartIdx = input.getFirstTokenIndex( (JCTree)node );
             int catchIdx = input.findNext( catchStartIdx, TokenType.CATCH ).getAsInt();
-            int rightBraceIdx = input.findPrev( catchIdx, TokenType.BRACE_RIGHT ).getAsInt();
+            int rightBraceIdx = input.findPrev( catchIdx, TokenType.RIGHT_BRACE ).getAsInt();
             int blockStartIdx = input.getFirstTokenIndex( (JCTree)node.getBlock() );
-            int leftBraceIdx = input.findPrev( (blockStartIdx + 1), TokenType.BRACE_LEFT ).getAsInt();
-
-            // cuddle catch statement to its parent's closing brace
+            int leftBraceIdx = input.findPrev( (blockStartIdx + 1), TokenType.LEFT_BRACE ).getAsInt();
             cuddleRightBrace( input, rightBraceIdx, catchIdx, leftBraceIdx ).ifPresent( this::addReplacement );
 
-            // process statements within catch block's body
-            return scan( node.getBlock(), input );
+            return super.visitCatch( node, input );
         }
 
         @Override
         public Void visitDoWhileLoop( DoWhileLoopTree node, Input input ) {
-            // find index of last token within do-while body
             int bodyEndIdx = input.getLastTokenIndex( (JCTree)node.getStatement() );
-
-            // find while-token
             int whileIdx = input.findNext( bodyEndIdx, TokenType.WHILE ).getAsInt();
-
-            // find first do-block's closing brace
-            int braceIdx = input.findPrev( whileIdx, TokenType.BRACE_RIGHT ).getAsInt();
-
-            // find first non-whitespace token before closing brace
+            int braceIdx = input.findPrev( whileIdx, TokenType.RIGHT_BRACE ).getAsInt();
             int parentIdx = input.findPrevByExclusion( braceIdx, TokenType.WHITESPACE ).getAsInt();
 
             StringBuilder sb = new StringBuilder();
@@ -72,79 +61,53 @@ public class RightBraceCuddler extends ScanningFormatter {
             sb.append( input.stringifyTokens( (parentIdx + 1), braceIdx ) );
             sb.append( "} " );
 
-            // cuddle while statement to the do-block's closing brace
-            createReplacement( input, (parentIdx + 1), (whileIdx - 1), sb ).ifPresent( this::addReplacement );
+            createReplacement( input, (parentIdx + 1), whileIdx, sb ).ifPresent( this::addReplacement );
 
-            // cuddle braces contained within loop's body
-            return scan( node.getStatement(), input );
+            return super.visitDoWhileLoop( node, input );
         }
 
         @Override
         public Void visitIf( IfTree node, Input input ) {
-            if( node.getThenStatement().getKind() == Kind.BLOCK ) {
-                // cuddle statements within then-block
-                scan( (BlockTree)node.getThenStatement(), input );
-            }
-
             int startIdx = input.getFirstTokenIndex( (JCTree)node );
             int elseIfIdx = input.findPrevByExclusion( startIdx, TokenType.WHITESPACE ).getAsInt();
             if( input.tokens.get( elseIfIdx ).type == TokenType.ELSE ) {
                 // cuddle else-if statement to its parent's closing brace
-                int rightBraceIdx = input.findPrev( elseIfIdx, TokenType.BRACE_RIGHT ).getAsInt();
+                int rightBraceIdx = input.findPrev( elseIfIdx, TokenType.RIGHT_BRACE ).getAsInt();
                 int condEndIdx = input.getLastTokenIndex( (JCTree)node.getCondition() );
 
                 // scanner gets confused if there's not a space after condition, so check for either case
-                int leftBraceIdx = input.tokens.get( condEndIdx ).type == TokenType.BRACE_LEFT
+                int leftBraceIdx = input.tokens.get( condEndIdx ).type == TokenType.LEFT_BRACE
                         ? condEndIdx
-                        : input.findNext( (condEndIdx + 1), TokenType.BRACE_LEFT ).getAsInt();
+                        : input.findNext( (condEndIdx + 1), TokenType.LEFT_BRACE ).getAsInt();
 
                 cuddleRightBrace( input, rightBraceIdx, elseIfIdx, leftBraceIdx ).ifPresent( this::addReplacement );
             }
 
             StatementTree elseStatement = node.getElseStatement();
-            if( elseStatement != null ) {
-                if( elseStatement.getKind() == Kind.IF ) {
-                    // call visitIf on everything after else-if statement
-                    scan( elseStatement, input );
-                } else {
-                    // cuddle else statement to its parent's closing brace
-                    int blockStartIdx = input.getFirstTokenIndex( (JCTree)elseStatement );
-                    int elseIdx = input.findPrev( blockStartIdx, TokenType.ELSE ).getAsInt();
-                    int rightBraceIdx = input.findPrev( elseIdx, TokenType.BRACE_RIGHT ).getAsInt();
-                    int leftBraceIdx = input.findNext( elseIdx, TokenType.BRACE_LEFT ).getAsInt();
-                    cuddleRightBrace( input, rightBraceIdx, elseIdx, leftBraceIdx ).ifPresent( this::addReplacement );
-
-                    if( elseStatement.getKind() == Kind.BLOCK ) {
-                        // cuddle statements within else-block
-                        scan( (BlockTree)elseStatement, input );
-                    }
-                }
+            if( elseStatement != null && elseStatement.getKind() != Kind.IF ) {
+                // cuddle final else statement to its parent's closing brace
+                int blockStartIdx = input.getFirstTokenIndex( (JCTree)elseStatement );
+                int elseIdx = input.findPrev( blockStartIdx, TokenType.ELSE ).getAsInt();
+                int rightBraceIdx = input.findPrev( elseIdx, TokenType.RIGHT_BRACE ).getAsInt();
+                int leftBraceIdx = input.findNext( elseIdx, TokenType.LEFT_BRACE ).getAsInt();
+                cuddleRightBrace( input, rightBraceIdx, elseIdx, leftBraceIdx ).ifPresent( this::addReplacement );
             }
 
-            return null;
+            return super.visitIf( node, input );
         }
 
         @Override
         public Void visitTry( TryTree node, Input input ) {
-            // cuddle each catch statement to its parent's closing brace
-            for( CatchTree catchTree : node.getCatches() ) {
-                scan( catchTree, input );
-            }
-
             if( node.getFinallyBlock() != null ) {
+                // cuddle finally statement to its parent's closing brace
                 int finallyStartIdx = input.getFirstTokenIndex( (JCTree)node.getFinallyBlock() );
                 int finallyIdx = input.findPrev( finallyStartIdx, TokenType.FINALLY ).getAsInt();
-                int rightBraceIdx = input.findPrev( finallyIdx, TokenType.BRACE_RIGHT ).getAsInt();
-                int leftBraceIdx = input.findNext( finallyIdx, TokenType.BRACE_LEFT ).getAsInt();
-
-                // cuddle finally statement to its parent's closing brace
+                int rightBraceIdx = input.findPrev( finallyIdx, TokenType.RIGHT_BRACE ).getAsInt();
+                int leftBraceIdx = input.findNext( finallyIdx, TokenType.LEFT_BRACE ).getAsInt();
                 cuddleRightBrace( input, rightBraceIdx, finallyIdx, leftBraceIdx ).ifPresent( this::addReplacement );
-
-                // process statements within finally block's body
-                scan( node.getFinallyBlock(), input );
             }
 
-            return null;
+            return super.visitTry( node, input );
         }
 
         private Optional<Replacement> cuddleRightBrace( Input input, int rightBraceIdx, int childIdx, int leftBraceIdx ) {
@@ -177,26 +140,7 @@ public class RightBraceCuddler extends ScanningFormatter {
                 lastIdxToReplace = firstNonWSIdx - 1;
             }
 
-            return createReplacement( input, rightBraceIdx, lastIdxToReplace, sb );
-        }
-
-        private Optional<Replacement> createReplacement( Input input, int startIdx, int endIdx, StringBuilder sb ) {
-            String oldText = input.stringifyTokens( startIdx, (endIdx + 1) );
-            String replacementText = sb.toString();
-
-            if( !replacementText.equals( oldText ) ) {
-                TextToken firstTokenToReplace = input.tokens.get( startIdx );
-                TextToken lastTokenToReplace = input.tokens.get( endIdx );
-                return Optional.of(
-                      new Replacement(
-                              firstTokenToReplace.start,
-                              lastTokenToReplace.end,
-                              sb.toString()
-                      )
-                );
-            } else {
-                return Optional.empty();
-            }
+            return createReplacement( input, rightBraceIdx, (lastIdxToReplace + 1), sb );
         }
 
     }

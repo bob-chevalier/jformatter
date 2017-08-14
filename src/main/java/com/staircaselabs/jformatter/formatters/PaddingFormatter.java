@@ -30,6 +30,7 @@ import com.sun.source.tree.TryTree;
 import com.sun.source.tree.WhileLoopTree;
 import com.sun.tools.javac.tree.JCTree;
 
+//TODO handle type parameter padding
 public class PaddingFormatter extends ScanningFormatter {
 
     public PaddingFormatter( int numPaddingSpaces ) {
@@ -247,21 +248,7 @@ public class PaddingFormatter extends ScanningFormatter {
                 }
             }
 
-            String oldText = stringifyTokens( input.tokens, leftBoundIdx, (rightBoundIdx + 1) );
-            String replacementText = sb.toString();
-            if( !replacementText.equals( oldText ) ) {
-                TextToken firstTokenToReplace = input.tokens.get( leftBoundIdx );
-                TextToken lastTokenToReplace = input.tokens.get( rightBoundIdx );
-                return Optional.of(
-                        new Replacement(
-                                firstTokenToReplace.start,
-                                lastTokenToReplace.end,
-                                sb.toString()
-                        )
-                );
-            } else {
-                return Optional.empty();
-            }
+            return createReplacement( input, leftBoundIdx, (rightBoundIdx + 1), sb );
         }
 
     }

@@ -18,9 +18,12 @@ public class TextToken {
         return text;
     }
 
+    public TokenType getType() {
+        return type;
+    }
+
     public enum TokenType {
-        BRACE_LEFT,
-        BRACE_RIGHT,
+        AT,
         CATCH,
         COMMENT_LINE,
         COMMENT_BLOCK,
@@ -28,9 +31,17 @@ public class TextToken {
         ELSE,
         EOF,
         FINALLY,
+        GREATER_THAN,
         IMPORT,
+        LEFT_BRACE,
+        LEFT_BRACKET,
+        LEFT_PAREN,
+        LESS_THAN,
         NEWLINE,
         OTHER,
+        RIGHT_BRACE,
+        RIGHT_BRACKET,
+        RIGHT_PAREN,
         SEMICOLON,
         STATIC,
         WHILE,

@@ -34,12 +34,28 @@ public final class TokenUtils {
                 .anyMatch( TokenUtils::isComment );
     }
 
+    public static boolean contains( List<TextToken> tokens, int startInclusive, int endExclusive, TokenType... types ) {
+        if( startInclusive >= endExclusive ) {
+            return false;
+        }
+
+        List<TokenType> typesList = Arrays.asList( types );
+        return tokens.subList( startInclusive, endExclusive )
+                .stream()
+                .map( TextToken::getType )
+                .anyMatch( typesList::contains );
+    }
+
     public static OptionalInt findNext(
             List<TextToken> tokens,
             int startInclusive,
             int endExclusive,
             TokenType... types
     ) {
+        if( startInclusive >= endExclusive ) {
+            return OptionalInt.empty();
+        }
+
         List<TokenType> included = Arrays.asList( types );
         return IntStream.range( startInclusive, endExclusive )
                 .filter( i -> included.contains( tokens.get( i ).type ) )
@@ -60,6 +76,10 @@ public final class TokenUtils {
             int endExclusive,
             TokenType... types
     ) {
+        if( startInclusive >= endExclusive ) {
+            return OptionalInt.empty();
+        }
+
         List<TokenType> excluded = Arrays.asList( types );
         return IntStream.range( startInclusive, endExclusive )
                 .filter( i -> !excluded.contains( tokens.get( i ).type) )
@@ -80,6 +100,10 @@ public final class TokenUtils {
             int endExclusive,
             TokenType... types
     ) {
+        if( startInclusive >= endExclusive ) {
+            return OptionalInt.empty();
+        }
+
         List<TokenType> included = Arrays.asList( types );
         return IntStream.range( startInclusive, endExclusive )
                 .filter( i -> included.contains( tokens.get( i ).type ) )
@@ -88,30 +112,34 @@ public final class TokenUtils {
 
     public static OptionalInt findPrev(
             List<TextToken> tokens,
-            int stopExclusive,
+            int endExclusive,
             TokenType... types
     ) {
-        return findPrev( tokens, 0, stopExclusive, types );
+        return findPrev( tokens, 0, endExclusive, types );
     }
 
     public static OptionalInt findPrevByExclusion(
             List<TextToken> tokens,
             int startInclusive,
-            int stopExclusive,
+            int endExclusive,
             TokenType... types
     ) {
+        if( startInclusive >= endExclusive ) {
+            return OptionalInt.empty();
+        }
+
         List<TokenType> excluded = Arrays.asList( types );
-        return IntStream.range( startInclusive, stopExclusive )
+        return IntStream.range( startInclusive, endExclusive )
                 .filter( i -> !excluded.contains( tokens.get( i ).type ) )
                 .reduce( (a, b) -> b );
     }
 
     public static OptionalInt findPrevByExclusion(
             List<TextToken> tokens,
-            int stopExclusive,
+            int endExclusive,
             TokenType... types
     ) {
-        return findPrevByExclusion( tokens, 0, stopExclusive, types );
+        return findPrevByExclusion( tokens, 0, endExclusive, types );
     }
 
     public static String getLinebreak( List<TextToken> tokens ) {
@@ -279,12 +307,26 @@ public final class TokenUtils {
             return TokenType.EOF;
         case FINALLY:
             return TokenType.FINALLY;
+        case GT:
+            return TokenType.GREATER_THAN;
         case IMPORT:
             return TokenType.IMPORT;
         case LBRACE:
-            return TokenType.BRACE_LEFT;
+            return TokenType.LEFT_BRACE;
+        case LBRACKET:
+            return TokenType.LEFT_BRACKET;
+        case LT:
+            return TokenType.LESS_THAN;
+        case LPAREN:
+            return TokenType.LEFT_PAREN;
+        case MONKEYS_AT:
+            return TokenType.AT;
         case RBRACE:
-            return TokenType.BRACE_RIGHT;
+            return TokenType.RIGHT_BRACE;
+        case RBRACKET:
+            return TokenType.RIGHT_BRACKET;
+        case RPAREN:
+            return TokenType.RIGHT_PAREN;
         case SEMI:
             return TokenType.SEMICOLON;
         case STATIC:

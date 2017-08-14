@@ -55,6 +55,7 @@ import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.UnionTypeTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.tree.WhileLoopTree;
+import com.sun.tools.javac.tree.JCTree;
 
 public class SampleFormatter extends ScanningFormatter {
 
@@ -70,7 +71,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitAnnotatedType( AnnotatedTypeTree node, Input input ) {
             System.out.println( "======visitAnnotatedType======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitAnnotatedType( node, input );
@@ -80,7 +81,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitAnnotation( AnnotationTree node, Input input ) {
             System.out.println( "======visitAnnotation======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitAnnotation( node, input );
@@ -90,7 +91,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitArrayAccess( ArrayAccessTree node, Input input ) {
             System.out.println( "======visitArrayAccess======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitArrayAccess( node, input );
@@ -100,7 +101,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitArrayType( ArrayTypeTree node, Input input ) {
             System.out.println( "======visitArrayType======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitArrayType( node, input );
@@ -110,7 +111,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitAssert( AssertTree node, Input input ) {
             System.out.println( "======visitAssert======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitAssert( node, input );
@@ -120,7 +121,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitAssignment( AssignmentTree node, Input input ) {
             System.out.println( "======visitAssignment======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitAssignment( node, input );
@@ -130,7 +131,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitBinary( BinaryTree node, Input input ) {
             System.out.println( "======visitBinary======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitBinary( node, input );
@@ -140,7 +141,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitBlock(BlockTree node, Input input){
             System.out.println( "======visitBlock======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitBlock( node, input );
@@ -150,7 +151,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitBreak( BreakTree node, Input input ) {
             System.out.println( "======visitBreak======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitBreak( node, input );
@@ -160,7 +161,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitCase( CaseTree node, Input input ) {
             System.out.println( "======visitCase======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitCase( node, input );
@@ -170,7 +171,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitCatch( CatchTree node, Input input ) {
             System.out.println( "======visitCatch======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitCatch( node, input );
@@ -180,7 +181,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitClass( ClassTree node, Input input ) {
             System.out.println( "======visitClass======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitClass( node, input );
@@ -190,7 +191,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitCompilationUnit( CompilationUnitTree node, Input input ) {
             System.out.println( "======visitCompUnit======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitCompilationUnit( node, input );
@@ -198,9 +199,9 @@ public class SampleFormatter extends ScanningFormatter {
 
         @Override
         public Void visitCompoundAssignment( CompoundAssignmentTree node, Input input ) {
-            System.out.println( "BFC CompoundAssignment======" );
+            System.out.println( "======visitCompoundAssignment======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitCompoundAssignment( node, input );
@@ -210,7 +211,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitConditionalExpression( ConditionalExpressionTree node, Input input ) {
             System.out.println( "======visitConditionalExpression======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitConditionalExpression( node, input );
@@ -220,7 +221,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitContinue(ContinueTree node, Input input ) {
             System.out.println( "======visitContinue======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitContinue( node, input );
@@ -230,7 +231,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitDoWhileLoop(DoWhileLoopTree node, Input input ) {
             System.out.println( "======visitDoWhileLoop======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitDoWhileLoop( node, input );
@@ -240,7 +241,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitEmptyStatement(EmptyStatementTree node, Input input ) {
             System.out.println( "======visitEmptyStatement======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitEmptyStatement( node, input );
@@ -250,7 +251,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitEnhancedForLoop(EnhancedForLoopTree node, Input input ) {
             System.out.println( "======visitEnhancedForLoop======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitEnhancedForLoop( node, input );
@@ -260,7 +261,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitErroneous(ErroneousTree node, Input input ) {
             System.out.println( "======visitErroneous======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitErroneous( node, input );
@@ -270,7 +271,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitExpressionStatement(ExpressionStatementTree node, Input input ) {
             System.out.println( "======visitExpressionStatement======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitExpressionStatement( node, input );
@@ -280,7 +281,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitForLoop(ForLoopTree node, Input input ) {
             System.out.println( "======visitForLoop======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitForLoop( node, input );
@@ -290,7 +291,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitIdentifier(IdentifierTree node, Input input ) {
             System.out.println( "======visitIdentifier======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitIdentifier( node, input );
@@ -300,7 +301,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitIntersectionType(IntersectionTypeTree node, Input input ) {
             System.out.println( "======visitIntersection======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitIntersectionType( node, input );
@@ -310,7 +311,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitIf(IfTree node, Input input ) {
             System.out.println( "======visitIf======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitIf( node, input );
@@ -320,7 +321,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitImport(ImportTree node, Input input ) {
             System.out.println( "======visitImport======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitImport( node, input );
@@ -330,7 +331,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitInstanceOf(InstanceOfTree node, Input input ) {
             System.out.println( "======visitInstanceOf======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitInstanceOf( node, input );
@@ -340,7 +341,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitLabeledStatement(LabeledStatementTree node, Input input ) {
             System.out.println( "======visitLabeledStatement======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitLabeledStatement( node, input );
@@ -350,7 +351,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitLambdaExpression(LambdaExpressionTree node, Input input ) {
             System.out.println( "======visitLambdaExpression======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitLambdaExpression( node, input );
@@ -360,7 +361,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitLiteral(LiteralTree node, Input input ) {
             System.out.println( "======visitLiteral======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitLiteral( node, input );
@@ -370,7 +371,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitMemberReference(MemberReferenceTree node, Input input ) {
             System.out.println( "======visitMemberReference======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitMemberReference( node, input );
@@ -380,7 +381,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitMemberSelect(MemberSelectTree node, Input input ) {
             System.out.println( "======visitMemberSelect======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitMemberSelect( node, input );
@@ -390,7 +391,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitMethod(MethodTree node, Input input ) {
             System.out.println( "======visitMethod======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitMethod( node, input );
@@ -400,7 +401,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitMethodInvocation(MethodInvocationTree node, Input input ) {
             System.out.println( "======visitMethodInvocation======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitMethodInvocation( node, input );
@@ -410,7 +411,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitModifiers(ModifiersTree node, Input input ) {
             System.out.println( "======visitModifiers======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitModifiers( node, input );
@@ -420,7 +421,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitNewArray(NewArrayTree node, Input input ) {
             System.out.println( "======visitNewArray======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitNewArray( node, input );
@@ -430,7 +431,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitNewClass(NewClassTree node, Input input ) {
             System.out.println( "======visitNewClass======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitNewClass( node, input );
@@ -440,7 +441,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitOther(Tree node, Input input ) {
             System.out.println( "======visitOther======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitOther( node, input );
@@ -450,7 +451,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitParameterizedType(ParameterizedTypeTree node, Input input ) {
             System.out.println( "======visitParameterizedType======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitParameterizedType( node, input );
@@ -460,7 +461,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitParenthesized(ParenthesizedTree node, Input input ) {
             System.out.println( "======visitParenthesized======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitParenthesized( node, input );
@@ -470,7 +471,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitPrimitiveType(PrimitiveTypeTree node, Input input ) {
             System.out.println( "======visitPrimitiveType======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitPrimitiveType( node, input );
@@ -480,7 +481,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitReturn( ReturnTree node, Input input ) {
             System.out.println( "======visitReturn======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitReturn( node, input );
@@ -490,7 +491,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitSwitch(SwitchTree node, Input input ) {
             System.out.println( "======visitSwitch======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitSwitch( node, input );
@@ -500,7 +501,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitSynchronized(SynchronizedTree node, Input input ) {
             System.out.println( "======visitSynchronized======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitSynchronized( node, input );
@@ -510,7 +511,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitThrow(ThrowTree node, Input input ) {
             System.out.println( "======visitThrow======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitThrow( node, input );
@@ -520,7 +521,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitTry(TryTree node, Input input ) {
             System.out.println( "======visitTry" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitTry( node, input );
@@ -530,7 +531,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitTypeCast(TypeCastTree node, Input input ) {
             System.out.println( "======visitTypeCast======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitTypeCast( node, input );
@@ -540,7 +541,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitTypeParameter(TypeParameterTree node, Input input ) {
             System.out.println( "======visitTypeParameter======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitTypeParameter( node, input );
@@ -550,7 +551,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitUnionType(UnionTypeTree node, Input input ) {
             System.out.println( "======visitUnionType======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitUnionType( node, input );
@@ -560,7 +561,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitUnary(UnaryTree node, Input input ) {
             System.out.println( "======visitUnary======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitUnary( node, input );
@@ -570,7 +571,7 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitVariable(VariableTree node, Input input ) {
             System.out.println( "======visitVariable======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitVariable( node, input );
@@ -580,10 +581,18 @@ public class SampleFormatter extends ScanningFormatter {
         public Void visitWhileLoop(WhileLoopTree node, Input input ) {
             System.out.println( "======visitWhileLoop======" );
             if( VERBOSE ) {
-                System.out.println( node );
+                printTree( (JCTree)node, input );
                 System.out.println( "------------" );
             }
             return super.visitWhileLoop( node, input );
+        }
+
+        private printTree( JCTree tree, Input input ) {
+            int startIdx = input.getFirstTokenIndex( tree );
+            int endIdx = input.getLastTokenIndex( tree );
+            for( int pos=startIdx; pos<=endIdx; pos++ ) {
+                System.out.println( pos + ": [" + input.tokens.get( pos ).getText() + "]" );
+            }
         }
 
     }

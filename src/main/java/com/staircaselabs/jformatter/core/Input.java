@@ -50,6 +50,10 @@ public class Input {
         return TokenUtils.containsComments( tokens, startInclusive, endExclusive );
     }
 
+    public boolean contains( int startInclusive, int endExclusive, TokenType... types ) {
+        return TokenUtils.contains( tokens, startInclusive, endExclusive, types );
+    }
+
     public OptionalInt findNext( int startInclusive, int endExclusive, TokenType... types ) {
         return TokenUtils.findNext( tokens, startInclusive, endExclusive, types );
     }
@@ -82,6 +86,11 @@ public class Input {
         return TokenUtils.findPrevByExclusion( tokens, stopExclusive, types );
     }
 
+    public boolean isValid( JCTree tree ) {
+        // Not sure why, but occasionally scanner produces non-printable trees
+        return (tree != null && tree.getStartPosition() >= 0);
+    }
+
     public String stringifyTokens() {
         return TokenUtils.stringifyTokens( tokens, 0, tokens.size() );
     }
@@ -92,6 +101,21 @@ public class Input {
 
     public String stringifyTokens( int startInclusive, int endExclusive ) {
         return TokenUtils.stringifyTokens( tokens, startInclusive, endExclusive );
+    }
+
+    public String stringifyTree( JCTree tree ) {
+        int startIdx = getFirstTokenIndex( tree );
+        int endIdx = getLastTokenIndex( tree );
+        return TokenUtils.stringifyTokens( tokens, startIdx, endIdx );
+    }
+
+    public String stringifyTreeAndTrim( JCTree tree ) {
+        int startIdx = getFirstTokenIndex( tree );
+        int endIdx = getLastTokenIndex( tree );
+
+        int trimmedStartIdx = findNextByExclusion( startIdx, TokenType.WHITESPACE ).getAsInt();
+        int trimmedEndIdx = findPrevByExclusion( endIdx, TokenType.WHITESPACE ).getAsInt();
+        return TokenUtils.stringifyTokens( tokens, trimmedStartIdx, (trimmedEndIdx + 1) );
     }
 
 }

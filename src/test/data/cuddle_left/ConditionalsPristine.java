@@ -24,15 +24,6 @@ public class SomeClass {
 
     }
 
-    private void doUncuddledWhileNested( boolean condition ) {
-        while( true ) {
-            if( condition ) {
-                continue;
-            }
-        }
-        int count = status ? 1 : 2;
-    };
-
     private void doCuddledIfElseIfElse( int value ) {
         if( value == 5 ) {
             System.out.println( "four" );
