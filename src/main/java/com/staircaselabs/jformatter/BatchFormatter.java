@@ -55,6 +55,7 @@ public final class BatchFormatter {
         }
 
         // wait for all threads to complete and check for any errors
+        //TODO count up number of failures?
         boolean allSucceeded = true;
         for( Map.Entry<Path, Future<Boolean>> entry : results.entrySet() ) {
             try {

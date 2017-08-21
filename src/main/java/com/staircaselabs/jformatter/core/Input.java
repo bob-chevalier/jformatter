@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.OptionalInt;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
@@ -15,6 +16,11 @@ import com.sun.tools.javac.tree.JCTree;
 
 public class Input {
 
+    private static final TokenType[] COMMENT = {
+            TokenType.COMMENT_BLOCK,
+            TokenType.COMMENT_JAVADOC,
+            TokenType.COMMENT_LINE
+    };
     public List<TextToken> tokens;
     public EndPosTable endPosTable;
     public String newline;
@@ -109,6 +115,7 @@ public class Input {
         return TokenUtils.stringifyTokens( tokens, startIdx, endIdx );
     }
 
+    //TODO see if this method can be deleted
     public String stringifyTreeAndTrim( JCTree tree ) {
         int startIdx = getFirstTokenIndex( tree );
         int endIdx = getLastTokenIndex( tree );
@@ -116,6 +123,19 @@ public class Input {
         int trimmedStartIdx = findNextByExclusion( startIdx, TokenType.WHITESPACE ).getAsInt();
         int trimmedEndIdx = findPrevByExclusion( endIdx, TokenType.WHITESPACE ).getAsInt();
         return TokenUtils.stringifyTokens( tokens, trimmedStartIdx, (trimmedEndIdx + 1) );
+    }
+
+    public String collectCommentsAndNewlines( int startInclusive, int endExclusive ) {
+        if( !containsComments( startInclusive, endExclusive ) ) {
+            return "";
+        } else {
+            int firstComment = findNext( startInclusive, COMMENT ).getAsInt();
+            return IntStream.range( firstComment, endExclusive )
+                    .mapToObj( tokens::get )
+                    .filter( t -> TokenUtils.isComment( t ) || t.type == TokenType.NEWLINE )
+                    .map( TextToken::getText )
+                    .collect( Collectors.joining() );
+        }
     }
 
 }

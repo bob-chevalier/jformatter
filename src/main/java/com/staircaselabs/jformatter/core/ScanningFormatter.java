@@ -9,7 +9,7 @@ import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
 public class ScanningFormatter {
 
-    private FormatScanner scanner;
+    protected FormatScanner scanner;
 
     public ScanningFormatter( FormatScanner scanner ) {
         this.scanner = scanner;
@@ -17,22 +17,26 @@ public class ScanningFormatter {
 
     public String format( String text ) throws FormatException {
         try {
-            boolean moreReplacements = true;
-            while( moreReplacements ) {
+            boolean rescanRequired;
+            do {
                 List<TextToken> tokens = tokenizeText( text );
                 JCCompilationUnit unit = getCompilationUnit( text );
                 Input input = new Input( tokens, unit.endPositions );
 
                 // scan text to find any remaining blocks that require replacement
-                scanner.clearReplacements();
+                scanner.init();
                 scanner.scan( unit, input );
+
+                if( scanner.hasError() ) {
+                    throw new FormatException( "Encountered syntax error" );
+                }
 
                 // initialize state variables
                 StringBuilder sb = new StringBuilder( text );
                 int minReplacementPos = Integer.MAX_VALUE;
-                moreReplacements = false;
 
                 // attempt to apply all replacements in a single pass
+                rescanRequired = false;
                 for( Replacement replacement : scanner.getReplacements().descendingSet() ) {
                     // we must ensure that replacements don't overlap, if we detect an overlapping
                     // replacement, we skip it and re-scan text after applying other replacements
@@ -40,12 +44,12 @@ public class ScanningFormatter {
                         replacement.apply( sb );
                         minReplacementPos = replacement.getStart();
                     } else {
-                        moreReplacements = true;
+                        rescanRequired = true;
                     }
                 }
 
                 text = sb.toString();
-            }
+            } while( rescanRequired );
 
             return text;
         } catch( Throwable throwable ) {

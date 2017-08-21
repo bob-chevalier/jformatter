@@ -1,17 +1,25 @@
 package com.staircaselabs.jformatter.core;
 
-import static java.util.Comparator.comparingInt;
-
 import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.TreeSet;
 
+import com.sun.source.tree.ErroneousTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.util.TreeScanner;
 import com.sun.tools.javac.tree.JCTree;
 
 public class FormatScanner extends TreeScanner<Void, Input> {
+
+    protected boolean errorEncountered = false;
+
+    // keep replacements sorted using a custom comparator
+    protected NavigableSet<Replacement> replacements = new TreeSet<>(
+            Comparator.comparingInt( Replacement::getStart )
+                    .thenComparingInt( Replacement::getEnd ).reversed()
+                    .thenComparing( Replacement::getNewText )
+    );
 
     @Override
     public Void scan( Tree node, Input input ) {
@@ -24,23 +32,27 @@ public class FormatScanner extends TreeScanner<Void, Input> {
         }
     }
 
-    // keep replacements sorted using a custom comparator
-    private NavigableSet<Replacement> replacements = new TreeSet<>(
-            Comparator.comparingInt( Replacement::getStart )
-                    .thenComparingInt( Replacement::getEnd )
-                    .thenComparing( Replacement::getNewText )
-    );
+    @Override
+    public Void visitErroneous( ErroneousTree node, Input input ) {
+        errorEncountered = true;
+        return null;
+    }
+
+    public void init() {
+        replacements.clear();
+        errorEncountered = false;
+    }
+
+    public boolean hasError() {
+        return errorEncountered;
+    }
 
     public NavigableSet<Replacement> getReplacements() {
         return replacements;
-    };
+    }
 
     public void addReplacement( Replacement replacement ) {
         replacements.add( replacement );
-    }
-
-    public void clearReplacements() {
-        replacements.clear();
     }
 
     protected Optional<Replacement> createReplacement(

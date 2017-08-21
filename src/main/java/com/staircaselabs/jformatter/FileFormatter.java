@@ -7,7 +7,8 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 import com.staircaselabs.jformatter.core.FormatException;
-import com.staircaselabs.jformatter.formatters.SpaceFormatter;
+import com.staircaselabs.jformatter.core.Padding;
+import com.staircaselabs.jformatter.formatters.LayoutFormatter;
 import com.staircaselabs.jformatter.formatters.BraceInserter;
 import com.staircaselabs.jformatter.formatters.LeftBraceCuddler;
 import com.staircaselabs.jformatter.formatters.HeaderFormatter;
@@ -28,22 +29,27 @@ public class FileFormatter implements Callable<Boolean> {
 
     @Override
     //  public String call() throws FormatterException {
-    public Boolean call() throws InterruptedException, FormatException {
-        originalText = workingText = readFileToString( path );
+    public Boolean call() {
+        try {
+            originalText = workingText = readFileToString( path );
 
-//        workingText = HeaderFormatter.format( workingText );
-//        workingText = TrailingWhitespaceRemover.format( workingText );
-//        workingText = UnusedImportsRemover.format( workingText );
-//        workingText = ImportsSorter.format( workingText );
-//        workingText = new BraceInserter().format( workingText );
-//        workingText = new LeftBraceCuddler().format( workingText );
-//        workingText = new RightBraceCuddler().format( workingText );
-//        workingText = new PaddingFormatter( 1 ).format( workingText );
-        workingText = new SpaceFormatter().format( workingText );
+//          workingText = HeaderFormatter.format( workingText );
+//          workingText = TrailingWhitespaceRemover.format( workingText );
+//          workingText = UnusedImportsRemover.format( workingText );
+//          workingText = ImportsSorter.format( workingText );
+//          workingText = new BraceInserter().format( workingText );
+//          workingText = new LeftBraceCuddler().format( workingText );
+//          workingText = new RightBraceCuddler().format( workingText );
+//          workingText = new PaddingFormatter( 1 ).format( workingText );
+          boolean cuddleBraces = true;
+          workingText = new LayoutFormatter( new Padding.Builder().build(), cuddleBraces ).format( workingText );
 
-        System.out.println( workingText );
+          System.out.println( workingText );
+        } catch ( FormatException ex ) {
+            //TODO log exception
+            return false;
+        }
 
-        //TODO why even return anything here?  it will either succeed or throw
         return true;
     }
 

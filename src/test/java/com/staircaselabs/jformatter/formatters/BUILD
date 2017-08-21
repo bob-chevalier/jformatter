@@ -17,16 +17,16 @@ test_suite(
 #    tags = [ "-flaky" ],
 )
 
-java_test(
-    name = "TestBraceInserter",
-    size = "small",
-    test_class = "com.staircaselabs.jformatter.formatters.TestBraceInserter",
-    runtime_deps = [
-        "@org_opentest4j//jar",
-        ":formatters",
-    ],
-    data = [ "//src/test/data/brace_inserter:test-inputs", ],
-)
+#java_test(
+#    name = "TestBraceInserter",
+#    size = "small",
+#    test_class = "com.staircaselabs.jformatter.formatters.TestBraceInserter",
+#    runtime_deps = [
+#        "@org_opentest4j//jar",
+#        ":formatters",
+#    ],
+#    data = [ "//src/test/data/brace_inserter:test-inputs", ],
+#)
 
 java_test(
     name = "TestHeaderFormatter",
@@ -50,48 +50,48 @@ java_test(
     data = [ "//src/test/data/imports_sorter:test-inputs", ],
 )
 
-java_test(
-    name = "TestLeftBraceCuddler",
-    size = "small",
-    test_class = "com.staircaselabs.jformatter.formatters.TestLeftBraceCuddler",
-    runtime_deps = [
-        "@org_opentest4j//jar",
-        ":formatters",
-    ],
-    data = [ "//src/test/data/cuddle_left:test-inputs", ],
-)
+#java_test(
+#    name = "TestLeftBraceCuddler",
+#    size = "small",
+#    test_class = "com.staircaselabs.jformatter.formatters.TestLeftBraceCuddler",
+#    runtime_deps = [
+#        "@org_opentest4j//jar",
+#        ":formatters",
+#    ],
+#    data = [ "//src/test/data/cuddle_left:test-inputs", ],
+#)
+
+#java_test(
+#    name = "TestPaddingFormatter",
+#    size = "small",
+#    test_class = "com.staircaselabs.jformatter.formatters.TestPaddingFormatter",
+#    runtime_deps = [
+#        "@org_opentest4j//jar",
+#        ":formatters",
+#    ],
+#    data = [ "//src/test/data/padding:test-inputs", ],
+#)
+
+#java_test(
+#    name = "TestRightBraceCuddler",
+#    size = "small",
+#    test_class = "com.staircaselabs.jformatter.formatters.TestRightBraceCuddler",
+#    runtime_deps = [
+#        "@org_opentest4j//jar",
+#        ":formatters",
+#    ],
+#    data = [ "//src/test/data/cuddle_right:test-inputs", ],
+#)
 
 java_test(
-    name = "TestPaddingFormatter",
+    name = "TestLayoutFormatter",
     size = "small",
-    test_class = "com.staircaselabs.jformatter.formatters.TestPaddingFormatter",
+    test_class = "com.staircaselabs.jformatter.formatters.TestLayoutFormatter",
     runtime_deps = [
         "@org_opentest4j//jar",
         ":formatters",
     ],
-    data = [ "//src/test/data/padding:test-inputs", ],
-)
-
-java_test(
-    name = "TestRightBraceCuddler",
-    size = "small",
-    test_class = "com.staircaselabs.jformatter.formatters.TestRightBraceCuddler",
-    runtime_deps = [
-        "@org_opentest4j//jar",
-        ":formatters",
-    ],
-    data = [ "//src/test/data/cuddle_right:test-inputs", ],
-)
-
-java_test(
-    name = "TestSpaceFormatter",
-    size = "small",
-    test_class = "com.staircaselabs.jformatter.formatters.TestSpaceFormatter",
-    runtime_deps = [
-        "@org_opentest4j//jar",
-        ":formatters",
-    ],
-    data = [ "//src/test/data/space:test-inputs", ],
+    data = [ "//src/test/data/layout:test-inputs", ],
 )
 
 java_test(

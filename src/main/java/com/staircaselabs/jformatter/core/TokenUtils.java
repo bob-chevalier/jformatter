@@ -7,6 +7,7 @@ import java.util.ListIterator;
 import java.util.OptionalInt;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.sun.tools.javac.parser.JavaTokenizer;
@@ -175,7 +176,9 @@ public final class TokenUtils {
     public static String stringifyTokens( List<TextToken> tokens, int startInclusive, int endExclusive ) {
         return IntStream.range( startInclusive, endExclusive )
                 .mapToObj( i -> tokens.get( i ).getText() )
-                .reduce( "", String::concat );
+              .reduce( "", String::concat );
+        // TODO replace the line above with the following (and perhaps replace 2 lines above)
+//                .collect( Collectors.joining() );
     }
 
     public static List<TextToken> tokenizeText( String text ) throws FormatException {
@@ -229,7 +232,6 @@ public final class TokenUtils {
                             text.substring( rawToken.pos, rawToken.endPos ),
                             tokenTypeFromTokenKind( rawToken.kind ),
                             rawToken.pos,
-//                            rawToken.pos + rawToken.endPos
                             rawToken.endPos
                     )
             );
@@ -301,6 +303,14 @@ public final class TokenUtils {
         switch( kind ) {
         case CATCH:
             return TokenType.CATCH;
+        case CASE:
+            return TokenType.CASE;
+        case COLON:
+            return TokenType.COLON;
+        case DEFAULT:
+            return TokenType.DEFAULT;
+        case DO:
+            return TokenType.DO;
         case ELSE:
             return TokenType.ELSE;
         case EOF:
@@ -309,6 +319,8 @@ public final class TokenUtils {
             return TokenType.FINALLY;
         case GT:
             return TokenType.GREATER_THAN;
+        case IF:
+            return TokenType.IF;
         case IMPORT:
             return TokenType.IMPORT;
         case LBRACE:
