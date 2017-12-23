@@ -9,14 +9,17 @@ import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
 public class ScanningFormatter {
 
+    private static final boolean DEBUGGING = true;
+
     protected FormatScanner scanner;
+    private FormatScanner debugScanner = new FormatScanner();
 
     public ScanningFormatter( FormatScanner scanner ) {
         this.scanner = scanner;
     }
 
     public String format( String text ) throws FormatException {
-        try {
+//        try {
             boolean rescanRequired;
             do {
                 List<TextToken> tokens = tokenizeText( text );
@@ -28,7 +31,7 @@ public class ScanningFormatter {
                 scanner.scan( unit, input );
 
                 if( scanner.hasError() ) {
-                    throw new FormatException( "Encountered syntax error" );
+                    throw new FormatException( getClass().getSimpleName() + " encountered a syntax error" );
                 }
 
                 // initialize state variables
@@ -36,13 +39,34 @@ public class ScanningFormatter {
                 int minReplacementPos = Integer.MAX_VALUE;
 
                 // attempt to apply all replacements in a single pass
-                rescanRequired = false;
+                rescanRequired = scanner.isRescanRequired();
                 for( Replacement replacement : scanner.getReplacements().descendingSet() ) {
                     // we must ensure that replacements don't overlap, if we detect an overlapping
                     // replacement, we skip it and re-scan text after applying other replacements
-                    if( replacement.getEnd() < minReplacementPos ) {
+                    if( replacement.getStop() < minReplacementPos ) {
                         replacement.apply( sb );
                         minReplacementPos = replacement.getStart();
+
+                        if( DEBUGGING ) {
+                            text = sb.toString();
+                            tokens = tokenizeText( text );
+                            unit = getCompilationUnit( text );
+                            input = new Input( tokens, unit.endPositions );
+
+                            // scan text to find any remaining blocks that require replacement
+                            debugScanner.init();
+                            debugScanner.scan( unit, input );
+
+                            if( debugScanner.hasError() ) {
+                                throw new FormatException(
+                                        "Syntax error caused by " + replacement.getDebugLabel()
+                                        + "\n=========Before=========\n" + replacement.getOldText()
+                                        + "\n=========After==========\n" + replacement.getNewText()
+                                        + "\n========================"
+                                );
+                            }
+                            sb = new StringBuilder( text );
+                        }
                     } else {
                         rescanRequired = true;
                     }
@@ -52,11 +76,11 @@ public class ScanningFormatter {
             } while( rescanRequired );
 
             return text;
-        } catch( Throwable throwable ) {
-            //TODO include stacktrace or diagnostic info?
-            throwable.printStackTrace();
-            throw new FormatException( throwable.getMessage() );
-        }
+//        } catch( Throwable throwable ) {
+//            //TODO include stacktrace or diagnostic info?
+//            throwable.printStackTrace();
+//            throw new FormatException( throwable.getMessage() );
+//        }
     }
 
 }

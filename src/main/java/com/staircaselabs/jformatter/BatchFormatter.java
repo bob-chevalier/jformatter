@@ -7,9 +7,11 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -55,26 +57,46 @@ public final class BatchFormatter {
         }
 
         // wait for all threads to complete and check for any errors
-        //TODO count up number of failures?
-        boolean allSucceeded = true;
+        List<String> failedFiles = new ArrayList<>();
+        List<String> modifiedFiles = new ArrayList<>();
         for( Map.Entry<Path, Future<Boolean>> entry : results.entrySet() ) {
             try {
-                allSucceeded = entry.getValue().get() && allSucceeded;
+                if( entry.getValue().get() ) {
+                    modifiedFiles.add( entry.getKey().toString() );
+                }
                 outWriter.println( entry.getKey() + " " + (entry.getValue().get() ? "succeeded" : "failed") );
                 outWriter.flush();
             } catch( InterruptedException | ExecutionException e ) {
+                //TODO send stacktrace info to logfile not console
                 errWriter.println( entry.getKey() );
                 e.printStackTrace( errWriter );
                 errWriter.flush();
-                allSucceeded = false;
+                failedFiles.add( entry.getKey().toString() );
             }
         }
 
+        // print results
+        outWriter.println( createMsg( results.size(), "processed" ) );
+        outWriter.println( createMsg( modifiedFiles.size(), "modified" ) );
+        outWriter.println( createMsg( failedFiles.size(), "failed" ) );
+        failedFiles.stream().forEach( outWriter::println );
+
         errWriter.flush();
         outWriter.flush();
-        return allSucceeded;
+        return failedFiles.isEmpty();
     }
 
+    private static String createMsg( int numFiles, String verb ) {
+        StringBuilder sb = new StringBuilder();
+        sb.append( numFiles );
+        sb.append( " file" );
+        if( numFiles != 1 ) {
+            sb.append( "s" );
+        }
+        sb.append( " " );
+        sb.append( verb );
+        return sb.toString();
+    }
     public static void main( String[] args ) throws Exception {
         BatchFormatterOptions opts = BatchFormatterOptions.parseArgs( args );
         boolean success = BatchFormatter.formatFiles( opts.files );

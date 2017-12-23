@@ -13,11 +13,12 @@ import com.sun.tools.javac.tree.JCTree;
 public class FormatScanner extends TreeScanner<Void, Input> {
 
     protected boolean errorEncountered = false;
+    protected boolean rescanRequired = false;
 
-    // keep replacements sorted using a custom comparator
+    // we want to sort replacements in reverse order, by replacement range
     protected NavigableSet<Replacement> replacements = new TreeSet<>(
-            Comparator.comparingInt( Replacement::getStart )
-                    .thenComparingInt( Replacement::getEnd ).reversed()
+            Comparator.comparingInt( Replacement::getStop ).reversed()
+                    .thenComparingInt( Replacement::getStart ).reversed()
                     .thenComparing( Replacement::getNewText )
     );
 
@@ -41,10 +42,19 @@ public class FormatScanner extends TreeScanner<Void, Input> {
     public void init() {
         replacements.clear();
         errorEncountered = false;
+        rescanRequired = false;
     }
 
     public boolean hasError() {
         return errorEncountered;
+    }
+
+    public void forceRescan() {
+        rescanRequired = true;
+    }
+
+    public boolean isRescanRequired() {
+        return rescanRequired;
     }
 
     public NavigableSet<Replacement> getReplacements() {
@@ -55,6 +65,7 @@ public class FormatScanner extends TreeScanner<Void, Input> {
         replacements.add( replacement );
     }
 
+    //TODO get rid of this method
     protected Optional<Replacement> createReplacement(
             Input input,
             int startIdxInclusive,
@@ -69,8 +80,10 @@ public class FormatScanner extends TreeScanner<Void, Input> {
 
             return Optional.of(
                     new Replacement(
-                            firstTokenToReplace.start,
-                            lastTokenToReplace.end,
+                            "TODO: remove this method",
+                            firstTokenToReplace.beginInclusive,
+                            lastTokenToReplace.endExclusive,
+                            oldText,
                             newText
                     )
             );
@@ -79,7 +92,7 @@ public class FormatScanner extends TreeScanner<Void, Input> {
         }
     }
 
-    protected Optional<Replacement> createReplacement( Input input, JCTree tree, StringBuilder newTextBuilder ) {
+    protected Optional<Replacement> createReplacement( Input input, Tree tree, StringBuilder newTextBuilder ) {
         int startIdx = input.getFirstTokenIndex( tree );
         int endIdx = input.getLastTokenIndex( tree );
         return createReplacement( input, startIdx, endIdx, newTextBuilder );

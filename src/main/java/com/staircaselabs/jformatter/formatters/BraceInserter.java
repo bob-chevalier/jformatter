@@ -155,8 +155,10 @@ public class BraceInserter extends ScanningFormatter {
 
                 return Optional.of(
                         new Replacement(
-                                firstTokenToReplace.start,
-                                lastTokenToReplace.end,
+                                "BraceInserter::surroundWithBraces",
+                                firstTokenToReplace.beginInclusive,
+                                lastTokenToReplace.endExclusive,
+                                input.stringifyTokens( firstTokenToReplace.beginInclusive, lastTokenToReplace.endExclusive ),
                                 sb.toString()
                         )
                 );

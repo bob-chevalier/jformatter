@@ -11,16 +11,20 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.tree.EndPosTable;
 import com.sun.tools.javac.tree.JCTree;
 
 public class Input {
+
+    public static final String SPACE = " ";
 
     private static final TokenType[] COMMENT = {
             TokenType.COMMENT_BLOCK,
             TokenType.COMMENT_JAVADOC,
             TokenType.COMMENT_LINE
     };
+
     public List<TextToken> tokens;
     public EndPosTable endPosTable;
     public String newline;
@@ -34,17 +38,17 @@ public class Input {
         for( int idx = 0; idx < tokens.size(); idx++ ) {
             TextToken token = tokens.get( idx );
             if( token.type != TokenType.EOF ) {
-                positionToIndexMap.put( token.start, idx );
+                positionToIndexMap.put( token.beginInclusive, idx );
             }
         }
     }
 
-    public int getFirstTokenIndex( JCTree tree ) {
-        return getTokenIndexFromPosition( tree.getStartPosition() );
+    public int getFirstTokenIndex( Tree tree ) {
+        return getTokenIndexFromPosition( ((JCTree)tree).getStartPosition() );
     }
 
-    public int getLastTokenIndex( JCTree tree ) {
-        return getTokenIndexFromPosition( tree.getEndPosition( endPosTable ) );
+    public int getLastTokenIndex( Tree tree ) {
+        return getTokenIndexFromPosition( ((JCTree)tree).getEndPosition( endPosTable ) );
     }
 
     public int getTokenIndexFromPosition( int charPosition ) {
@@ -92,9 +96,9 @@ public class Input {
         return TokenUtils.findPrevByExclusion( tokens, stopExclusive, types );
     }
 
-    public boolean isValid( JCTree tree ) {
+    public boolean isValid( Tree tree ) {
         // Not sure why, but occasionally scanner produces non-printable trees
-        return (tree != null && tree.getStartPosition() >= 0);
+        return (tree != null && ((JCTree)tree).getStartPosition() >= 0);
     }
 
     public String stringifyTokens() {
@@ -109,33 +113,20 @@ public class Input {
         return TokenUtils.stringifyTokens( tokens, startInclusive, endExclusive );
     }
 
-    public String stringifyTree( JCTree tree ) {
+    public String stringifyTree( Tree tree ) {
         int startIdx = getFirstTokenIndex( tree );
         int endIdx = getLastTokenIndex( tree );
         return TokenUtils.stringifyTokens( tokens, startIdx, endIdx );
     }
 
     //TODO see if this method can be deleted
-    public String stringifyTreeAndTrim( JCTree tree ) {
-        int startIdx = getFirstTokenIndex( tree );
-        int endIdx = getLastTokenIndex( tree );
-
-        int trimmedStartIdx = findNextByExclusion( startIdx, TokenType.WHITESPACE ).getAsInt();
-        int trimmedEndIdx = findPrevByExclusion( endIdx, TokenType.WHITESPACE ).getAsInt();
-        return TokenUtils.stringifyTokens( tokens, trimmedStartIdx, (trimmedEndIdx + 1) );
-    }
-
-    public String collectCommentsAndNewlines( int startInclusive, int endExclusive ) {
-        if( !containsComments( startInclusive, endExclusive ) ) {
-            return "";
-        } else {
-            int firstComment = findNext( startInclusive, COMMENT ).getAsInt();
-            return IntStream.range( firstComment, endExclusive )
-                    .mapToObj( tokens::get )
-                    .filter( t -> TokenUtils.isComment( t ) || t.type == TokenType.NEWLINE )
-                    .map( TextToken::getText )
-                    .collect( Collectors.joining() );
-        }
-    }
+//    public String stringifyTreeAndTrim( JCTree tree ) {
+//        int startIdx = getFirstTokenIndex( tree );
+//        int endIdx = getLastTokenIndex( tree );
+//
+//        int trimmedStartIdx = findNextByExclusion( startIdx, TokenType.WHITESPACE ).getAsInt();
+//        int trimmedEndIdx = findPrevByExclusion( endIdx, TokenType.WHITESPACE ).getAsInt();
+//        return TokenUtils.stringifyTokens( tokens, trimmedStartIdx, (trimmedEndIdx + 1) );
+//    }
 
 }
