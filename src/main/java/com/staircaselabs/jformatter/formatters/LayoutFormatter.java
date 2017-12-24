@@ -402,6 +402,10 @@ public class LayoutFormatter extends ScanningFormatter {
             //TODO
             if( VERBOSE ) System.out.println( "======visitCompUnit======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "CompilationUnit" );
+
+//            replacement.appendWithNewlinesAfterComments()
+//                    replacement.appendList( node.getPackageAnnotations(), TokenType.NEWLINE );
+//            node.getPackageAnnotations().stream().forEach( replacement.ap);
 //            TODO put imports in alphabetical/static order (Do this in a separate formatter: one for members and one for methods?)
 //            if( node.getImports() != null ) {
 //                System.out.println( "BFC Imports" );

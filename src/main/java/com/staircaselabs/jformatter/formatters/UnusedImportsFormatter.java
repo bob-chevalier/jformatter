@@ -1,19 +1,24 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
-
-import com.staircaselabs.jformatter.core.*;
-import com.sun.source.tree.*;
+import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.core.FormatScanner;
+import com.staircaselabs.jformatter.core.Input;
+import com.staircaselabs.jformatter.core.Replacement;
+import com.staircaselabs.jformatter.core.ScanningFormatter;
+import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.ImportTree;
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.util.TreePathScanner;
 import com.sun.tools.javac.tree.JCTree;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
 
 /**
  *
@@ -75,38 +80,47 @@ public class UnusedImportsFormatter extends ScanningFormatter {
         @Override
         public Void visitCompilationUnit( CompilationUnitTree node, Input input ) {
             if (VERBOSE) System.out.println("======UnusedImportsFormatter::visitCompUnit======");
+            if( !node.getImports().isEmpty() ) {
+                int compUnitStart = input.getFirstTokenIndex( node );
+                int importsStart = input.getFirstTokenIndex( node.getImports().get( 0 ) );
+                int replaceStart = input.findPrevByExclusion(
+                        compUnitStart,
+                        importsStart,
+                        TokenType.WHITESPACE,
+                        TokenType.NEWLINE
+                ).orElse( compUnitStart - 1 );
+                replaceStart++;
 
-            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "CompilationUnit" )
-                    .append( input.newline );
+                Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "CompilationUnit" );
 
-            List<Tree> newImports = node.getImports().stream().filter( this::isUsed ).collect( Collectors.toList() );
-            if( !newImports.isEmpty() ) {
-                replacement.append( input.newline )
-                        .appendList( newImports, TokenType.NEWLINE )
-                        .append( input.newline );
+                boolean foundValidImport = false;
+                for( ImportTree importTree : node.getImports() ) {
+                    if( isUsed( importTree ) ) {
+                        if( !foundValidImport ) {
+                            // this is the first valid import so insert an extra newline
+                            replacement.appendWithLeadingNewlines( importTree, 2 );
+                            foundValidImport = true;
+                        } else {
+                            replacement.appendWithLeadingNewlines( importTree, 1 );
+                        }
+                    } else {
+                        // skip this import and any comments that preceed it
+                        replacement.setCurrentPositionInclusive( input.getLastTokenIndex( importTree ) + 1 );
+                    }
+                }
+                replacement.append( input.newline ).append( input.newline );
+
+                int compUnitStop = input.getLastTokenIndex( node );
+                int replaceStop = input.findNextByExclusion(
+                        replacement.getCurrentPosInclusive(),
+                        compUnitStop,
+                        TokenType.WHITESPACE,
+                        TokenType.NEWLINE
+                ).orElse( compUnitStop );
+
+                if (ENABLED) replacement.build(replaceStart, replaceStop).ifPresent(this::addReplacement);
             }
 
-            replacement.append( input.newline );
-
-            int importsStart = input.getFirstTokenIndex( node.getImports().get( 0 ) );
-            int importsStop = input.getLastTokenIndex( node.getImports().get( node.getImports().size() - 1 ) );
-
-            int replaceStart = input.findPrevByExclusion(
-                    input.getFirstTokenIndex( node ),
-                    importsStart,
-                    TokenType.WHITESPACE,
-                    TokenType.NEWLINE
-            ).orElse( importsStart - 1 );
-            replaceStart++;
-
-            int replaceStop = input.findNextByExclusion(
-                    importsStop,
-                    input.getLastTokenIndex( node ),
-                    TokenType.WHITESPACE,
-                    TokenType.NEWLINE
-            ).orElse( importsStop );
-
-            if( ENABLED ) replacement.build( replaceStart, replaceStop ).ifPresent( this::addReplacement );
             return super.visitCompilationUnit( node, input );
         }
 
@@ -129,13 +143,7 @@ public class UnusedImportsFormatter extends ScanningFormatter {
                 return false;
             }
         }
-        private void printTree( Tree tree, Input input ) {
-            int startIdx = input.getFirstTokenIndex( tree );
-            int endIdx = input.getLastTokenIndex( tree );
-            for( int pos=startIdx; pos<endIdx; pos++ ) {
-                System.out.println( pos + ": [" + input.tokens.get( pos ).getText() + "]" );
-            }
-        }
+
     }
 
 }

@@ -169,12 +169,12 @@ public class Replacement {
         public Builder appendNewlines( Tree tree, int numNewlines ) {
             int treeStart = input.getFirstTokenIndex( tree );
 
-            // skip any newlines or whitespace before leading comments
+            // skip any existing newlines or whitespace
             currentPosInclusive =
                     input.findNextByExclusion( currentPosInclusive, treeStart, TokenType.NEWLINE, TokenType.WHITESPACE )
                             .orElse( currentPosInclusive );
 
-            // append the appropriate number of leading newlines
+            // append the appropriate number of newlines
             IntStream.range( 0, numNewlines ).forEach( i -> append( input.newline ) );
 
             return this;
@@ -188,7 +188,7 @@ public class Replacement {
             return append( type );
         }
 
-        public Builder appendWithNewlinesAfterComments( Tree tree, int numNewlines ) {
+        public Builder appendWithLeadingNewlinesAfterComments( Tree tree, int numNewlines ) {
             int treeStart = input.getFirstTokenIndex( tree );
             appendCommentsAndNewlines( treeStart, numNewlines );
 
