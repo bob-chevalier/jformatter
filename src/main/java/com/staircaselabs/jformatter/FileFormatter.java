@@ -29,10 +29,8 @@ public class FileFormatter implements Callable<Boolean> {
             originalText = workingText = readFileToString( path );
 
             workingText = new HeaderFormatter().format( workingText );
-            workingText = new UnusedImportsFormatter().format( workingText );
+            workingText = new ImportSorterFormatter().format( workingText );
 //          workingText = TrailingWhitespaceRemover.format( workingText );
-//          workingText = UnusedImportsRemover.format( workingText );
-//          workingText = ImportsSorter.format( workingText );
 //          workingText = new BraceInserter().format( workingText );
 //          workingText = new LeftBraceCuddler().format( workingText );
 //          workingText = new RightBraceCuddler().format( workingText );
