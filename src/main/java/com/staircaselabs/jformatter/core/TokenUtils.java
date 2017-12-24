@@ -402,6 +402,8 @@ public final class TokenUtils {
             return TokenType.AT;
         case NEW:
             return TokenType.NEW;
+        case PACKAGE:
+            return TokenType.PACKAGE;
         case PERCENT:
             return TokenType.MOD;
         case PERCENTEQ:

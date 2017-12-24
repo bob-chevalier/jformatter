@@ -159,19 +159,29 @@ public class Replacement {
             return this;
         }
 
+        public Builder appendWithLeadingNewlines( TokenType type, int numNewlines ) {
+            OptionalInt typePos = input.findNext( currentPosInclusive, endExclusive, type );
+            if( typePos.isPresent() ) {
+                appendNewlines( typePos.getAsInt(), numNewlines );
+
+                // now append the given token
+                append( type );
+            }
+            return this;
+        }
+
         public Builder appendWithLeadingNewlines( Tree tree, int numNewlines ) {
-            appendNewlines( tree, numNewlines );
+            int treeStart = input.getFirstTokenIndex( tree );
+            appendNewlines( treeStart, numNewlines );
 
             // now append the given tree
             return append( tree );
         }
 
-        public Builder appendNewlines( Tree tree, int numNewlines ) {
-            int treeStart = input.getFirstTokenIndex( tree );
-
+        public Builder appendNewlines( int stopPosExclusive, int numNewlines ) {
             // skip any existing newlines or whitespace
             currentPosInclusive =
-                    input.findNextByExclusion( currentPosInclusive, treeStart, TokenType.NEWLINE, TokenType.WHITESPACE )
+                    input.findNextByExclusion( currentPosInclusive, stopPosExclusive, TokenType.NEWLINE, TokenType.WHITESPACE )
                             .orElse( currentPosInclusive );
 
             // append the appropriate number of newlines

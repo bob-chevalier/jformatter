@@ -382,7 +382,7 @@ public class LayoutFormatter extends ScanningFormatter {
             for( Tree tree : node.getMembers() ) {
                 if( tree instanceof VariableTree ) {
                     // it's a member variable so insert newlines between annotations before appending
-                    replacement.appendNewlines( tree, 2 );
+                    replacement.appendNewlines( input.getFirstTokenIndex( tree ), 2 );
                     VariableFormatter.appendVariable( (VariableTree)tree, input, replacement, true );
                 } else {
                     // it's a member method so just append it
@@ -399,32 +399,20 @@ public class LayoutFormatter extends ScanningFormatter {
 
         @Override
         public Void visitCompilationUnit( CompilationUnitTree node, Input input ) {
-            //TODO
             if( VERBOSE ) System.out.println( "======visitCompUnit======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "CompilationUnit" );
 
-//            replacement.appendWithNewlinesAfterComments()
-//                    replacement.appendList( node.getPackageAnnotations(), TokenType.NEWLINE );
-//            node.getPackageAnnotations().stream().forEach( replacement.ap);
-//            TODO put imports in alphabetical/static order (Do this in a separate formatter: one for members and one for methods?)
-//            if( node.getImports() != null ) {
-//                System.out.println( "BFC Imports" );
-//                System.out.println( node.getImports().toString() );
-//            }
-//            if( node.getPackageAnnotations() != null ) {
-//                System.out.println( "BFC PackageAnnotations" );
-//                System.out.println( node.getPackageAnnotations().toString() );
-//            }
-//            if( node.getPackageName() != null ) {
-//                System.out.println( "BFC PackageName" );
-//                System.out.println( node.getPackageName().toString() );
-//            }
-//            if( node.getTypeDecls() != null ) {
-//                System.out.println( "BFC TypeDecls" );
-//                System.out.println( node.getTypeDecls().toString() );
-//            }
+            // append package annotations and package name
+            node.getPackageAnnotations().stream().forEach( t -> replacement.append( t ).append( input.newline ) );
+            if( node.getPackageName() != null ) {
+                replacement.append( TokenType.PACKAGE ).append( SPACE ).append( node.getPackageName() );
+            }
 
-//            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            // only replace package annotations and package name, everything else is formatted elsewhere
+            int replaceStart = input.getFirstTokenIndex( node );
+            int replaceStop = replacement.getCurrentPosInclusive();
+
+            if( ENABLED ) replacement.build( replaceStart, replaceStop ).ifPresent( this::addReplacement );
             return super.visitCompilationUnit( node, input );
         }
 

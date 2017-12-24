@@ -28,7 +28,7 @@ public class FileFormatter implements Callable<Boolean> {
         try {
             originalText = workingText = readFileToString( path );
 
-//            workingText = new HeaderFormatter().format( workingText );
+            workingText = new HeaderFormatter().format( workingText );
             workingText = new UnusedImportsFormatter().format( workingText );
 //          workingText = TrailingWhitespaceRemover.format( workingText );
 //          workingText = UnusedImportsRemover.format( workingText );
@@ -37,11 +37,11 @@ public class FileFormatter implements Callable<Boolean> {
 //          workingText = new LeftBraceCuddler().format( workingText );
 //          workingText = new RightBraceCuddler().format( workingText );
 //          workingText = new PaddingFormatter( 1 ).format( workingText );
-//            workingText = new ModifierFormatter().format( workingText );
-//            workingText = new VariableFormatter().format( workingText );
-//            workingText = new ParenthesizedFormatter( padding ).format( workingText );
-//            boolean cuddleBraces = true;
-//            workingText = new LayoutFormatter( padding, cuddleBraces ).format( workingText );
+            workingText = new ModifierFormatter().format( workingText );
+            workingText = new VariableFormatter().format( workingText );
+            workingText = new ParenthesizedFormatter( padding ).format( workingText );
+            boolean cuddleBraces = true;
+            workingText = new LayoutFormatter( padding, cuddleBraces ).format( workingText );
 
             System.out.println( workingText );
         } catch ( FormatException ex ) {

@@ -80,6 +80,7 @@ public class TextToken {
         OTHER,
         OR, // maybe rename this to PIPE
         OR_ASSIGNMENT,
+        PACKAGE,
         PLUS,
         PLUS_ASSIGNMENT,
         PRIVATE,
