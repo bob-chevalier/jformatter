@@ -127,8 +127,6 @@ public class Replacement {
         }
 
         public Optional<Replacement> build() {
-//            int startInclusive = input.getFirstTokenIndex( treeToReplace );
-//            int endExclusive = input.getLastTokenIndex( treeToReplace );
             return build( beginInclusive, endExclusive );
         }
 

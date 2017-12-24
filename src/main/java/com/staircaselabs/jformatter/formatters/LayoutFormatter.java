@@ -6,13 +6,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.staircaselabs.jformatter.core.FormatScanner;
-import com.staircaselabs.jformatter.core.Input;
-import com.staircaselabs.jformatter.core.Padding;
-import com.staircaselabs.jformatter.core.Replacement;
-import com.staircaselabs.jformatter.core.ScanningFormatter;
+import com.staircaselabs.jformatter.core.*;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
-import com.staircaselabs.jformatter.core.TokenUtils;
 import com.sun.source.tree.AnnotatedTypeTree;
 import com.sun.source.tree.AnnotationTree;
 import com.sun.source.tree.ArrayAccessTree;
@@ -78,7 +73,7 @@ public class LayoutFormatter extends ScanningFormatter {
 
     private static class LayoutFormatterScanner extends FormatScanner {
 
-        private static final boolean VERBOSE = true;
+        private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;
         private static final String NAME = "LayoutFormatter::";
 
@@ -406,14 +401,26 @@ public class LayoutFormatter extends ScanningFormatter {
         public Void visitCompilationUnit( CompilationUnitTree node, Input input ) {
             //TODO
             if( VERBOSE ) System.out.println( "======visitCompUnit======" );
+            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "CompilationUnit" );
 //            TODO put imports in alphabetical/static order (Do this in a separate formatter: one for members and one for methods?)
-//            System.out.println( "BFC checking for package annotations" );
-//            for( AnnotationTree anno : node.getPackageAnnotations() ) {
-//                System.out.println( "BFC anno: " + input.stringifyTree( anno ) );
+//            if( node.getImports() != null ) {
+//                System.out.println( "BFC Imports" );
+//                System.out.println( node.getImports().toString() );
 //            }
-//            node.getPackageName();
-//
-//            if( ENABLED ) createReplacement( input, node, sb ).ifPresent( this::addReplacement );
+//            if( node.getPackageAnnotations() != null ) {
+//                System.out.println( "BFC PackageAnnotations" );
+//                System.out.println( node.getPackageAnnotations().toString() );
+//            }
+//            if( node.getPackageName() != null ) {
+//                System.out.println( "BFC PackageName" );
+//                System.out.println( node.getPackageName().toString() );
+//            }
+//            if( node.getTypeDecls() != null ) {
+//                System.out.println( "BFC TypeDecls" );
+//                System.out.println( node.getTypeDecls().toString() );
+//            }
+
+//            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
             return super.visitCompilationUnit( node, input );
         }
 

@@ -27,7 +27,7 @@ public class ModifierFormatter extends ScanningFormatter {
 
     private static class ModifierFormatterScanner extends FormatScanner {
 
-        private static final boolean VERBOSE = true;
+        private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;
         private static final String NAME = "ModifierFormatter::";
 
@@ -44,25 +44,6 @@ public class ModifierFormatter extends ScanningFormatter {
             return super.visitModifiers( node, input );
         }
 
-        private void printTree( Tree tree, Input input ) {
-            int startIdx = input.getFirstTokenIndex( tree );
-            int endIdx = input.getLastTokenIndex( tree );
-            for( int pos=startIdx; pos<endIdx; pos++ ) {
-                System.out.println( pos + ": [" + input.tokens.get( pos ).getText() + "]" );
-            }
-        }
-
-        private void printBeforeAfter( Tree tree, Input input, StringBuilder sb ) {
-            System.out.println( input.stringifyTree( tree ) );
-            System.out.println( "----------------------" );
-            System.out.println( sb.toString() );
-        }
-
-        private void printBeforeAfter( Tree tree, Input input, String newText ) {
-            System.out.println( input.stringifyTree( tree ) );
-            System.out.println( "----------------------" );
-            System.out.println( newText );
-        }
     }
 
     public static void appendAnnotationsAndFlags(

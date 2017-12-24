@@ -7,9 +7,6 @@ import com.staircaselabs.jformatter.core.Replacement;
 import com.staircaselabs.jformatter.core.ScanningFormatter;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.source.tree.ParenthesizedTree;
-import com.sun.source.tree.VariableTree;
-
-import static com.staircaselabs.jformatter.core.Input.SPACE;
 
 /**
  * Parentheses are formatted outside of the LayoutFormatter so that we can apply different padding sizes to each of
@@ -32,7 +29,7 @@ public class ParenthesizedFormatter extends ScanningFormatter {
 
     private static class ParenthesizedFormatterScanner extends FormatScanner {
 
-        private static final boolean VERBOSE = true;
+        private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;
         private static final String NAME = "ParenthesizedFormatter::";
 

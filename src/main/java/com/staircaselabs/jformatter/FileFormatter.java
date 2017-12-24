@@ -2,10 +2,7 @@ package com.staircaselabs.jformatter;
 
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.Padding;
-import com.staircaselabs.jformatter.formatters.LayoutFormatter;
-import com.staircaselabs.jformatter.formatters.ModifierFormatter;
-import com.staircaselabs.jformatter.formatters.ParenthesizedFormatter;
-import com.staircaselabs.jformatter.formatters.VariableFormatter;
+import com.staircaselabs.jformatter.formatters.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,7 +28,8 @@ public class FileFormatter implements Callable<Boolean> {
         try {
             originalText = workingText = readFileToString( path );
 
-//          workingText = HeaderFormatter.format( workingText );
+//            workingText = new HeaderFormatter().format( workingText );
+            workingText = new UnusedImportsFormatter().format( workingText );
 //          workingText = TrailingWhitespaceRemover.format( workingText );
 //          workingText = UnusedImportsRemover.format( workingText );
 //          workingText = ImportsSorter.format( workingText );
@@ -39,11 +37,11 @@ public class FileFormatter implements Callable<Boolean> {
 //          workingText = new LeftBraceCuddler().format( workingText );
 //          workingText = new RightBraceCuddler().format( workingText );
 //          workingText = new PaddingFormatter( 1 ).format( workingText );
-            workingText = new ModifierFormatter().format( workingText );
-            workingText = new VariableFormatter().format( workingText );
-            workingText = new ParenthesizedFormatter( padding ).format( workingText );
-            boolean cuddleBraces = true;
-            workingText = new LayoutFormatter( padding, cuddleBraces ).format( workingText );
+//            workingText = new ModifierFormatter().format( workingText );
+//            workingText = new VariableFormatter().format( workingText );
+//            workingText = new ParenthesizedFormatter( padding ).format( workingText );
+//            boolean cuddleBraces = true;
+//            workingText = new LayoutFormatter( padding, cuddleBraces ).format( workingText );
 
             System.out.println( workingText );
         } catch ( FormatException ex ) {

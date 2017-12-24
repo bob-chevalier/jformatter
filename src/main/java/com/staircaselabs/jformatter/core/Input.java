@@ -19,12 +19,6 @@ public class Input {
 
     public static final String SPACE = " ";
 
-    private static final TokenType[] COMMENT = {
-            TokenType.COMMENT_BLOCK,
-            TokenType.COMMENT_JAVADOC,
-            TokenType.COMMENT_LINE
-    };
-
     public List<TextToken> tokens;
     public EndPosTable endPosTable;
     public String newline;
@@ -118,15 +112,5 @@ public class Input {
         int endIdx = getLastTokenIndex( tree );
         return TokenUtils.stringifyTokens( tokens, startIdx, endIdx );
     }
-
-    //TODO see if this method can be deleted
-//    public String stringifyTreeAndTrim( JCTree tree ) {
-//        int startIdx = getFirstTokenIndex( tree );
-//        int endIdx = getLastTokenIndex( tree );
-//
-//        int trimmedStartIdx = findNextByExclusion( startIdx, TokenType.WHITESPACE ).getAsInt();
-//        int trimmedEndIdx = findPrevByExclusion( endIdx, TokenType.WHITESPACE ).getAsInt();
-//        return TokenUtils.stringifyTokens( tokens, trimmedStartIdx, (trimmedEndIdx + 1) );
-//    }
 
 }

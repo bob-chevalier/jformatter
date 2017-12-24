@@ -14,12 +14,7 @@ import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
 public class HeaderFormatter {
 
-    private static final TokenType[] WHITESPACE_OR_NEWLINE = {
-            TokenType.WHITESPACE,
-            TokenType.NEWLINE
-    };
-
-    private static final TokenType[] COMMENTS_WHITESPACE_OR_NEWLINE = {
+    private static final TokenType[] WS_NEWLINE_OR_COMMENT = {
             TokenType.COMMENT_BLOCK,
             TokenType.COMMENT_JAVADOC,
             TokenType.COMMENT_LINE,
@@ -30,33 +25,30 @@ public class HeaderFormatter {
     public static String format( String text ) throws FormatException {
         List<TextToken> tokens = tokenizeText( text );
 
-        // find index of the first token in header, excluding leading whitespace and newlines
-        int startIdx = findNextByExclusion( tokens, 0, WHITESPACE_OR_NEWLINE )
-                .orElseThrow( () -> new FormatException( "File does not contain any class declarations" ) );
+        // find first non-whitespace, non-newline token
+        int headerStart = findNextByExclusion( tokens, 0, TokenType.WHITESPACE, TokenType.NEWLINE )
+                .orElseThrow( () -> new RuntimeException( "Found empty file." ) );
 
         // verify that a header exists in this file
-        if( isComment( tokens.get( startIdx ) ) ) {
-            // find index of first token representing actual code
-            int codeIdx = findNextByExclusion( tokens, startIdx, COMMENTS_WHITESPACE_OR_NEWLINE )
-                    .orElseThrow( () -> new FormatException( "File does not contain any class declarations" ) );
+        if( isComment( tokens.get( headerStart ) ) ) {
+            // find first token that represents source code
+            int codeStart = findNextByExclusion( tokens, headerStart, WS_NEWLINE_OR_COMMENT )
+                    .orElseThrow( () -> new RuntimeException( "Found file with no source code." ) );
 
-            // find index of last token in header, excluding trailing whitespace and newlines
-            int stopIdx = findPrevByExclusion( tokens, startIdx, codeIdx - 1, WHITESPACE_OR_NEWLINE )
-                    .orElseThrow( () -> new FormatException( "File does not contain any class declarations" ) );
+            // find the end of the header
+            int headerStop = findPrevByExclusion( tokens, headerStart, codeStart, TokenType.WHITESPACE, TokenType.NEWLINE )
+                    .orElseThrow( () -> new FormatException( "Unexpected missing token." ) );
 
             // find an existing linebreak in the file so that inserted newlines have the same format
             String newline = getLinebreak( tokens );
 
             // rebuild text, ensuring that first line of code is preceded by two newlines
-            return stringifyTokens( tokens, startIdx, (stopIdx + 1) )
+            return stringifyTokens( tokens, headerStart, (headerStop + 1) )
                     + newline
-                    + newline
-                    + stringifyTokens( tokens, codeIdx );
+                    + stringifyTokens( tokens, codeStart );
         } else {
             // there is no header so just return original text as-is, excluding any leading whitespace and newlines
-            return stringifyTokens( tokens, startIdx );
-
-            //TODO potentially allow for the option of inserting a pre-defined header
+            return stringifyTokens( tokens, headerStart );
         }
     }
 

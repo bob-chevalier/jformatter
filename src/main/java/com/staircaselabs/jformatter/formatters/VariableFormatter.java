@@ -28,7 +28,7 @@ public class VariableFormatter extends ScanningFormatter {
 
     private static class VariableFormatterScanner extends FormatScanner {
 
-        private static final boolean VERBOSE = true;
+        private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;
         private static final String NAME = "VariableFormatter::";
 
@@ -50,8 +50,6 @@ public class VariableFormatter extends ScanningFormatter {
             boolean putAnnotationsOnSeparateLines
     ) {
         if( input.isValid( node.getModifiers() ) ) {
-//            replacement.append( node.getModifiers() )
-//                    .append( SPACE );
             ModifierFormatter.appendAnnotationsAndFlags(
                     node.getModifiers(),
                     input,
