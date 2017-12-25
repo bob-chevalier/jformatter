@@ -60,8 +60,6 @@ import com.sun.source.tree.WhileLoopTree;
 // 1. make sure comments are not being dropped
 // 4. check code coverage of all visit methods
 // 5. figure out how to handle exceptions
-// 6. add newlines after annotations in another formatter
-// 7. add padding in another formatter
 // 8. add java.util.Logging
 public class LayoutFormatter extends ScanningFormatter {
 
@@ -847,23 +845,22 @@ public class LayoutFormatter extends ScanningFormatter {
 
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Input input ) {
-            //TODO
             if( VERBOSE ) System.out.println( "======visitMethodInvocation======" );
-//            Replacement.Builder replacement = new Replacement.Builder( node, input )
-//                    .append( node.getMethodSelect() )
-//                    .append( padding.methodName )
-//                    .append( TokenType.LEFT_PAREN );
-//
-//            List<Tree> args = node.getArguments().stream().map( Tree.class::cast ).collect( Collectors.toList() );
-//            if( !args.isEmpty() ) {
-//                replacement.append( padding.methodArg )
-//                        .appendList( args, TokenType.COMMA )
-//                        .append( padding.methodArg );
-//            }
-//
-//            replacement.append( TokenType.RIGHT_PAREN );
-//            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "MethodInvocation" )
+                    .append( node.getMethodSelect() )
+                    .append( padding.methodName )
+                    .append( TokenType.LEFT_PAREN );
 
+            List<Tree> args = node.getArguments().stream().map( Tree.class::cast ).collect( Collectors.toList() );
+            if( !args.isEmpty() ) {
+                replacement.append( padding.methodArg )
+                        .appendList( args, TokenType.COMMA, true )
+                        .append( padding.methodArg );
+            }
+
+            replacement.append( TokenType.RIGHT_PAREN );
+
+            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
             return super.visitMethodInvocation( node, input );
         }
 
