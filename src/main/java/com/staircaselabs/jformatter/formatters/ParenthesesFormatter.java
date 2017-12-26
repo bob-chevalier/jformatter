@@ -4,7 +4,7 @@ import com.staircaselabs.jformatter.core.ReplacementScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Padding;
 import com.staircaselabs.jformatter.core.Replacement;
-import com.staircaselabs.jformatter.core.ScanningFormatter;
+import com.staircaselabs.jformatter.core.ReplacementFormatter;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.source.tree.ParenthesizedTree;
 
@@ -21,7 +21,7 @@ import com.sun.source.tree.ParenthesizedTree;
  * We first process all parentheses using this formatter, which will apply padding appropriate for normal grouping
  * parentheses.  The LayoutFormatter then re-processes all other types of parentheses, applying appropriate padding.
  */
-public class ParenthesesFormatter extends ScanningFormatter {
+public class ParenthesesFormatter extends ReplacementFormatter {
 
     public ParenthesesFormatter(Padding padding ) {
         super( new ParenthesesScanner( padding ) );

@@ -4,7 +4,7 @@ import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.ReplacementScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Replacement;
-import com.staircaselabs.jformatter.core.ScanningFormatter;
+import com.staircaselabs.jformatter.core.ReplacementFormatter;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.IdentifierTree;
@@ -26,7 +26,7 @@ import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilat
 /**
  *
  */
-public class SortedImportsFormatter extends ScanningFormatter {
+public class SortedImportsFormatter extends ReplacementFormatter {
 
     public SortedImportsFormatter() {
         super( new SortedImportsScanner() );

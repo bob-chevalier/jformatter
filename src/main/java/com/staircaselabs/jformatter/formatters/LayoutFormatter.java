@@ -61,7 +61,7 @@ import com.sun.source.tree.WhileLoopTree;
 // 4. check code coverage of all visit methods
 // 5. figure out how to handle exceptions
 // 8. add java.util.Logging
-public class LayoutFormatter extends ScanningFormatter {
+public class LayoutFormatter extends ReplacementFormatter {
 
     public LayoutFormatter( Padding padding, boolean cuddleBraces ) {
         super( new LayoutScanner( padding, cuddleBraces ) );

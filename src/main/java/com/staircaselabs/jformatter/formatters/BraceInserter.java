@@ -7,7 +7,7 @@ import java.util.Optional;
 import com.staircaselabs.jformatter.core.ReplacementScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Replacement;
-import com.staircaselabs.jformatter.core.ScanningFormatter;
+import com.staircaselabs.jformatter.core.ReplacementFormatter;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.source.tree.BlockTree;
@@ -20,7 +20,7 @@ import com.sun.source.tree.SynchronizedTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.tools.javac.tree.JCTree;
 
-public class BraceInserter extends ScanningFormatter {
+public class BraceInserter extends ReplacementFormatter {
 
     public BraceInserter() {
         super( new BraceInserterScanner() );

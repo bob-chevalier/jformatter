@@ -12,7 +12,7 @@ import static com.staircaselabs.jformatter.core.Input.SPACE;
  * lines.  We first process all Variables using this formatter, which will separate annotations by a single SPACE.
  * The LayoutFormatter then re-processes class member Variables, inserting newlines.
  */
-public class VariableFormatter extends ScanningFormatter {
+public class VariableFormatter extends ReplacementFormatter {
 
     public VariableFormatter() {
         super( new VariableScanner() );

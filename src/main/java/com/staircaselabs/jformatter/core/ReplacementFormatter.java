@@ -7,14 +7,14 @@ import java.util.List;
 
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
-public class ScanningFormatter {
+public class ReplacementFormatter {
 
     private static final boolean DEBUGGING = true;
 
     protected ReplacementScanner scanner;
     private ReplacementScanner debugScanner = new ReplacementScanner();
 
-    public ScanningFormatter( ReplacementScanner scanner ) {
+    public ReplacementFormatter( ReplacementScanner scanner ) {
         this.scanner = scanner;
     }
 

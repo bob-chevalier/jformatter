@@ -19,7 +19,7 @@ import static com.staircaselabs.jformatter.core.Input.SPACE;
  * annotations by a single SPACE.  The LayoutFormatter then re-processes the Modifiers for classes and methods,
  * inserting newlines.
  */
-public class ModifierFormatter extends ScanningFormatter {
+public class ModifierFormatter extends ReplacementFormatter {
 
     public ModifierFormatter() {
         super( new ModifierScanner() );
