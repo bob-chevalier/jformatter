@@ -4,7 +4,7 @@ import static com.staircaselabs.jformatter.core.TokenUtils.isComment;
 
 import java.util.Optional;
 
-import com.staircaselabs.jformatter.core.FormatScanner;
+import com.staircaselabs.jformatter.core.ReplacementScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Replacement;
 import com.staircaselabs.jformatter.core.ScanningFormatter;
@@ -26,7 +26,7 @@ public class BraceInserter extends ScanningFormatter {
         super( new BraceInserterScanner() );
     }
 
-    private static class BraceInserterScanner extends FormatScanner {
+    private static class BraceInserterScanner extends ReplacementScanner {
 
         private static final TokenType[] COMMENT_OR_NEWLINE = {
                 TokenType.COMMENT_BLOCK,

@@ -69,7 +69,7 @@ public class LayoutFormatter extends ScanningFormatter {
 
 //    public static enum IndentType { SPACES, TABS }
 
-    private static class LayoutFormatterScanner extends FormatScanner {
+    private static class LayoutFormatterScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;

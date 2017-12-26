@@ -11,10 +11,10 @@ public class ScanningFormatter {
 
     private static final boolean DEBUGGING = true;
 
-    protected FormatScanner scanner;
-    private FormatScanner debugScanner = new FormatScanner();
+    protected ReplacementScanner scanner;
+    private ReplacementScanner debugScanner = new ReplacementScanner();
 
-    public ScanningFormatter( FormatScanner scanner ) {
+    public ScanningFormatter( ReplacementScanner scanner ) {
         this.scanner = scanner;
     }
 

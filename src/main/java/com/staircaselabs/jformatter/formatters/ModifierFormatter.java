@@ -25,7 +25,7 @@ public class ModifierFormatter extends ScanningFormatter {
         super( new ModifierFormatterScanner() );
     }
 
-    private static class ModifierFormatterScanner extends FormatScanner {
+    private static class ModifierFormatterScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;

@@ -1,6 +1,6 @@
 package com.staircaselabs.jformatter.formatters;
 
-import com.staircaselabs.jformatter.core.FormatScanner;
+import com.staircaselabs.jformatter.core.ReplacementScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Padding;
 import com.staircaselabs.jformatter.core.Replacement;
@@ -27,7 +27,7 @@ public class ParenthesizedFormatter extends ScanningFormatter {
         super( new ParenthesizedFormatterScanner( padding ) );
     }
 
-    private static class ParenthesizedFormatterScanner extends FormatScanner {
+    private static class ParenthesizedFormatterScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;

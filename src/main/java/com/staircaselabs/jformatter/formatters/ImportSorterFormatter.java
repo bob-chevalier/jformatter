@@ -1,7 +1,7 @@
 package com.staircaselabs.jformatter.formatters;
 
 import com.staircaselabs.jformatter.core.FormatException;
-import com.staircaselabs.jformatter.core.FormatScanner;
+import com.staircaselabs.jformatter.core.ReplacementScanner;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Replacement;
 import com.staircaselabs.jformatter.core.ScanningFormatter;
@@ -64,7 +64,7 @@ public class ImportSorterFormatter extends ScanningFormatter {
 
     }
 
-    private static class ImportSorterFormatterScanner extends FormatScanner {
+    private static class ImportSorterFormatterScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;

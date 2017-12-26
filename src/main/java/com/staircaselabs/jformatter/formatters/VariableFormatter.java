@@ -2,15 +2,7 @@ package com.staircaselabs.jformatter.formatters;
 
 import com.staircaselabs.jformatter.core.*;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
-import com.sun.source.tree.ModifiersTree;
-import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
-
-import javax.lang.model.element.Modifier;
-import java.util.Iterator;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.stream.Collectors;
 
 import static com.staircaselabs.jformatter.core.Input.SPACE;
 
@@ -26,7 +18,7 @@ public class VariableFormatter extends ScanningFormatter {
         super( new VariableFormatterScanner() );
     }
 
-    private static class VariableFormatterScanner extends FormatScanner {
+    private static class VariableFormatterScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;

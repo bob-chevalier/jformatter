@@ -10,7 +10,7 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.TreeScanner;
 import com.sun.tools.javac.tree.JCTree;
 
-public class FormatScanner extends TreeScanner<Void, Input> {
+public class ReplacementScanner extends TreeScanner<Void, Input> {
 
     protected boolean errorEncountered = false;
     protected boolean rescanRequired = false;
