@@ -15,10 +15,10 @@ import static com.staircaselabs.jformatter.core.Input.SPACE;
 public class VariableFormatter extends ScanningFormatter {
 
     public VariableFormatter() {
-        super( new VariableFormatterScanner() );
+        super( new VariableScanner() );
     }
 
-    private static class VariableFormatterScanner extends ReplacementScanner {
+    private static class VariableScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;

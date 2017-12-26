@@ -64,12 +64,12 @@ import com.sun.source.tree.WhileLoopTree;
 public class LayoutFormatter extends ScanningFormatter {
 
     public LayoutFormatter( Padding padding, boolean cuddleBraces ) {
-        super( new LayoutFormatterScanner( padding, cuddleBraces ) );
+        super( new LayoutScanner( padding, cuddleBraces ) );
     }
 
 //    public static enum IndentType { SPACES, TABS }
 
-    private static class LayoutFormatterScanner extends ReplacementScanner {
+    private static class LayoutScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;
@@ -96,7 +96,7 @@ public class LayoutFormatter extends ScanningFormatter {
         private final Padding padding;
         private final boolean cuddleBraces;
 
-        private LayoutFormatterScanner( Padding padding, boolean cuddleBraces ) {
+        private LayoutScanner(Padding padding, boolean cuddleBraces ) {
             this.padding = padding;
             this.cuddleBraces = cuddleBraces;
         }

@@ -29,12 +29,12 @@ public class FileFormatter implements Callable<Boolean> {
             originalText = workingText = readFileToString( path );
 
             workingText = new HeaderFormatter().format( workingText );
-            workingText = new ImportSorterFormatter().format( workingText );
+            workingText = new SortedImportsFormatter().format( workingText );
 //          workingText = TrailingWhitespaceRemover.format( workingText );
 //          workingText = new BraceInserter().format( workingText );
             workingText = new ModifierFormatter().format( workingText );
             workingText = new VariableFormatter().format( workingText );
-            workingText = new ParenthesizedFormatter( padding ).format( workingText );
+            workingText = new ParenthesesFormatter( padding ).format( workingText );
             boolean cuddleBraces = true;
             workingText = new LayoutFormatter( padding, cuddleBraces ).format( workingText );
 

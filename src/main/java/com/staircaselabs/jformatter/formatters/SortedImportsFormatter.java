@@ -26,10 +26,10 @@ import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilat
 /**
  *
  */
-public class ImportSorterFormatter extends ScanningFormatter {
+public class SortedImportsFormatter extends ScanningFormatter {
 
-    public ImportSorterFormatter() {
-        super( new ImportSorterFormatterScanner() );
+    public SortedImportsFormatter() {
+        super( new SortedImportsScanner() );
     }
 
     /**
@@ -44,9 +44,9 @@ public class ImportSorterFormatter extends ScanningFormatter {
         usedNamesScanner.scan( unit, usedNames );
 
         // pass the used names and package name to the update scanner
-        ((ImportSorterFormatterScanner)scanner).setUsedNames( usedNames );
+        ((SortedImportsScanner)scanner).setUsedNames( usedNames );
         String pkgName = unit.getPackageName() == null ? null : unit.getPackageName().toString();
-        ((ImportSorterFormatterScanner)scanner).setPackageName( pkgName );
+        ((SortedImportsScanner)scanner).setPackageName( pkgName );
 
         // now remove unused imports using the update scanner
         return super.format( text );
@@ -64,11 +64,11 @@ public class ImportSorterFormatter extends ScanningFormatter {
 
     }
 
-    private static class ImportSorterFormatterScanner extends ReplacementScanner {
+    private static class SortedImportsScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;
-        private static final String NAME = "ImportSorterFormatter::";
+        private static final String NAME = "SortedImportsFormatter::";
         private Set<String> usedNames;
         private String pkgName;
 
@@ -82,7 +82,7 @@ public class ImportSorterFormatter extends ScanningFormatter {
 
         @Override
         public Void visitCompilationUnit( CompilationUnitTree node, Input input ) {
-            if (VERBOSE) System.out.println("======ImportSorterFormatter::visitCompUnit======");
+            if (VERBOSE) System.out.println("======SortedImportsFormatter::visitCompUnit======");
             if( !node.getImports().isEmpty() ) {
                 int compUnitStart = input.getFirstTokenIndex( node );
                 int importsStart = input.getFirstTokenIndex( node.getImports().get( 0 ) );

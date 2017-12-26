@@ -22,10 +22,10 @@ import static com.staircaselabs.jformatter.core.Input.SPACE;
 public class ModifierFormatter extends ScanningFormatter {
 
     public ModifierFormatter() {
-        super( new ModifierFormatterScanner() );
+        super( new ModifierScanner() );
     }
 
-    private static class ModifierFormatterScanner extends ReplacementScanner {
+    private static class ModifierScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;

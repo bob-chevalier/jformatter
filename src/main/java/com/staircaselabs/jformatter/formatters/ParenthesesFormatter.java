@@ -21,27 +21,27 @@ import com.sun.source.tree.ParenthesizedTree;
  * We first process all parentheses using this formatter, which will apply padding appropriate for normal grouping
  * parentheses.  The LayoutFormatter then re-processes all other types of parentheses, applying appropriate padding.
  */
-public class ParenthesizedFormatter extends ScanningFormatter {
+public class ParenthesesFormatter extends ScanningFormatter {
 
-    public ParenthesizedFormatter( Padding padding ) {
-        super( new ParenthesizedFormatterScanner( padding ) );
+    public ParenthesesFormatter(Padding padding ) {
+        super( new ParenthesesScanner( padding ) );
     }
 
-    private static class ParenthesizedFormatterScanner extends ReplacementScanner {
+    private static class ParenthesesScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;
-        private static final String NAME = "ParenthesizedFormatter::";
+        private static final String NAME = "ParenthesesFormatter::";
 
         private final Padding padding;
 
-        private ParenthesizedFormatterScanner( Padding padding ) {
+        private ParenthesesScanner(Padding padding ) {
             this.padding = padding;
         }
 
         @Override
         public Void visitParenthesized(ParenthesizedTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======ParenthesizedFormatter::visitParenthesized======" );
+            if( VERBOSE ) System.out.println( "======ParenthesesFormatter::visitParenthesized======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Parenthesized" )
                     .append( TokenType.LEFT_PAREN )
                     .append( padding.parenGrouping )
