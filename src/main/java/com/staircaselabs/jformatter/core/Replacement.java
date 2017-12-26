@@ -137,7 +137,7 @@ public class Replacement {
 
         public Builder append( int pos ) {
             appendComments( pos );
-            output.append( input.tokens.get( pos ).getText() );
+            output.append( input.tokens.get( pos ).toString() );
             currentPosInclusive = pos + 1;
             return this;
         }
@@ -301,7 +301,7 @@ public class Replacement {
                 output.append( IntStream.range(currentPosInclusive, stopExclusive )
                         .mapToObj( input.tokens::get )
                         .filter( t -> TokenUtils.isComment( t ) || t.type == TokenType.NEWLINE )
-                        .map( TextToken::getText )
+                        .map( TextToken::toString )
                         .collect( Collectors.joining() )
                 );
             }

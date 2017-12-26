@@ -16,12 +16,13 @@ public class TextToken {
         this.endExclusive = endExclusive;
     }
 
-    public String getText() {
-        return text;
-    }
-
     public TokenType getType() {
         return type;
+    }
+
+    @Override
+    public String toString() {
+        return text;
     }
 
     public enum TokenType {

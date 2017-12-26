@@ -13,7 +13,7 @@ import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.util.TreePathScanner;
-import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +39,7 @@ public class SortedImportsFormatter extends ReplacementFormatter {
     public String format( String text ) throws FormatException {
         // collect all of the used names from the given text using the read-only scanner
         Set<String> usedNames = new HashSet<>();
-        JCTree.JCCompilationUnit unit = getCompilationUnit( text );
+        JCCompilationUnit unit = getCompilationUnit( text );
         UsedNamesScanner usedNamesScanner = new UsedNamesScanner();
         usedNamesScanner.scan( unit, usedNames );
 
@@ -117,7 +117,7 @@ public class SortedImportsFormatter extends ReplacementFormatter {
                     int pos = input.getFirstTokenIndex( info.importTree );
                     int importStop = input.getLastTokenIndex( info.importTree );
                     while( pos <= importStop && input.tokens.get( pos ).getType() != TokenType.SEMICOLON ) {
-                        replacement.append( input.tokens.get( pos++ ).getText() );
+                        replacement.append( input.tokens.get( pos++ ).toString() );
                     }
                     replacement.append( ";" ).append( input.newline );
                 }

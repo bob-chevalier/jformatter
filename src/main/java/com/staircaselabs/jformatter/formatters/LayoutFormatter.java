@@ -802,7 +802,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                 // this is a constructor so we have to manually find the method name
                 int scanPos = replacement.getCurrentPosInclusive();
                 int nameIdx = input.findNextByExclusion( scanPos, WS_NEWLINE_OR_COMMENT ).getAsInt();
-                name = input.tokens.get( nameIdx ).getText();
+                name = input.tokens.get( nameIdx ).toString();
             }
             replacement.append( name )
                     .append( padding.methodName )
@@ -1286,7 +1286,7 @@ public class LayoutFormatter extends ReplacementFormatter {
             int startIdx = input.getFirstTokenIndex( tree );
             int endIdx = input.getLastTokenIndex( tree );
             for( int pos=startIdx; pos<endIdx; pos++ ) {
-                System.out.println( pos + ": [" + input.tokens.get( pos ).getText() + "]" );
+                System.out.println( pos + ": [" + input.tokens.get( pos ).toString() + "]" );
             }
         }
 

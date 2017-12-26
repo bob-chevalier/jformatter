@@ -148,7 +148,7 @@ public final class TokenUtils {
     public static String getLinebreak( List<TextToken> tokens ) {
         OptionalInt linebreakIdx = findNext( tokens, 0, TokenType.NEWLINE );
         return linebreakIdx.isPresent()
-                ? tokens.get( linebreakIdx.getAsInt() ).getText()
+                ? tokens.get( linebreakIdx.getAsInt() ).toString()
                 : DEFAULT_LINEBREAK;
     }
 
@@ -178,7 +178,7 @@ public final class TokenUtils {
 
     public static String stringifyTokens( List<TextToken> tokens, int startInclusive, int endExclusive ) {
         return IntStream.range( startInclusive, endExclusive )
-                .mapToObj( i -> tokens.get( i ).getText() )
+                .mapToObj( i -> tokens.get( i ).toString() )
               .reduce( "", String::concat );
         // TODO replace the line above with the following (and perhaps replace 2 lines above)
 //                .collect( Collectors.joining() );
