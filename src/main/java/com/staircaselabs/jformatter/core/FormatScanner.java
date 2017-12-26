@@ -65,37 +65,4 @@ public class FormatScanner extends TreeScanner<Void, Input> {
         replacements.add( replacement );
     }
 
-    //TODO get rid of this method
-    protected Optional<Replacement> createReplacement(
-            Input input,
-            int startIdxInclusive,
-            int endIdxExclusive,
-            StringBuilder newTextBuilder
-    ) {
-        String oldText = input.stringifyTokens( startIdxInclusive, endIdxExclusive );
-        String newText = newTextBuilder.toString();
-        if( !newText.equals( oldText ) ) {
-            TextToken firstTokenToReplace = input.tokens.get( startIdxInclusive );
-            TextToken lastTokenToReplace = input.tokens.get( (endIdxExclusive - 1) );
-
-            return Optional.of(
-                    new Replacement(
-                            "TODO: remove this method",
-                            firstTokenToReplace.beginInclusive,
-                            lastTokenToReplace.endExclusive,
-                            oldText,
-                            newText
-                    )
-            );
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    protected Optional<Replacement> createReplacement( Input input, Tree tree, StringBuilder newTextBuilder ) {
-        int startIdx = input.getFirstTokenIndex( tree );
-        int endIdx = input.getLastTokenIndex( tree );
-        return createReplacement( input, startIdx, endIdx, newTextBuilder );
-    }
-
 }

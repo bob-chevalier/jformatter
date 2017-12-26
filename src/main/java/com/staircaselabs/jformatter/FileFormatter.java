@@ -32,9 +32,6 @@ public class FileFormatter implements Callable<Boolean> {
             workingText = new ImportSorterFormatter().format( workingText );
 //          workingText = TrailingWhitespaceRemover.format( workingText );
 //          workingText = new BraceInserter().format( workingText );
-//          workingText = new LeftBraceCuddler().format( workingText );
-//          workingText = new RightBraceCuddler().format( workingText );
-//          workingText = new PaddingFormatter( 1 ).format( workingText );
             workingText = new ModifierFormatter().format( workingText );
             workingText = new VariableFormatter().format( workingText );
             workingText = new ParenthesizedFormatter( padding ).format( workingText );
