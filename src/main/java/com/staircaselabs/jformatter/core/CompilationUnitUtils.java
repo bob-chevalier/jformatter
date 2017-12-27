@@ -15,9 +15,11 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardLocation;
 
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.parser.JavacParser;
 import com.sun.tools.javac.parser.ParserFactory;
+import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Log;
@@ -68,6 +70,11 @@ public final class CompilationUnitUtils {
         }
 
         return unit;
+    }
+
+    public static boolean isValid( Tree tree ) {
+        // Not sure why, but occasionally scanner produces non-printable trees
+        return (tree != null && ((JCTree)tree).getStartPosition() >= 0);
     }
 
 }

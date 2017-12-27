@@ -1,13 +1,12 @@
 package com.staircaselabs.jformatter.formatters;
 
-import static com.staircaselabs.jformatter.core.Input.SPACE;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import com.staircaselabs.jformatter.core.*;
+import com.staircaselabs.jformatter.core.Input;
+import com.staircaselabs.jformatter.core.Padding;
+import com.staircaselabs.jformatter.core.Replacement;
+import com.staircaselabs.jformatter.core.ReplacementFormatter;
+import com.staircaselabs.jformatter.core.ReplacementScanner;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.staircaselabs.jformatter.core.TokenUtils;
 import com.sun.source.tree.AnnotatedTypeTree;
 import com.sun.source.tree.AnnotationTree;
 import com.sun.source.tree.ArrayAccessTree;
@@ -55,6 +54,16 @@ import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.UnionTypeTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.tree.WhileLoopTree;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static com.staircaselabs.jformatter.core.CompilationUnitUtils.isValid;
+import static com.staircaselabs.jformatter.core.Input.SPACE;
 
 //TODO:
 // 1. make sure comments are not being dropped
@@ -321,7 +330,7 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( VERBOSE ) System.out.println( "======visitClass======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Class" );
 
-            if( input.isValid( node.getModifiers() ) ) {
+            if( isValid( node.getModifiers() ) ) {
                 // append annotations, separated by newlines, and then any flags
                 ModifierFormatter.appendAnnotationsAndFlags( node.getModifiers(), input, replacement, true );
 
@@ -777,7 +786,7 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( VERBOSE ) System.out.println( "======visitMethod======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Method" );
 
-            if( input.isValid( node.getModifiers() ) ) {
+            if( isValid( node.getModifiers() ) ) {
                 // append annotations, separated by newlines, and then any flags
                 ModifierFormatter.appendAnnotationsAndFlags(node.getModifiers(), input, replacement, true);
             }
@@ -1051,7 +1060,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                     .append( cuddleBraces ? SPACE : input.newline )
                     .appendList( catches, SPACE );
 
-            if( input.isValid( node.getFinallyBlock() ) ) {
+            if( isValid( node.getFinallyBlock() ) ) {
                 replacement.append( cuddleBraces ? SPACE : input.newline )
                         .append( TokenType.FINALLY )
                         .appendOpeningBrace( cuddleBraces )
@@ -1167,7 +1176,7 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( tree != null ) {
                 // check if tree is already surrounded by curly braces
                 int start = input.getFirstTokenIndex( tree );
-                if( input.tokens.get( start ).type != TokenType.LEFT_BRACE ) {
+                if( input.tokens.get( start ).getType() != TokenType.LEFT_BRACE ) {
                     // find parent of this tree (excluding whitespace, newlines, and comments)
                     int parent = input.findPrevByExclusion( start, WS_NEWLINE_OR_COMMENT ).getAsInt();
 

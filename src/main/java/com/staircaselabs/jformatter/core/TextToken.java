@@ -4,10 +4,11 @@ import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
 public class TextToken {
 
-    public final TokenType type;
     public final int beginInclusive;
     public final int endExclusive;
     private final String text;
+    private final TokenType type;
+    private BreakType breakType = BreakType.NON_BREAKING;
 
     public TextToken( String text, TokenType type, int beginInclusive, int endExclusive ) {
         this.text = text;
@@ -18,6 +19,14 @@ public class TextToken {
 
     public TokenType getType() {
         return type;
+    }
+
+    public void setBreakType( BreakType breakType ) {
+        this.breakType = breakType;
+    }
+
+    public BreakType getBreakType() {
+        return breakType;
     }
 
     @Override
@@ -111,6 +120,12 @@ public class TextToken {
         WHITESPACE,
         XOR,
         XOR_ASSIGNMENT
+    }
+
+    public enum BreakType {
+        INDEPENDENT,
+        UNIFIED,
+        NON_BREAKING
     }
 
 }

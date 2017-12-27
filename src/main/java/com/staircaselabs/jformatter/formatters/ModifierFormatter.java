@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
+import static com.staircaselabs.jformatter.core.CompilationUnitUtils.isValid;
 import static com.staircaselabs.jformatter.core.Input.SPACE;
 
 /**
@@ -34,7 +35,7 @@ public class ModifierFormatter extends ReplacementFormatter {
         @Override
         public Void visitModifiers( ModifiersTree node, Input input ) {
             if( VERBOSE ) System.out.println( "======visitModifiers======" );
-            if( input.isValid( node ) ) {
+            if( isValid( node ) ) {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Modifiers" );
                 appendAnnotationsAndFlags( node, input, replacement, false );
 

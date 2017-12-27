@@ -31,7 +31,7 @@ public class Input {
 
         for( int idx = 0; idx < tokens.size(); idx++ ) {
             TextToken token = tokens.get( idx );
-            if( token.type != TokenType.EOF ) {
+            if( token.getType() != TokenType.EOF ) {
                 positionToIndexMap.put( token.beginInclusive, idx );
             }
         }
@@ -88,11 +88,6 @@ public class Input {
 
     public OptionalInt findPrevByExclusion( int stopExclusive, TokenType... types ) {
         return TokenUtils.findPrevByExclusion( tokens, stopExclusive, types );
-    }
-
-    public boolean isValid( Tree tree ) {
-        // Not sure why, but occasionally scanner produces non-printable trees
-        return (tree != null && ((JCTree)tree).getStartPosition() >= 0);
     }
 
     public String stringifyTokens() {

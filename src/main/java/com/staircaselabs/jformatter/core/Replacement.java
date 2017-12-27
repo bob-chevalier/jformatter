@@ -300,7 +300,7 @@ public class Replacement {
                 // strip out everything except comments and newlines
                 output.append( IntStream.range(currentPosInclusive, stopExclusive )
                         .mapToObj( input.tokens::get )
-                        .filter( t -> TokenUtils.isComment( t ) || t.type == TokenType.NEWLINE )
+                        .filter( t -> TokenUtils.isComment( t ) || t.getType() == TokenType.NEWLINE )
                         .map( TextToken::toString )
                         .collect( Collectors.joining() )
                 );
@@ -311,7 +311,7 @@ public class Replacement {
 
         public Builder appendBracedBlock( Tree tree, String newline ) {
             int start = input.getFirstTokenIndex( tree );
-            if( input.tokens.get( start ).type != TokenType.LEFT_BRACE ) {
+            if( input.tokens.get( start ).getType() != TokenType.LEFT_BRACE ) {
                 // tree is not surrounded by grouping symbols so just append the whole thing
                 return append( tree );
             } else {

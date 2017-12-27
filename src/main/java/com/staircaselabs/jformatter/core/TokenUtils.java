@@ -61,7 +61,7 @@ public final class TokenUtils {
 
         List<TokenType> included = Arrays.asList( types );
         return IntStream.range( startInclusive, endExclusive )
-                .filter( i -> included.contains( tokens.get( i ).type ) )
+                .filter( i -> included.contains( tokens.get( i ).getType() ) )
                 .findFirst();
     }
 
@@ -85,7 +85,7 @@ public final class TokenUtils {
 
         List<TokenType> excluded = Arrays.asList( types );
         return IntStream.range( startInclusive, endExclusive )
-                .filter( i -> !excluded.contains( tokens.get( i ).type) )
+                .filter( i -> !excluded.contains( tokens.get( i ).getType() ) )
                 .findFirst();
     }
 
@@ -109,7 +109,7 @@ public final class TokenUtils {
 
         List<TokenType> included = Arrays.asList( types );
         return IntStream.range( startInclusive, endExclusive )
-                .filter( i -> included.contains( tokens.get( i ).type ) )
+                .filter( i -> included.contains( tokens.get( i ).getType() ) )
                 .reduce( (a, b) -> b );
     }
 
@@ -133,7 +133,7 @@ public final class TokenUtils {
 
         List<TokenType> excluded = Arrays.asList( types );
         return IntStream.range( startInclusive, endExclusive )
-                .filter( i -> !excluded.contains( tokens.get( i ).type ) )
+                .filter( i -> !excluded.contains( tokens.get( i ).getType() ) )
                 .reduce( (a, b) -> b );
     }
 
@@ -153,9 +153,9 @@ public final class TokenUtils {
     }
 
     public static boolean isComment( TextToken token ) {
-        return token.type == TokenType.COMMENT_BLOCK 
-                || token.type == TokenType.COMMENT_JAVADOC
-                || token.type  == TokenType.COMMENT_LINE;
+        return token.getType() == TokenType.COMMENT_BLOCK
+                || token.getType() == TokenType.COMMENT_JAVADOC
+                || token.getType()  == TokenType.COMMENT_LINE;
     }
 
     public static boolean isSingleWhitespace( List<TextToken> tokens, int startInclusive, int endExclusive ) {
@@ -163,7 +163,7 @@ public final class TokenUtils {
             return false;
         } else {
             TextToken token = tokens.get( startInclusive );
-            return (token.type == TokenType.WHITESPACE
+            return (token.getType() == TokenType.WHITESPACE
                     && (token.endExclusive - token.beginInclusive) == 1);
         }
     }
@@ -178,10 +178,9 @@ public final class TokenUtils {
 
     public static String stringifyTokens( List<TextToken> tokens, int startInclusive, int endExclusive ) {
         return IntStream.range( startInclusive, endExclusive )
-                .mapToObj( i -> tokens.get( i ).toString() )
-              .reduce( "", String::concat );
-        // TODO replace the line above with the following (and perhaps replace 2 lines above)
-//                .collect( Collectors.joining() );
+                .mapToObj( tokens::get )
+                .map( TextToken::toString )
+                .collect( Collectors.joining() );
     }
 
     public static List<TextToken> tokenizeText( String text ) throws FormatException {

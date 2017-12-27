@@ -4,6 +4,7 @@ import com.staircaselabs.jformatter.core.*;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.source.tree.VariableTree;
 
+import static com.staircaselabs.jformatter.core.CompilationUnitUtils.isValid;
 import static com.staircaselabs.jformatter.core.Input.SPACE;
 
 /**
@@ -41,21 +42,21 @@ public class VariableFormatter extends ReplacementFormatter {
             Replacement.Builder replacement,
             boolean putAnnotationsOnSeparateLines
     ) {
-        if( input.isValid( node.getModifiers() ) ) {
+        if( isValid( node.getModifiers() ) ) {
             ModifierFormatter.appendAnnotationsAndFlags(
                     node.getModifiers(),
                     input,
                     replacement, putAnnotationsOnSeparateLines
             );
         }
-        if( input.isValid( node.getType() ) ) {
+        if( isValid( node.getType() ) ) {
             replacement.append( node.getType() )
                     .append( SPACE );
         }
 
         replacement.append( node.getName().toString() );
 
-        if( input.isValid( node.getInitializer() ) ) {
+        if( isValid( node.getInitializer() ) ) {
             replacement.append( SPACE )
                     .append( TokenType.ASSIGNMENT )
                     .append( SPACE )
