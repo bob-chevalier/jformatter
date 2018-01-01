@@ -1,14 +1,18 @@
 package com.staircaselabs.jformatter.core;
 
-import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import java.text.DecimalFormat;
 
 public class TextToken {
 
+    private final DecimalFormat decimalFormat = new DecimalFormat( "+#;-#" );
     public final int beginInclusive;
     public final int endExclusive;
     private final String text;
     private final TokenType type;
-    private BreakType breakType = BreakType.NON_BREAKING;
+    private LineBreak lineBreak = LineBreak.NON_BREAKING;
+    private String lineBreakSource = "default";
+    private int indentOffset = 0;
+    private static final boolean VERBOSE_MARKUP = false;
 
     public TextToken( String text, TokenType type, int beginInclusive, int endExclusive ) {
         this.text = text;
@@ -21,17 +25,43 @@ public class TextToken {
         return type;
     }
 
-    public void setBreakType( BreakType breakType ) {
-        this.breakType = breakType;
+    public void setLineBreakTag( LineBreak breakType, String source ) {
+//        if( this.lineBreak.canBeOverriden( lineBreak ) ) {
+            this.lineBreak = breakType;
+            lineBreakSource = source;
+//        }
     }
 
-    public BreakType getBreakType() {
-        return breakType;
+    public LineBreak getLineBreak() {
+        return lineBreak;
+    }
+
+    public void updateIndentOffset( int amount ) {
+        indentOffset += amount;
+    }
+
+    public int getIndentOffset() {
+        return indentOffset;
+    }
+
+    public int getWidth() {
+        // ignore newlines when calculating the width of a line
+        return (type == TokenType.NEWLINE
+                ? 0
+                : endExclusive - beginInclusive);
     }
 
     @Override
     public String toString() {
         return text;
+    }
+
+    public String toMarkupString() {
+        String indentLabel = indentOffset == 0 ? "" : decimalFormat.format( indentOffset ) + ":";
+//        String typeLabel = lineBreak == LineBreak.NON_BREAKING ? "" : lineBreak.toString();
+        String srcLabel = VERBOSE_MARKUP ? ":" + lineBreakSource : "";
+        String markupLabel = lineBreak == LineBreak.NON_BREAKING ? "" : String.format( "[%s%s%s]", indentLabel, lineBreak.toString(), srcLabel );
+        return  markupLabel + toString();
     }
 
     public enum TokenType {
@@ -120,12 +150,6 @@ public class TextToken {
         WHITESPACE,
         XOR,
         XOR_ASSIGNMENT
-    }
-
-    public enum BreakType {
-        INDEPENDENT,
-        UNIFIED,
-        NON_BREAKING
     }
 
 }

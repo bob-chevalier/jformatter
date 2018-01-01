@@ -17,7 +17,13 @@ import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 
 public class WhitespaceFormatter {
 
-    public static String format( String text ) throws FormatException {
+    private final boolean trimLeadingWhitespace;
+
+    public WhitespaceFormatter( boolean trimLeadingWhitespace ) {
+        this.trimLeadingWhitespace = trimLeadingWhitespace;
+    }
+
+    public String format( String text ) throws FormatException {
         List<TextToken> tokens = tokenizeText( text );
         List<TextToken> validTokens = new ArrayList<>();
 
@@ -38,8 +44,12 @@ public class WhitespaceFormatter {
                 validTokens.add( tokens.get( newline ) );
             }
 
-            // find next non-whitespace token after previous newline
-            lineStart = findNextByExclusion( tokens, newline + 1, TokenType.WHITESPACE, TokenType.EOF );
+            if( trimLeadingWhitespace ) {
+                // skip leading whitespace on following line
+                lineStart = findNextByExclusion(tokens, newline + 1, TokenType.WHITESPACE, TokenType.EOF);
+            } else {
+                lineStart = findNextByExclusion(tokens, newline + 1, TokenType.EOF);
+            }
         }
 
         return validTokens.stream().map( TextToken::toString ).collect( Collectors.joining() );

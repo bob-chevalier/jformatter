@@ -5,6 +5,7 @@ import static com.staircaselabs.jformatter.core.TokenUtils.getLinebreak;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -18,6 +19,12 @@ import com.sun.tools.javac.tree.JCTree;
 public class Input {
 
     public static final String SPACE = " ";
+
+    private static final TokenType[] COMMENT = {
+            TokenType.COMMENT_BLOCK,
+            TokenType.COMMENT_JAVADOC,
+            TokenType.COMMENT_LINE
+    };
 
     public List<TextToken> tokens;
     public EndPosTable endPosTable;
@@ -37,6 +44,14 @@ public class Input {
         }
     }
 
+    public TextToken getFirstToken( Tree tree ) {
+        return tokens.get(getFirstTokenIndex(tree));
+    }
+
+    public TextToken getLastToken( Tree tree ) {
+        return tokens.get( getLastTokenIndex( tree ) );
+    }
+
     public int getFirstTokenIndex( Tree tree ) {
         return getTokenIndexFromPosition( ((JCTree)tree).getStartPosition() );
     }
@@ -50,12 +65,37 @@ public class Input {
         return positionToIndexMap.floorEntry( charPosition ).getValue();
     }
 
+    public Optional<String> collectComments( int startInclusive, int endExclusive ) {
+        OptionalInt firstComment = findNext( startInclusive,endExclusive, COMMENT );
+        if( firstComment.isPresent() ) {
+            StringBuilder builder = new StringBuilder();
+            builder.append( SPACE );
+
+            // strip out everything except comments and newlines
+            builder.append( IntStream.range( startInclusive, endExclusive )
+                    .mapToObj( tokens::get )
+                    .filter( t -> TokenUtils.isComment( t ) || t.getType() == TokenType.NEWLINE )
+                    .map( TextToken::toString )
+                    .collect( Collectors.joining() )
+            );
+
+            return Optional.of( builder.toString() );
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public boolean containsComments( int startInclusive, int endExclusive ) {
         return TokenUtils.containsComments( tokens, startInclusive, endExclusive );
     }
 
     public boolean contains( int startInclusive, int endExclusive, TokenType... types ) {
         return TokenUtils.contains( tokens, startInclusive, endExclusive, types );
+    }
+
+    public Optional<TextToken> findNextToken( int startInclusive, int endExclusive, TokenType... types ) {
+        OptionalInt idx = findNext( startInclusive, endExclusive, types );
+        return idx.isPresent() ? Optional.of( tokens.get( idx.getAsInt() ) ) : Optional.empty();
     }
 
     public OptionalInt findNext( int startInclusive, int endExclusive, TokenType... types ) {

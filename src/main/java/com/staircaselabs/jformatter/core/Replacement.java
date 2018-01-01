@@ -58,11 +58,6 @@ public class Replacement {
 
         public static final String SPACE = " ";
 
-        private static final TokenType[] COMMENT = {
-                TokenType.COMMENT_BLOCK,
-                TokenType.COMMENT_JAVADOC,
-                TokenType.COMMENT_LINE
-        };
         private static final TokenType[] WS_OR_NEWLINE = {
                 TokenType.WHITESPACE,
                 TokenType.NEWLINE
@@ -146,9 +141,19 @@ public class Replacement {
          * Append the next token of the given type, if one exists between current position and end of tree.
          * Leading comments and newlines will be appended before the token.
          */
+        //TODO determine if all calls to this should be replaced with more restrictive method, below
         public Builder append( TokenType type  ) {
-            input.findNext( currentPosInclusive, endExclusive, type ).ifPresent( this::append );
+            return append( type, endExclusive );
+        }
+
+        /**
+         * Append the next token of the given type, if it exists between current position and given stop position.
+         * If leading comments exist, they will be appended along with any leading newlines.
+         */
+        public Builder append( TokenType type, int stopExclusive ) {
+            input.findNext( currentPosInclusive, stopExclusive, type ).ifPresent( this::append );
             return this;
+
         }
 
         public Builder append( Tree tree ) {
@@ -160,56 +165,14 @@ public class Replacement {
         }
 
         public Builder appendWithLeadingNewlines( TokenType type, int numNewlines ) {
-            OptionalInt typePos = input.findNext( currentPosInclusive, endExclusive, type );
-            if( typePos.isPresent() ) {
-                appendNewlines( typePos.getAsInt(), numNewlines );
-
-                // now append the given token
-                append( type );
-            }
-            return this;
-        }
-
-        public Builder appendWithLeadingNewlines( Tree tree, int numNewlines ) {
-            int treeStart = input.getFirstTokenIndex( tree );
-            appendNewlines( treeStart, numNewlines );
-
-            // now append the given tree
-            return append( tree );
-        }
-
-        public Builder appendNewlines( int stopPosExclusive, int numNewlines ) {
-            // skip any existing newlines or whitespace
-            currentPosInclusive =
-                    input.findNextByExclusion( currentPosInclusive, stopPosExclusive, TokenType.NEWLINE, TokenType.WHITESPACE )
-                            .orElse( currentPosInclusive );
-
-            // append the appropriate number of newlines
-            IntStream.range( 0, numNewlines ).forEach( i -> append( input.newline ) );
-
-            return this;
-        }
-
-        public Builder appendWithLeadingNewlinesAfterComments( TokenType type, int numNewlines ) {
             int tokenPos = input.findNext( currentPosInclusive, type ).getAsInt();
-            appendCommentsAndNewlines( tokenPos, numNewlines );
+            appendNewlines( tokenPos, numNewlines );
 
             // now append the given token
             return append( type );
         }
 
-        public Builder appendWithLeadingNewlinesAfterComments( Tree tree, int numNewlines ) {
-            int treeStart = input.getFirstTokenIndex( tree );
-            appendCommentsAndNewlines( treeStart, numNewlines );
-
-            // now append the given tree
-            output.append( input.stringifyTree( tree ) );
-            currentPosInclusive = input.getLastTokenIndex( tree );
-
-            return this;
-        }
-
-        private void appendCommentsAndNewlines( int stopPos, int numNewlines ) {
+        private void appendNewlines( int stopPos, int numNewlines ) {
             // find final leading comment before given tree, excluding newlines and whitespace
             OptionalInt leadingComments =
                     input.findPrevByExclusion( currentPosInclusive, stopPos, TokenType.NEWLINE, TokenType.WHITESPACE );
@@ -243,12 +206,12 @@ public class Replacement {
 
         //TODO determine if this is actually called anywhere and if not, make includeSpaceAfterDelimiter = true the default
         // this version of appendList will only insert the given delimiter if it exists in the original text
-        public Builder appendList( List<Tree> list, TokenType delimiter ) {
+        public Builder appendList( List<? extends Tree> list, TokenType delimiter ) {
             return appendList( list, delimiter, false );
         }
 
         // this version of appendList will only insert the given delimiter if it exists in the original text
-        public Builder appendList( List<Tree> list, TokenType delimiter, boolean includeSpaceAfterDelimiter ) {
+        public Builder appendList( List<? extends Tree> list, TokenType delimiter, boolean includeSpaceAfterDelimiter ) {
             if( list.isEmpty() ) {
                 return this;
             }
@@ -257,14 +220,22 @@ public class Replacement {
             append( list.get( 0 ) );
 
             for( int idx = 1; idx < list.size(); idx++ ) {
-                // append delimiter and any leading comments
-                append( delimiter );
+                Tree element = list.get( idx );
+
+                if( delimiter == TokenType.NEWLINE ) {
+                    // ensure that at least one newline separates elements of the list
+                    appendNewlines( input.getFirstTokenIndex( element ), 1 );
+                } else {
+                    // if delimiter exists before current element, append it as well as any leading comments
+                    append(delimiter, input.getFirstTokenIndex(element));
+                }
+
                 if( includeSpaceAfterDelimiter ) {
                     append(SPACE);
                 }
 
-                // append tree and any leading comments
-                append( list.get( idx ) );
+                // now append the current element and any leading comments
+                append( element );
             }
 
             return this;
@@ -293,18 +264,7 @@ public class Replacement {
         }
 
         public Builder appendComments( int stopExclusive ) {
-            OptionalInt firstComment = input.findNext(currentPosInclusive, stopExclusive, COMMENT );
-            if( firstComment.isPresent() ) {
-                output.append( SPACE );
-
-                // strip out everything except comments and newlines
-                output.append( IntStream.range(currentPosInclusive, stopExclusive )
-                        .mapToObj( input.tokens::get )
-                        .filter( t -> TokenUtils.isComment( t ) || t.getType() == TokenType.NEWLINE )
-                        .map( TextToken::toString )
-                        .collect( Collectors.joining() )
-                );
-            }
+            input.collectComments( currentPosInclusive, stopExclusive ).ifPresent( output::append );
             currentPosInclusive = stopExclusive;
             return this;
         }
@@ -331,6 +291,18 @@ public class Replacement {
 
                 return this;
             }
+        }
+
+        public Builder stripParenthesesAndAppend( Tree tree ) {
+            int begin = input.getFirstTokenIndex( tree );
+            int end = input.getLastTokenIndex( tree );
+
+            int exprBegin = input.findNextByExclusion( begin, end, TokenType.LEFT_PAREN, TokenType.WHITESPACE )
+                    .orElseThrow( () -> new RuntimeException( "Missing expected left paren." ) );
+            int exprEnd = input.findPrevByExclusion( begin, end, TokenType.RIGHT_PAREN, TokenType.WHITESPACE )
+                    .orElseThrow( () -> new RuntimeException( "Missing expected right paren." ) );
+
+            return append( input.stringifyTokens( exprBegin, exprEnd + 1 ) );
         }
 
         public Builder appendOpeningBrace( boolean cuddleBraces ) {

@@ -1,5 +1,6 @@
 package com.staircaselabs.jformatter.formatters;
 
+import com.staircaselabs.jformatter.core.CommentedTree;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Padding;
 import com.staircaselabs.jformatter.core.Replacement;
@@ -55,8 +56,10 @@ import com.sun.source.tree.UnionTypeTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.tree.WhileLoopTree;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -64,6 +67,7 @@ import java.util.stream.IntStream;
 
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.isValid;
 import static com.staircaselabs.jformatter.core.Input.SPACE;
+import static java.util.stream.Collectors.partitioningBy;
 
 //TODO:
 // 1. make sure comments are not being dropped
@@ -76,14 +80,18 @@ public class LayoutFormatter extends ReplacementFormatter {
         super( new LayoutScanner( padding, cuddleBraces ) );
     }
 
-//    public static enum IndentType { SPACES, TABS }
-
     private static class LayoutScanner extends ReplacementScanner {
 
         private static final boolean VERBOSE = false;
         private static final boolean ENABLED = true;
         private static final String NAME = "LayoutFormatter::";
 
+        private static final TokenType[] WS_OR_COMMENT = {
+                TokenType.WHITESPACE,
+                TokenType.COMMENT_BLOCK,
+                TokenType.COMMENT_JAVADOC,
+                TokenType.COMMENT_LINE
+        };
         private static final TokenType[] WS_NEWLINE_OR_COMMENT = {
                 TokenType.WHITESPACE,
                 TokenType.NEWLINE,
@@ -100,8 +108,6 @@ public class LayoutFormatter extends ReplacementFormatter {
                 TokenType.LEFT_BRACKET
         };
 
-//        private final IndentType indentType;
-//        private final int numTabSpaces;
         private final Padding padding;
         private final boolean cuddleBraces;
 
@@ -296,12 +302,14 @@ public class LayoutFormatter extends ReplacementFormatter {
             } else {
                 replacement.append( TokenType.DEFAULT );
             }
-            replacement.append( TokenType.COLON )
-                    .append( input.newline );
 
-            List<Tree> statements =
-                    node.getStatements().stream().map( Tree.class::cast ).collect( Collectors.toList() );
-            replacement.appendList( statements, TokenType.NEWLINE );
+            replacement.append( TokenType.COLON );
+
+            for( StatementTree tree : node.getStatements() ) {
+                // append leading newline, if one exists and then the statement
+                replacement.append( TokenType.NEWLINE, input.getFirstTokenIndex( tree ) )
+                        .append( tree );
+            }
 
             if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
             return super.visitCase( node, input );
@@ -386,19 +394,56 @@ public class LayoutFormatter extends ReplacementFormatter {
             replacement.append( cuddleBraces ? SPACE : input.newline )
                     .append( TokenType.LEFT_BRACE );
 
-            for( Tree tree : node.getMembers() ) {
-                if( tree instanceof VariableTree ) {
-                    // it's a member variable so insert newlines between annotations before appending
-                    replacement.appendNewlines( input.getFirstTokenIndex( tree ), 2 );
-                    VariableFormatter.appendVariable( (VariableTree)tree, input, replacement, true );
-                } else {
-                    // it's a member method so just append it
-                    replacement.appendWithLeadingNewlines( tree, 2 );
+            if( !node.getMembers().isEmpty() ) {
+                Tree firstMember = node.getMembers().get( 0 );
+
+                // group members with their associated comments
+                List<CommentedTree> members = new ArrayList<>();
+                int pos = replacement.getCurrentPosInclusive();
+                for (Tree tree : node.getMembers()) {
+                    // collect leading comments
+                    int treeBegin = input.getFirstTokenIndex(tree);
+                    int treeEnd = input.getLastTokenIndex(tree);
+                    Optional<String> leadingComments = input.collectComments(pos, treeBegin );
+
+                    // collect trailing inline comment
+                    int endExclusive = input.findNextByExclusion(treeEnd, WS_OR_COMMENT)
+                            .orElseThrow(() -> new RuntimeException("Unexpected missing token."));
+                    Optional<String> trailingComment = input.collectComments(treeEnd, endExclusive);
+
+                    members.add(new CommentedTree(tree, leadingComments, trailingComment));
+                    pos = endExclusive;
+                }
+
+                // partition members into variables and methods
+                Map<Boolean, List<CommentedTree>> partitionedMembers =
+                        members.stream().collect(partitioningBy(t -> t.tree instanceof VariableTree));
+
+                // add all member variables first
+                for (CommentedTree ctree : partitionedMembers.get(true)) {
+                    // insert newlines between annotations before appending
+                    replacement.append(input.newline).append(input.newline);
+                    ctree.leadingComments.ifPresent(replacement::append);
+
+                    // insert newlines between annotations before appending
+                    replacement.setCurrentPositionInclusive(input.getFirstTokenIndex(ctree.tree));
+                    VariableFormatter.appendVariable((VariableTree) ctree.tree, input, replacement, true);
+
+                    ctree.trailingInlineComment.ifPresent(replacement::append);
+                }
+
+                // now add all member methods
+                for (CommentedTree ctree : partitionedMembers.get(false)) {
+                    replacement.append(input.newline).append(input.newline);
+                    ctree.leadingComments.ifPresent(replacement::append);
+                    replacement.setCurrentPositionInclusive(input.getFirstTokenIndex(ctree.tree))
+                            .append(ctree.tree);
+                    ctree.trailingInlineComment.ifPresent(replacement::append);
                 }
             }
 
             // append any remaining comments, followed by two newlines, and then the closing brace
-            replacement.appendWithLeadingNewlinesAfterComments( TokenType.RIGHT_BRACE, 2 );
+            replacement.appendWithLeadingNewlines( TokenType.RIGHT_BRACE, 2 );
 
             if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
             return super.visitClass( node, input );
@@ -501,8 +546,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( cuddleBraces ? SPACE : input.newline )
                         .append( TokenType.WHILE )
                         .append( padding.methodName )
-                        .append( node.getCondition() )
+                        .append( TokenType.LEFT_PAREN )
+                        .append( padding.methodArg )
+                        .stripParenthesesAndAppend( node.getCondition() )
+                        .append( padding.methodArg )
+                        .append( TokenType.RIGHT_PAREN )
                         .append( TokenType.SEMICOLON );
+
                 if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
             }
 
@@ -548,7 +598,6 @@ public class LayoutFormatter extends ReplacementFormatter {
             return super.visitEnhancedForLoop( node, input );
         }
 
-        //TODO this isn't being used
 //        @Override
 //        public Void visitExpressionStatement(ExpressionStatementTree node, Input input ) {
 //            if( VERBOSE ) System.out.println( "======visitExpressionStatement======" );
@@ -625,7 +674,6 @@ public class LayoutFormatter extends ReplacementFormatter {
                 padParentheses( node.getCondition(), input, padding.methodArg, replacement );
 
                 replacement.appendOpeningBrace( cuddleBraces )
-                        .appendOpeningBrace( cuddleBraces )
                         .appendBracedBlock( node.getThenStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
 
@@ -706,13 +754,19 @@ public class LayoutFormatter extends ReplacementFormatter {
                 List<Tree> params =
                         node.getParameters().stream().map( Tree.class::cast ).collect( Collectors.toList() );
 
-                Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "LambdaExpression" )
-                        .append( TokenType.LEFT_PAREN )
-                        .append( padding.methodArg )
-                        .appendList( params, TokenType.COMMA, true )
-                        .append( padding.methodArg )
-                        .append( TokenType.RIGHT_PAREN )
-                        .append( SPACE )
+                Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "LambdaExpression" );
+
+                if( node.getParameters().size() != 1 ) {
+                    replacement.append(TokenType.LEFT_PAREN)
+                            .append(padding.methodArg);
+                }
+                replacement.appendList( params, TokenType.COMMA, true );
+                if( node.getParameters().size() != 1 ) {
+                    replacement.append(padding.methodArg)
+                            .append(TokenType.RIGHT_PAREN);
+                }
+
+                replacement.append( SPACE )
                         .append( TokenType.ARROW )
                         .append( SPACE )
                         .append( node.getBody() );
@@ -989,7 +1043,6 @@ public class LayoutFormatter extends ReplacementFormatter {
         @Override
         public Void visitSwitch( SwitchTree node, Input input ) {
             if( VERBOSE ) System.out.println( "======visitSwitch======" );
-            List<Tree> cases = node.getCases().stream().map( Tree.class::cast ).collect( Collectors.toList() );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Switch" )
                     .append( TokenType.SWITCH )
                     .append( padding.methodName );
@@ -998,11 +1051,10 @@ public class LayoutFormatter extends ReplacementFormatter {
             padParentheses( node.getExpression(), input, padding.methodArg, replacement );
 
             replacement.appendOpeningBrace( cuddleBraces )
-                    .appendList( cases, TokenType.NEWLINE ) //TODO what if there isn't an existing newline? maybe use alternate appendList method?
-                    .append( input.newline )
-                    .append( TokenType.RIGHT_BRACE );
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                    .appendList( node.getCases(), TokenType.NEWLINE )
+                    .appendWithLeadingNewlines( TokenType.RIGHT_BRACE, 1 );
 
+            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
             return super.visitSwitch( node, input );
         }
 
@@ -1300,9 +1352,11 @@ public class LayoutFormatter extends ReplacementFormatter {
         }
 
         private void printBeforeAfter( Tree tree, Input input, StringBuilder sb ) {
-            System.out.println( input.stringifyTree( tree ) );
+            System.out.println( "++++++++++++++++++++++" );
+            System.out.println( "[" + input.stringifyTree( tree ) + "]" );
             System.out.println( "----------------------" );
-            System.out.println( sb.toString() );
+            System.out.println( "[" + sb.toString() + "]");
+            System.out.println( "++++++++++++++++++++++" );
         }
 
         private void printBeforeAfter( Tree tree, Input input, String newText ) {
