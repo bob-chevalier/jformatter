@@ -27,8 +27,9 @@ public class FileFormatter implements Callable<Boolean> {
         boolean cuddleBraces = true;
         Padding padding = new Padding.Builder().build();
         int tabWidth = 4;
-        Indent indent = Indent.spaces( tabWidth );
-        int maxLineWidth = 44;
+        int numLineWrapTabs = 2;
+        Indent indent = Indent.spaces( tabWidth, numLineWrapTabs );
+        int maxLineWidth = 40;
 
         try {
             originalText = workingText = readFileToString( path );

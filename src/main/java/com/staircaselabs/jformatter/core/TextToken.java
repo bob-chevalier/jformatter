@@ -60,7 +60,7 @@ public class TextToken {
         String indentLabel = indentOffset == 0 ? "" : decimalFormat.format( indentOffset ) + ":";
 //        String typeLabel = lineBreak == LineBreak.NON_BREAKING ? "" : lineBreak.toString();
         String srcLabel = VERBOSE_MARKUP ? ":" + lineBreakSource : "";
-        String markupLabel = lineBreak == LineBreak.NON_BREAKING ? "" : String.format( "[%s%s%s]", indentLabel, lineBreak.toString(), srcLabel );
+        String markupLabel = (indentOffset == 0 && lineBreak == LineBreak.NON_BREAKING) ? "" : String.format( "[%s%s%s]", indentLabel, lineBreak.toString(), srcLabel );
         return  markupLabel + toString();
     }
 

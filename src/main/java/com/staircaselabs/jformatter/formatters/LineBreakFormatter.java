@@ -3,6 +3,7 @@ package com.staircaselabs.jformatter.formatters;
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.Indent;
 import com.staircaselabs.jformatter.core.Input;
+import com.staircaselabs.jformatter.core.Line;
 import com.staircaselabs.jformatter.core.LineBreak;
 import com.staircaselabs.jformatter.core.MarkupTool;
 import com.staircaselabs.jformatter.core.TextToken;
@@ -16,13 +17,13 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ConditionalExpressionTree;
 import com.sun.source.tree.DoWhileLoopTree;
 import com.sun.source.tree.EnhancedForLoopTree;
-import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.ForLoopTree;
 import com.sun.source.tree.IfTree;
 import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.SwitchTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TryTree;
@@ -31,13 +32,18 @@ import com.sun.source.tree.WhileLoopTree;
 import com.sun.source.util.TreePathScanner;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.OptionalInt;
-import java.util.function.Predicate;
+import java.util.Queue;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.isValid;
@@ -63,46 +69,47 @@ public class LineBreakFormatter {
         // markup tokens with line-break options and indentation levels
         LineBreakScanner lineBreakScanner = new LineBreakScanner();
         lineBreakScanner.scan( unit, input );
-        System.out.println( input.tokens.stream().map( TextToken::toMarkupString ).collect( Collectors.joining() ) );
 
         // group tokens into lines
         List<Line> lines = new ArrayList<>();
-        List<TextToken> lineTokens = new ArrayList<>();
+        Queue<TextToken> lineTokens = new LinkedList<>();
         int prevLineIndentLevel = 0;
         for( TextToken token : tokens ) {
             lineTokens.add( token );
 
             if( token.getType() == TokenType.NEWLINE ) {
-                Line line = new Line( maxLineWidth, indent, prevLineIndentLevel, lineTokens );
+                Line line = new Line( indent, prevLineIndentLevel, lineTokens );
                 lines.add( line );
-                prevLineIndentLevel += line.tokens.get( 0 ).getIndentOffset();
-                lineTokens = new ArrayList<>();
+                prevLineIndentLevel = line.getIndentLevel();
+                lineTokens = new LinkedList<>();
             }
         }
+
+//        lines.get( 3 ).writeDotFile( "/Users/rchevalier/bob.dot" );
 
         // insert additional line-breaks where necessary to enforce maximum line width
         ListIterator<Line> iter = lines.listIterator();
         while( iter.hasNext() ) {
-            Line head = iter.next();
-            while( head.needsLineBreak() ) {
-                List<TextToken> tailTokens = head.truncate();
-                if( !tailTokens.isEmpty() ) {
-                    // insert a line-break where we truncated the original line
-                    head.tokens.add( new TextToken( input.newline, TokenType.NEWLINE, 0, 0 ) );
+            Line line = iter.next();
+            Deque<Line> extraLines = new ArrayDeque<>();
 
-                    // update the indentation of the first extracted token based on its break type
-                    tailTokens.get( 0 ).updateIndentOffset( tailTokens.get( 0 ).getLineBreak().getIndentOffset() );
+            // if necessary, wrap line to ensure that it fits within max line width
+            while( line.getWidth() > maxLineWidth && line.canBeSplit() ) {
+                // add additional lines in reverse order to the front of the extra lines deque
+                line.wrap( input.newline ).descendingIterator().forEachRemaining( extraLines::addFirst );
+            }
 
-                    // create a new line from the tokens that were extracted from the original line
-                    Line tail = new Line( maxLineWidth, indent, head.indentLevel, tailTokens );
-
-                    // add the new line and then check whether it needs to be split again
-                    iter.add( tail );
-                    head = tail;
-                } else {
-                    // we couldn't find a good place to break the line so just let it be
-                    break;
+            // recursively expand any extra lines that were generated from original line
+            Line extraLine = extraLines.pollFirst();
+            while( extraLine != null ) {
+                while( extraLine.getWidth() > maxLineWidth && extraLine.canBeSplit() ) {
+                    // add additional lines in reverse order to the front of the extra lines deque
+                    extraLine.wrap( input.newline ).descendingIterator().forEachRemaining( extraLines::addFirst );
                 }
+
+                // head of extra line is now either sufficiently trimmed or at least as small as it's going to get
+                iter.add( extraLine );
+                extraLine = extraLines.pollFirst();
             }
         }
 
@@ -114,7 +121,6 @@ public class LineBreakFormatter {
         @Override
         public Void visitArrayAccess(ArrayAccessTree node, Input input ) {
             if( node.getExpression().getKind() == Tree.Kind.IDENTIFIER ) {
-//                System.out.println( "BFC IDENTIFIER" );
 //                Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayAccess" )
 //                        .append( node.getExpression() )
 //                        .append( TokenType.LEFT_BRACKET )
@@ -181,13 +187,7 @@ public class LineBreakFormatter {
 
         @Override
         public Void visitAssignment(AssignmentTree node, Input input) {
-            input.getFirstToken(node.getExpression()).setLineBreakTag( LineBreak.INDEPENDENT, "visitAssignment" );
-//            int variableEnd = input.getLastTokenIndex( node.getVariable() );
-//            int exprBegin = input.getFirstTokenIndex( node.getExpression() );
-//            int assignment = input.findNext( variableEnd, exprBegin, TokenType.ASSIGNMENT )
-//                    .orElseThrow( () -> new RuntimeException( "Missing expected = sign." ) );
-//            input.tokens.get( assignment ).setBreakType( BreakType.INDEPENDENT, "visitAssignment" );
-
+            new MarkupTool( node, input ).tagLineBreak(LineBreak.ASSIGNMENT, node.getExpression(), "visitAssignment");
             return super.visitAssignment(node, input);
         }
 
@@ -198,7 +198,7 @@ public class LineBreakFormatter {
             int right = input.getFirstTokenIndex( node.getRightOperand() );
             int operator = input.findNext( left, right, TokenUtils.tokenTypeFromBinaryOperator( node.getKind() ) )
                     .orElseThrow( () -> new RuntimeException( "Missing binary operator." ) );
-            input.tokens.get( operator ).setLineBreakTag( LineBreak.INDEPENDENT, "visitBinary" );
+            input.tokens.get( operator ).setLineBreakTag( LineBreak.ASSIGNMENT, "visitBinary" );
 
             return super.visitBinary( node, input );
         }
@@ -207,11 +207,11 @@ public class LineBreakFormatter {
         public Void visitClass(ClassTree node, Input input) {
             MarkupTool markup = new MarkupTool(node, input);
             if (node.getExtendsClause() != null) {
-                markup.tagIndependentBreak(TokenType.EXTENDS, "visitClass");
+                markup.tagLineBreak(LineBreak.EXTENDS, TokenType.EXTENDS, "visitClass");
             }
 
             if (!node.getImplementsClause().isEmpty()) {
-                markup.tagIndependentBreak(TokenType.IMPLEMENTS, "visitClass");
+                markup.tagLineBreak(LineBreak.IMPLEMENTS, TokenType.IMPLEMENTS, "visitClass");
             }
 
             if (!node.getMembers().isEmpty()) {
@@ -247,15 +247,15 @@ public class LineBreakFormatter {
             int trueExprEnd = input.getLastTokenIndex( node.getTrueExpression() );
             int falseExpr = input.getFirstTokenIndex( node.getFalseExpression() );
 
-            // all a line-break before the question mark
+            // add a line-break before the question mark
             int question = input.findNext( condition, trueExprBegin, TokenType.QUESTION )
                     .orElseThrow( () -> new RuntimeException( "Missing expected ?." ) );
-            input.tokens.get( question ).setLineBreakTag( LineBreak.UNIFIED_FIRST, "visitConditionalExpr" );
+            input.tokens.get( question ).setLineBreakTag( LineBreak.TERNARY, "visitConditionalExpr" );
 
             // ensure that if a line-break is inserted before question mark, one is also inserted before colon
             int colon = input.findNext( trueExprEnd, falseExpr, TokenType.COLON )
                     .orElseThrow( () -> new RuntimeException( "Missing expected :." ) );
-            input.tokens.get( colon ).setLineBreakTag( LineBreak.UNIFIED_LAST, "visitConditionalExpr" );
+            input.tokens.get( colon ).setLineBreakTag( LineBreak.TERNARY, "visitConditionalExpr" );
 
             return super.visitConditionalExpression( node, input );
         }
@@ -295,7 +295,6 @@ public class LineBreakFormatter {
         public Void visitLambdaExpression(LambdaExpressionTree node, Input input ) {
             // Statement lambdas don't appear to be parsed correctly, so we only handle expression lambdas
             if( node.getBodyKind() == LambdaExpressionTree.BodyKind.EXPRESSION ) {
-                System.out.println( "BFC Lambda expression" );
 //                List<Tree> params =
 //                        node.getParameters().stream().map( Tree.class::cast ).collect( Collectors.toList() );
 //
@@ -317,24 +316,23 @@ public class LineBreakFormatter {
 
         @Override
         public Void visitMemberSelect(MemberSelectTree node, Input input ) {
-            if( node.getExpression().getKind() == Tree.Kind.METHOD_INVOCATION ) {
+//            if( node.getExpression().getKind() == Tree.Kind.METHOD_INVOCATION ) {
                 int exprEnd = input.getLastTokenIndex( node.getExpression() );
                 int dot = input.findNext( exprEnd, input.getLastTokenIndex( node ), TokenType.DOT )
                         .orElseThrow( () -> new RuntimeException( "Missing dot." ) );
-                input.tokens.get( dot ).setLineBreakTag( LineBreak.UNIFIED, "visitMemberSelect" );
-            }
+                input.tokens.get( dot ).setLineBreakTag( LineBreak.METHOD_INVOCATION, "visitMemberSelect" );
+//            }
 
             return super.visitMemberSelect( node, input );
         }
 
         @Override
         public Void visitMethod(MethodTree node, Input input) {
-//            if( VERBOSE ) System.out.println( "======visitMethod======" );
             MarkupTool markup = new MarkupTool(node, input);
-            markup.tagUnifiedUnjustifiedBreaks(node.getParameters(), TokenType.RIGHT_PAREN, "visitMethod");
+            markup.tagLineBreaks(LineBreak.METHOD_ARG, node.getParameters(), "visitMethod");
             if (!node.getThrows().isEmpty()) {
-                markup.tagIndependentBreak(TokenType.THROWS, "visitMethod");
-                markup.tagUnifiedBreaks(node.getThrows(), "visitMethod");
+                markup.tagLineBreak( LineBreak.THROWS, TokenType.THROWS, "visitMethod");
+                markup.tagLineBreaks(LineBreak.UNBOUND_LIST_ITEM, node.getThrows(), "visitMethod");
             }
 
             markup.indentBracedBlock(node.getBody());
@@ -344,12 +342,8 @@ public class LineBreakFormatter {
 
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Input input) {
-//            if( VERBOSE ) System.out.println( "======visitMethodInvocation======" );
             MarkupTool markup = new MarkupTool(node, input);
-            markup.tagUnifiedUnjustifiedBreaks(node.getArguments(), TokenType.RIGHT_PAREN, "visitMethodInvocation" );
-
-//            ExpressionTree ms = node.getMethodSelect();
-//            System.out.println( "BFC k: " + ms.getKind() + ", ms: [" + input.stringifyTree( node.getMethodSelect() ) + "]" );
+            markup.tagLineBreaks(LineBreak.METHOD_ARG, node.getArguments(), "visitMethodInvocation" );
 
             return super.visitMethodInvocation(node, input);
         }
@@ -397,32 +391,13 @@ public class LineBreakFormatter {
 //            return super.visitNewArray( node, input );
 //        }
 
-//        @Override
-//        public Void visitNewClass( NewClassTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitNewClass======" );
-//            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "NewClass" )
-//                    .append( TokenType.NEW )
-//                    .append( SPACE )
-//                    .append( node.getIdentifier() )
-//                    .append( TokenType.LEFT_PAREN );
-//
-//            List<Tree> args = node.getArguments().stream().map( Tree.class::cast ).collect( Collectors.toList() );
-//            if( !args.isEmpty() ) {
-//                replacement.append( padding.methodArg )
-//                        .appendList( args, TokenType.COMMA, true )
-//                        .append( padding.methodArg );
-//            }
-//            replacement.append( TokenType.RIGHT_PAREN );
-//
-//            if( node.getClassBody() != null ) {
-//                replacement.appendOpeningBrace( cuddleBraces )
-//                        .appendBracedBlock( node.getClassBody(), input.newline )
-//                        .append( TokenType.RIGHT_BRACE );
-//            }
-//
-//            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
-//            return super.visitNewClass( node, input );
-//        }
+        @Override
+        public Void visitNewClass(NewClassTree node, Input input ) {
+            MarkupTool markup = new MarkupTool(node, input);
+            markup.tagLineBreaks(LineBreak.METHOD_ARG, node.getArguments(), "visitNewClass" );
+
+            return super.visitNewClass( node, input );
+        }
 
         @Override
         public Void visitSwitch(SwitchTree node, Input input) {
@@ -474,7 +449,7 @@ public class LineBreakFormatter {
 
             // allow line-breaks between resources
             if (node.getResources() != null && !node.getResources().isEmpty()) {
-                markup.tagUnifiedUnjustifiedBreaks(node.getResources(), TokenType.RIGHT_PAREN, "visitTry");
+                markup.tagLineBreaks(LineBreak.METHOD_ARG, node.getResources(), "visitTry");
             }
 
             // indent try-block
@@ -516,11 +491,7 @@ public class LineBreakFormatter {
         public Void visitVariable(VariableTree node, Input input) {
             if (isValid(node.getInitializer())) {
                 MarkupTool markup = new MarkupTool(node, input);
-                markup.tagIndependentBreak(node.getInitializer(), "visitVariable");
-//                int initializerBegin = input.getFirstTokenIndex( node.getInitializer() );
-//                int assignment = input.findPrev( input.getFirstTokenIndex( node ), initializerBegin, TokenType.ASSIGNMENT )
-//                        .orElseThrow( () -> new RuntimeException( "Missing expected = sign." ) );
-//                input.tokens.get( assignment ).setBreakType( BreakType.INDEPENDENT, "visitVariable" );
+                markup.tagLineBreak(LineBreak.ASSIGNMENT, node.getInitializer(), "visitVariable");
             }
 
             return super.visitVariable(node, input);
@@ -530,68 +501,6 @@ public class LineBreakFormatter {
         public Void visitWhileLoop(WhileLoopTree node, Input input) {
             new MarkupTool( node, input ).indentBracedBlock( node.getStatement() );
             return super.visitWhileLoop(node, input);
-        }
-
-    }
-
-    private static class Line {
-
-        private final int maxWidth;
-        private final Indent indent;
-        private int indentLevel;
-        private Predicate<LineBreak> isValidBreakPoint;
-        private List<TextToken> tokens;
-
-        public Line( int maxWidth, Indent indent, int parentIndentLevel, List<TextToken> tokens ) {
-            this.maxWidth = maxWidth;
-            this.indent = indent;
-            this.tokens = tokens;
-
-            TextToken firstToken = tokens.get( 0 );
-            indentLevel = parentIndentLevel + firstToken.getIndentOffset();
-            isValidBreakPoint = LineBreak.getValidBreakPredicate( firstToken.getLineBreak() );
-        }
-
-        public boolean needsLineBreak() {
-            return isPartOfUnifiedGroup() || getWidth() > maxWidth;
-        }
-
-        public List<TextToken> truncate() {
-            List<TextToken> tokensAfterBreak = new ArrayList<>();
-
-            // skip the first token
-            Iterator<TextToken> iter = tokens.listIterator( 1 );
-            boolean foundValidBreakPoint = false;
-            while( iter.hasNext() ) {
-                TextToken token = iter.next();
-                if( foundValidBreakPoint || isValidBreakPoint.test( token.getLineBreak() ) ) {
-                    tokensAfterBreak.add( token );
-                    iter.remove();
-                    foundValidBreakPoint = true;
-                }
-            }
-
-            return tokensAfterBreak;
-        }
-
-        @Override
-        public String toString() {
-            String indentString = getTextWidth() == 0 ? "" : indent.getText( indentLevel );
-            return indentString + tokens.stream().map( TextToken::toString ).collect( Collectors.joining() );
-        }
-
-        private boolean isPartOfUnifiedGroup() {
-            LineBreak firstTokenBreakType = tokens.get( 0 ).getLineBreak();
-            return firstTokenBreakType == LineBreak.UNIFIED_FIRST || firstTokenBreakType == LineBreak.UNIFIED;
-        }
-
-        private int getWidth() {
-            int textWidth = getTextWidth();
-            return textWidth == 0 ? 0 : textWidth + indent.getWidth( indentLevel );
-        }
-
-        private int getTextWidth() {
-            return tokens.stream().mapToInt( TextToken::getWidth ).sum();
         }
 
     }

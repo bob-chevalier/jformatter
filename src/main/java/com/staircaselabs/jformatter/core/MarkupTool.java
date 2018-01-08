@@ -23,42 +23,18 @@ public class MarkupTool {
         this.endExclusive = input.getLastTokenIndex( enclosingTree );
     }
 
-    public void tagUnifiedUnjustifiedBreaks( List<? extends Tree> list, TokenType closingTokenType, String source ) {
-        if( !list.isEmpty() ) {
-            tagTreeLineBreak( LineBreak.UNIFIED_FIRST, list.get( 0 ), source );
-
-            for( int i = 1; i < list.size(); i++ ) {
-                tagTreeLineBreak( LineBreak.UNIFIED, list.get( i ), source );
-            }
-
-            Optional<TextToken> closingToken = input.findNextToken( currentInclusive, endExclusive, closingTokenType );
-            if( closingToken.isPresent() ) {
-               closingToken.get().setLineBreakTag( LineBreak.UNIFIED_LAST_UNJUSTIFIED, source );
-               currentInclusive = closingToken.get().endExclusive;
-            }
-        }
+    public void tagLineBreaks( LineBreak type, List<? extends Tree> list, String source ) {
+        list.stream().forEach( t -> this.tagTreeLineBreak( type, t, source ) );
     }
 
-    public void tagUnifiedBreaks( List<? extends Tree> list, String source ) {
-        if( !list.isEmpty() ) {
-            tagTreeLineBreak( LineBreak.UNIFIED_FIRST, list.get( 0 ), source );
-
-            for( int i = 1; i < list.size() - 1; i++ ) {
-                tagTreeLineBreak( LineBreak.UNIFIED, list.get( i ), source );
-            }
-
-            tagTreeLineBreak( LineBreak.UNIFIED_LAST, list.get( list.size() - 1 ), source );
-        }
+    public void tagLineBreak( LineBreak type, Tree tree, String source ) {
+        tagTreeLineBreak( type, tree, source );
     }
 
-    public void tagIndependentBreak( Tree tree, String source ) {
-        tagTreeLineBreak( LineBreak.INDEPENDENT, tree, source );
-    }
-
-    public void tagIndependentBreak( TokenType tokenType, String source ) {
+    public void tagLineBreak( LineBreak type, TokenType tokenType, String source ) {
         Optional<TextToken> token = input.findNextToken( currentInclusive, endExclusive, tokenType );
         if( token.isPresent() ) {
-            token.get().setLineBreakTag( LineBreak.INDEPENDENT, source );
+            token.get().setLineBreakTag( type, source );
             currentInclusive = token.get().endExclusive;
         }
     }
