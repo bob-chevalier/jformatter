@@ -12,102 +12,42 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class LineSegment {
+public abstract class LineSegment {
 
-    private LineSegment parent;
-    private final BreakType type;
-    private final Queue<TextToken> head = new LinkedList<>();
-    private List<LineSegment> branches = new ArrayList<>();
-    private int width = 0;
-    private int openParens = 0;
+    protected LineSegment parent;
+    protected int width = 0;
+    protected int openParens = 0;
 
-    public LineSegment( LineSegment parent, BreakType type ) {
+    public LineSegment( LineSegment parent ) {
         this.parent = parent;
-        this.type = type;
     }
 
-    public void addLeafToken( TextToken token ) {
-        head.add( token );
-        width += token.getWidth();
+    public abstract void add( TextToken token );
 
-        // keep track of the number of left/right parentheses that we encounter
-        openParens += token.getType() == TokenType.LEFT_PAREN ? 1 : 0;
-        openParens += token.getType() == TokenType.RIGHT_PAREN ? -1 : 0;
-    }
+    public abstract void add( LineSegment branch );
 
-    public void addSegment( LineSegment segment ) {
-        segment.parent = this;
-        branches.add( segment );
-        width += segment.getWidth();
+    public abstract BreakType getType();
 
-        // keep track of the number of left/right parentheses that we encounter
-        openParens += segment.openParens;
-    }
+    public abstract TextToken getFirstToken();
 
-    public int getIndentOffset() {
-        return (!head.isEmpty() ? head.peek().getIndentOffset() : branches.get( 0 ).getIndentOffset());
-    }
+    public abstract Queue<TextToken> getTokens();
 
-    public void updateIndentOffset( int amount ) {
-        if( !head.isEmpty() ) {
-            head.peek().updateIndentOffset(amount);
-        } else {
-            branches.get( 0 ).updateIndentOffset( amount );
-        }
-    }
+    public abstract void appendLineBreak( String newline );
 
-    public boolean hasMultipleBranches() {
-        return branches.size() > 1;
-    }
+    public abstract int getIndentOffset();
 
-    public boolean isLeaf() {
-        return !head.isEmpty() || branches.isEmpty();
-    }
+    public abstract void updateIndentOffset( int amount );
 
-    public TextToken getFirstToken() {
-        return !head.isEmpty() ? head.peek() : branches.get( 0 ).getFirstToken();
-    }
+    public abstract boolean isLeaf();
 
-    public void appendLineBreak( String newline ) {
-        if( !branches.isEmpty() ) {
-            // insert linebreak after final segment in the tail
-            branches.get( branches.size() - 1 ).appendLineBreak( newline );
-        } else {
-            // insert linebreak after last head token
-            head.add( new TextToken( newline, TokenType.NEWLINE, 0, 0 ) );
-        }
-    }
+    public abstract boolean canBeSplit();
 
-    public List<LineSegment> split( String newline, int numLineWrapTabs ) {
-        // append linebreaks to each segment, except the last, which already has one
-        IntStream.range( 0, branches.size() - 1 )
-                .mapToObj( branches::get )
-                .forEach( s -> s.appendLineBreak( newline ) );
+    public abstract List<LineSegment> split( String newline, int numLineWrapTabs );
 
-        // indent second segment (which corresponds to what will be the first wrapped line)
-        branches.get( 1 ).updateIndentOffset( numLineWrapTabs );
-
-        // if necessary, unindent the final segment (which corresponds to what will be final wrapped line)
-        TextToken startOfLastSegment = branches.get( branches.size() - 1 ).getFirstToken();
-        if( startOfLastSegment.getLineBreakType() == BreakType.NON_BREAKING ) {
-            startOfLastSegment.updateIndentOffset( -numLineWrapTabs );
-        }
-
-        return branches;
-    }
+    public abstract void loadDotFile( String parentId, DotFile dotfile );
 
     public int getWidth() {
         return width;
-    }
-
-    public Queue<TextToken> getTokens() {
-        List<TextToken> branchTokens = branches.stream()
-                .map( LineSegment::getTokens )
-                .flatMap( Collection::stream )
-                .collect( Collectors.toList() );
-        return Stream.of( head, branchTokens )
-                .flatMap( Collection::stream )
-                .collect( Collectors.toCollection( LinkedList::new ) );
     }
 
     @Override
@@ -115,60 +55,37 @@ public class LineSegment {
         return getTokens().stream().map( TextToken::toString ).collect( Collectors.joining() );
     }
 
-    public void loadDotFile( String parentId, DotFile dotfile ) {
-        // generate a unique ID for this node and remove any dashes
-        String uuid = UUID.randomUUID().toString();
-
-        String label = isLeaf()
-                ? head.stream().map( TextToken::toString ).collect( Collectors.joining() )
-                : type.toString();
-
-        // strip off any newlines and double-quotes because Graphviz doesn't like them
-        label = label.replace( "\"", "" );
-
-        // add a label entry for this node
-        dotfile.addNode( uuid, label );
-
-        // add an edge from parent to this node
-        if( parentId != null ) {
-            dotfile.addEdge( parentId, uuid );
-        }
-
-        // process any branches
-        branches.forEach( b -> b.loadDotFile( uuid, dotfile ) );
-    }
-
     public static LineSegment create( Queue<TextToken> tokens, LineSegment parent ) {
-        LineSegment segment = new LineSegment( parent, BreakType.NON_BREAKING );
-        segment.addLeafToken( tokens.remove() );
+        LineSegment segment = new LeafLineSegment( parent );
+        segment.add( tokens.remove() );
 
         while( !tokens.isEmpty() ) {
             TextToken token = tokens.peek();
 
             if( token.getLineBreakType() == BreakType.ASSIGNMENT ) {
                 segment = createNewParent( segment, BreakType.ASSIGNMENT );
-                segment.addSegment( create( tokens, segment ) );
+                segment.add( create( tokens, segment ) );
             } else if( token.getLineBreakType() == BreakType.METHOD_ARG ) {
                 if( segment.openParens > 0 ) {
-                    if( segment.type == BreakType.METHOD_ARG ) {
-                        segment.addSegment( create( tokens, segment ) );
+                    if( segment.getType() == BreakType.METHOD_ARG ) {
+                        segment.add( create( tokens, segment ) );
                     } else {
                         segment = createNewParent( segment, BreakType.METHOD_ARG );
-                        segment.addSegment( create( tokens, segment ) );
+                        segment.add( create( tokens, segment ) );
                     }
                 } else {
                     return segment;
                 }
             } else if( token.getLineBreakType() == BreakType.METHOD_INVOCATION ) {
                 if( segment.openParens == 0 ) {
-                    if( segment.type == BreakType.METHOD_INVOCATION ) {
-                        segment.addSegment( create( tokens, segment ) );
+                    if( segment.getType() == BreakType.METHOD_INVOCATION ) {
+                        segment.add( create( tokens, segment ) );
                     } else {
-                        if( segment.parent.type == BreakType.METHOD_INVOCATION ) {
+                        if( segment.parent.getType() == BreakType.METHOD_INVOCATION ) {
                             return segment;
                         } else {
                             segment = createNewParent( segment, BreakType.METHOD_INVOCATION );
-                            segment.addSegment( create( tokens, segment ) );
+                            segment.add( create( tokens, segment ) );
                         }
                     }
                 } else if( segment.openParens < 0 ) {
@@ -178,17 +95,17 @@ public class LineSegment {
                 if( token.getType() == TokenType.RIGHT_PAREN ) {
                     if( segment.openParens == 0 ) {
                         return segment;
-                    } else if (segment.openParens > 0 && segment.type != BreakType.NON_BREAKING) {
-                        segment.addSegment(create(tokens, segment));
+                    } else if (segment.openParens > 0 && segment.getType() != BreakType.NON_BREAKING) {
+                        segment.add(create(tokens, segment));
                     } else {
                         if( segment.isLeaf() ) {
-                            segment.addLeafToken( tokens.remove() );
+                            segment.add( tokens.remove() );
                         } else {
-                            segment.addSegment(create(tokens, segment));
+                            segment.add(create(tokens, segment));
                         }
                     }
                 } else {
-                    segment.addLeafToken( tokens.remove() );
+                    segment.add( tokens.remove() );
                 }
             } else {
                 throw new RuntimeException( "Missing case for line break: " + token.getLineBreakType().toString() );
@@ -200,8 +117,8 @@ public class LineSegment {
 
     private static LineSegment createNewParent( LineSegment original, BreakType type ) {
         LineSegment child = original;
-        LineSegment parent = new LineSegment( child.parent, type );
-        parent.addSegment( child );
+        LineSegment parent = new BranchLineSegment( child.parent, type );
+        parent.add( child );
         return parent;
     }
 

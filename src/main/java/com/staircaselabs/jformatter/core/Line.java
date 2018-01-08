@@ -69,7 +69,7 @@ public class Line {
     }
 
     public boolean canBeSplit() {
-        return segment.hasMultipleBranches();
+        return segment.canBeSplit();
     }
 
     @Override
