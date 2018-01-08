@@ -4,7 +4,6 @@ import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -16,13 +15,13 @@ import java.util.stream.Stream;
 public class LineSegment {
 
     private LineSegment parent;
-    private final LineBreak type;
+    private final BreakType type;
     private final Queue<TextToken> head = new LinkedList<>();
     private List<LineSegment> branches = new ArrayList<>();
     private int width = 0;
     private int openParens = 0;
 
-    public LineSegment( LineSegment parent, LineBreak type ) {
+    public LineSegment( LineSegment parent, BreakType type ) {
         this.parent = parent;
         this.type = type;
     }
@@ -90,7 +89,7 @@ public class LineSegment {
 
         // if necessary, unindent the final segment (which corresponds to what will be final wrapped line)
         TextToken startOfLastSegment = branches.get( branches.size() - 1 ).getFirstToken();
-        if( startOfLastSegment.getLineBreak() == LineBreak.NON_BREAKING ) {
+        if( startOfLastSegment.getLineBreakType() == BreakType.NON_BREAKING ) {
             startOfLastSegment.updateIndentOffset( -numLineWrapTabs );
         }
 
@@ -140,46 +139,46 @@ public class LineSegment {
     }
 
     public static LineSegment create( Queue<TextToken> tokens, LineSegment parent ) {
-        LineSegment segment = new LineSegment( parent, LineBreak.NON_BREAKING );
+        LineSegment segment = new LineSegment( parent, BreakType.NON_BREAKING );
         segment.addLeafToken( tokens.remove() );
 
         while( !tokens.isEmpty() ) {
             TextToken token = tokens.peek();
 
-            if( token.getLineBreak() == LineBreak.ASSIGNMENT ) {
-                segment = createNewParent( segment, LineBreak.ASSIGNMENT );
+            if( token.getLineBreakType() == BreakType.ASSIGNMENT ) {
+                segment = createNewParent( segment, BreakType.ASSIGNMENT );
                 segment.addSegment( create( tokens, segment ) );
-            } else if( token.getLineBreak() == LineBreak.METHOD_ARG ) {
+            } else if( token.getLineBreakType() == BreakType.METHOD_ARG ) {
                 if( segment.openParens > 0 ) {
-                    if( segment.type == LineBreak.METHOD_ARG ) {
+                    if( segment.type == BreakType.METHOD_ARG ) {
                         segment.addSegment( create( tokens, segment ) );
                     } else {
-                        segment = createNewParent( segment, LineBreak.METHOD_ARG );
+                        segment = createNewParent( segment, BreakType.METHOD_ARG );
                         segment.addSegment( create( tokens, segment ) );
                     }
                 } else {
                     return segment;
                 }
-            } else if( token.getLineBreak() == LineBreak.METHOD_INVOCATION ) {
+            } else if( token.getLineBreakType() == BreakType.METHOD_INVOCATION ) {
                 if( segment.openParens == 0 ) {
-                    if( segment.type == LineBreak.METHOD_INVOCATION ) {
+                    if( segment.type == BreakType.METHOD_INVOCATION ) {
                         segment.addSegment( create( tokens, segment ) );
                     } else {
-                        if( segment.parent.type == LineBreak.METHOD_INVOCATION ) {
+                        if( segment.parent.type == BreakType.METHOD_INVOCATION ) {
                             return segment;
                         } else {
-                            segment = createNewParent( segment, LineBreak.METHOD_INVOCATION );
+                            segment = createNewParent( segment, BreakType.METHOD_INVOCATION );
                             segment.addSegment( create( tokens, segment ) );
                         }
                     }
                 } else if( segment.openParens < 0 ) {
                     return segment;
                 }
-            } else if( token.getLineBreak() == LineBreak.NON_BREAKING ) {
+            } else if( token.getLineBreakType() == BreakType.NON_BREAKING ) {
                 if( token.getType() == TokenType.RIGHT_PAREN ) {
                     if( segment.openParens == 0 ) {
                         return segment;
-                    } else if (segment.openParens > 0 && segment.type != LineBreak.NON_BREAKING) {
+                    } else if (segment.openParens > 0 && segment.type != BreakType.NON_BREAKING) {
                         segment.addSegment(create(tokens, segment));
                     } else {
                         if( segment.isLeaf() ) {
@@ -192,14 +191,14 @@ public class LineSegment {
                     segment.addLeafToken( tokens.remove() );
                 }
             } else {
-                throw new RuntimeException( "Missing case for line break: " + token.getLineBreak().toString() );
+                throw new RuntimeException( "Missing case for line break: " + token.getLineBreakType().toString() );
             }
         }
 
         return segment;
     }
 
-    private static LineSegment createNewParent( LineSegment original, LineBreak type ) {
+    private static LineSegment createNewParent( LineSegment original, BreakType type ) {
         LineSegment child = original;
         LineSegment parent = new LineSegment( child.parent, type );
         parent.addSegment( child );

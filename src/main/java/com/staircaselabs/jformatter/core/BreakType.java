@@ -1,6 +1,6 @@
 package com.staircaselabs.jformatter.core;
 
-public enum LineBreak {
+public enum BreakType {
     ASSIGNMENT( "A" ),
     EXTENDS( "E" ),
     IMPLEMENTS( "I" ),
@@ -13,7 +13,7 @@ public enum LineBreak {
 
     private final String shortName;
 
-    private LineBreak( String shortName ) {
+    private BreakType(String shortName ) {
         this.shortName = shortName;
     }
 

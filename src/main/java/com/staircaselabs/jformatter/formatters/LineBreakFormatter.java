@@ -1,10 +1,10 @@
 package com.staircaselabs.jformatter.formatters;
 
+import com.staircaselabs.jformatter.core.BreakType;
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.Indent;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Line;
-import com.staircaselabs.jformatter.core.LineBreak;
 import com.staircaselabs.jformatter.core.MarkupTool;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
@@ -34,16 +34,13 @@ import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.isValid;
@@ -187,7 +184,7 @@ public class LineBreakFormatter {
 
         @Override
         public Void visitAssignment(AssignmentTree node, Input input) {
-            new MarkupTool( node, input ).tagLineBreak(LineBreak.ASSIGNMENT, node.getExpression(), "visitAssignment");
+            new MarkupTool( node, input ).tagLineBreak(BreakType.ASSIGNMENT, node.getExpression(), "visitAssignment");
             return super.visitAssignment(node, input);
         }
 
@@ -198,7 +195,7 @@ public class LineBreakFormatter {
             int right = input.getFirstTokenIndex( node.getRightOperand() );
             int operator = input.findNext( left, right, TokenUtils.tokenTypeFromBinaryOperator( node.getKind() ) )
                     .orElseThrow( () -> new RuntimeException( "Missing binary operator." ) );
-            input.tokens.get( operator ).setLineBreakTag( LineBreak.ASSIGNMENT, "visitBinary" );
+            input.tokens.get( operator ).setLineBreakTag( BreakType.ASSIGNMENT, "visitBinary" );
 
             return super.visitBinary( node, input );
         }
@@ -207,11 +204,11 @@ public class LineBreakFormatter {
         public Void visitClass(ClassTree node, Input input) {
             MarkupTool markup = new MarkupTool(node, input);
             if (node.getExtendsClause() != null) {
-                markup.tagLineBreak(LineBreak.EXTENDS, TokenType.EXTENDS, "visitClass");
+                markup.tagLineBreak(BreakType.EXTENDS, TokenType.EXTENDS, "visitClass");
             }
 
             if (!node.getImplementsClause().isEmpty()) {
-                markup.tagLineBreak(LineBreak.IMPLEMENTS, TokenType.IMPLEMENTS, "visitClass");
+                markup.tagLineBreak(BreakType.IMPLEMENTS, TokenType.IMPLEMENTS, "visitClass");
             }
 
             if (!node.getMembers().isEmpty()) {
@@ -250,12 +247,12 @@ public class LineBreakFormatter {
             // add a line-break before the question mark
             int question = input.findNext( condition, trueExprBegin, TokenType.QUESTION )
                     .orElseThrow( () -> new RuntimeException( "Missing expected ?." ) );
-            input.tokens.get( question ).setLineBreakTag( LineBreak.TERNARY, "visitConditionalExpr" );
+            input.tokens.get( question ).setLineBreakTag( BreakType.TERNARY, "visitConditionalExpr" );
 
             // ensure that if a line-break is inserted before question mark, one is also inserted before colon
             int colon = input.findNext( trueExprEnd, falseExpr, TokenType.COLON )
                     .orElseThrow( () -> new RuntimeException( "Missing expected :." ) );
-            input.tokens.get( colon ).setLineBreakTag( LineBreak.TERNARY, "visitConditionalExpr" );
+            input.tokens.get( colon ).setLineBreakTag( BreakType.TERNARY, "visitConditionalExpr" );
 
             return super.visitConditionalExpression( node, input );
         }
@@ -320,7 +317,7 @@ public class LineBreakFormatter {
                 int exprEnd = input.getLastTokenIndex( node.getExpression() );
                 int dot = input.findNext( exprEnd, input.getLastTokenIndex( node ), TokenType.DOT )
                         .orElseThrow( () -> new RuntimeException( "Missing dot." ) );
-                input.tokens.get( dot ).setLineBreakTag( LineBreak.METHOD_INVOCATION, "visitMemberSelect" );
+                input.tokens.get( dot ).setLineBreakTag( BreakType.METHOD_INVOCATION, "visitMemberSelect" );
 //            }
 
             return super.visitMemberSelect( node, input );
@@ -329,10 +326,10 @@ public class LineBreakFormatter {
         @Override
         public Void visitMethod(MethodTree node, Input input) {
             MarkupTool markup = new MarkupTool(node, input);
-            markup.tagLineBreaks(LineBreak.METHOD_ARG, node.getParameters(), "visitMethod");
+            markup.tagLineBreaks(BreakType.METHOD_ARG, node.getParameters(), "visitMethod");
             if (!node.getThrows().isEmpty()) {
-                markup.tagLineBreak( LineBreak.THROWS, TokenType.THROWS, "visitMethod");
-                markup.tagLineBreaks(LineBreak.UNBOUND_LIST_ITEM, node.getThrows(), "visitMethod");
+                markup.tagLineBreak( BreakType.THROWS, TokenType.THROWS, "visitMethod");
+                markup.tagLineBreaks(BreakType.UNBOUND_LIST_ITEM, node.getThrows(), "visitMethod");
             }
 
             markup.indentBracedBlock(node.getBody());
@@ -343,7 +340,7 @@ public class LineBreakFormatter {
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Input input) {
             MarkupTool markup = new MarkupTool(node, input);
-            markup.tagLineBreaks(LineBreak.METHOD_ARG, node.getArguments(), "visitMethodInvocation" );
+            markup.tagLineBreaks(BreakType.METHOD_ARG, node.getArguments(), "visitMethodInvocation" );
 
             return super.visitMethodInvocation(node, input);
         }
@@ -394,7 +391,7 @@ public class LineBreakFormatter {
         @Override
         public Void visitNewClass(NewClassTree node, Input input ) {
             MarkupTool markup = new MarkupTool(node, input);
-            markup.tagLineBreaks(LineBreak.METHOD_ARG, node.getArguments(), "visitNewClass" );
+            markup.tagLineBreaks(BreakType.METHOD_ARG, node.getArguments(), "visitNewClass" );
 
             return super.visitNewClass( node, input );
         }
@@ -449,7 +446,7 @@ public class LineBreakFormatter {
 
             // allow line-breaks between resources
             if (node.getResources() != null && !node.getResources().isEmpty()) {
-                markup.tagLineBreaks(LineBreak.METHOD_ARG, node.getResources(), "visitTry");
+                markup.tagLineBreaks(BreakType.METHOD_ARG, node.getResources(), "visitTry");
             }
 
             // indent try-block
@@ -491,7 +488,7 @@ public class LineBreakFormatter {
         public Void visitVariable(VariableTree node, Input input) {
             if (isValid(node.getInitializer())) {
                 MarkupTool markup = new MarkupTool(node, input);
-                markup.tagLineBreak(LineBreak.ASSIGNMENT, node.getInitializer(), "visitVariable");
+                markup.tagLineBreak(BreakType.ASSIGNMENT, node.getInitializer(), "visitVariable");
             }
 
             return super.visitVariable(node, input);

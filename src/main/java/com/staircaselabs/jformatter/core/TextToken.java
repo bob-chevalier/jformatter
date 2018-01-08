@@ -9,7 +9,7 @@ public class TextToken {
     public final int endExclusive;
     private final String text;
     private final TokenType type;
-    private LineBreak lineBreak = LineBreak.NON_BREAKING;
+    private BreakType lineBreakType = BreakType.NON_BREAKING;
     private String lineBreakSource = "default";
     private int indentOffset = 0;
     private static final boolean VERBOSE_MARKUP = false;
@@ -25,15 +25,15 @@ public class TextToken {
         return type;
     }
 
-    public void setLineBreakTag( LineBreak breakType, String source ) {
-//        if( this.lineBreak.canBeOverriden( lineBreak ) ) {
-            this.lineBreak = breakType;
+    public void setLineBreakTag(BreakType breakType, String source ) {
+//        if( this.lineBreakType.canBeOverriden( lineBreakType ) ) {
+            this.lineBreakType = breakType;
             lineBreakSource = source;
 //        }
     }
 
-    public LineBreak getLineBreak() {
-        return lineBreak;
+    public BreakType getLineBreakType() {
+        return lineBreakType;
     }
 
     public void updateIndentOffset( int amount ) {
@@ -58,9 +58,10 @@ public class TextToken {
 
     public String toMarkupString() {
         String indentLabel = indentOffset == 0 ? "" : decimalFormat.format( indentOffset ) + ":";
-//        String typeLabel = lineBreak == LineBreak.NON_BREAKING ? "" : lineBreak.toString();
         String srcLabel = VERBOSE_MARKUP ? ":" + lineBreakSource : "";
-        String markupLabel = (indentOffset == 0 && lineBreak == LineBreak.NON_BREAKING) ? "" : String.format( "[%s%s%s]", indentLabel, lineBreak.toString(), srcLabel );
+        String markupLabel = (indentOffset == 0 && lineBreakType == BreakType.NON_BREAKING)
+                ? ""
+                : String.format( "[%s%s%s]", indentLabel, lineBreakType.toString(), srcLabel );
         return  markupLabel + toString();
     }
 

@@ -29,7 +29,7 @@ public class FileFormatter implements Callable<Boolean> {
         int tabWidth = 4;
         int numLineWrapTabs = 2;
         Indent indent = Indent.spaces( tabWidth, numLineWrapTabs );
-        int maxLineWidth = 40;
+        int maxLineWidth = 60;
 
         try {
             originalText = workingText = readFileToString( path );

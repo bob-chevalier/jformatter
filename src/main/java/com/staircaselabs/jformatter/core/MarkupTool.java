@@ -1,15 +1,11 @@
 package com.staircaselabs.jformatter.core;
 
-import com.staircaselabs.jformatter.core.LineBreak;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class MarkupTool {
 
@@ -23,15 +19,15 @@ public class MarkupTool {
         this.endExclusive = input.getLastTokenIndex( enclosingTree );
     }
 
-    public void tagLineBreaks( LineBreak type, List<? extends Tree> list, String source ) {
+    public void tagLineBreaks(BreakType type, List<? extends Tree> list, String source ) {
         list.stream().forEach( t -> this.tagTreeLineBreak( type, t, source ) );
     }
 
-    public void tagLineBreak( LineBreak type, Tree tree, String source ) {
+    public void tagLineBreak(BreakType type, Tree tree, String source ) {
         tagTreeLineBreak( type, tree, source );
     }
 
-    public void tagLineBreak( LineBreak type, TokenType tokenType, String source ) {
+    public void tagLineBreak(BreakType type, TokenType tokenType, String source ) {
         Optional<TextToken> token = input.findNextToken( currentInclusive, endExclusive, tokenType );
         if( token.isPresent() ) {
             token.get().setLineBreakTag( type, source );
@@ -86,7 +82,7 @@ public class MarkupTool {
         return false;
     }
 
-    private void tagTreeLineBreak( LineBreak breakType, Tree tree, String source ) {
+    private void tagTreeLineBreak(BreakType breakType, Tree tree, String source ) {
         input.getFirstToken( tree ).setLineBreakTag( breakType, source );
         currentInclusive = input.getLastTokenIndex( tree );
     }
