@@ -82,6 +82,7 @@ public class LineBreakFormatter {
             }
         }
 
+//        lines.forEach( Line::printMarkup );
 //        lines.get( 3 ).writeDotFile( "/Users/rchevalier/bob.dot" );
 
         // insert additional line-breaks where necessary to enforce maximum line width
@@ -313,12 +314,12 @@ public class LineBreakFormatter {
 
         @Override
         public Void visitMemberSelect(MemberSelectTree node, Input input ) {
-//            if( node.getExpression().getKind() == Tree.Kind.METHOD_INVOCATION ) {
+            if( node.getExpression().getKind() != Tree.Kind.IDENTIFIER ) {
                 int exprEnd = input.getLastTokenIndex( node.getExpression() );
                 int dot = input.findNext( exprEnd, input.getLastTokenIndex( node ), TokenType.DOT )
                         .orElseThrow( () -> new RuntimeException( "Missing dot." ) );
                 input.tokens.get( dot ).setLineBreakTag( BreakType.METHOD_INVOCATION, "visitMemberSelect" );
-//            }
+            }
 
             return super.visitMemberSelect( node, input );
         }

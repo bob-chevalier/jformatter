@@ -17,6 +17,9 @@ public final class BatchFormatterOptions {
     )
     public List<String> files = new ArrayList<>();
 
+    @Parameter( names = { "-c", "--config" }, description = "Relative config file path" )
+    public String config;
+
     @Parameter( names = { "-h", "--help" }, description = "Print this help message" )
     public boolean help;
 

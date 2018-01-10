@@ -1,5 +1,8 @@
 package com.staircaselabs.jformatter;
 
+import com.staircaselabs.jformatter.core.Config;
+import com.staircaselabs.jformatter.core.ConfigLoader;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
@@ -13,6 +16,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -23,9 +27,12 @@ public final class BatchFormatter {
 
     private static final int MAX_THREADS = 20;
 
-    public static boolean formatFiles( Collection<String> files ) throws IOException {
+    public static boolean formatFiles( Collection<String> files, Optional<String> configPath ) throws IOException {
         PrintWriter outWriter = new PrintWriter( new OutputStreamWriter( System.out, UTF_8 ) );
         PrintWriter errWriter = new PrintWriter( new OutputStreamWriter( System.err, UTF_8 ) );
+
+        // parse config file if one was provided, otherwise just create a default configuration object
+        Config config = configPath.map( ConfigLoader::parse ).orElse( new Config() );
 
         // convert filenames to paths and filter out non-java files and duplicates
         Set<Path> uniquePaths = new HashSet<>();
@@ -52,7 +59,7 @@ public final class BatchFormatter {
         for( Path path : uniquePaths ) {
             results.put(
                 path,
-                executorService.submit( new FileFormatter( path ) )
+                executorService.submit( new FileFormatter( path, config ) )
             );
         }
 
@@ -97,9 +104,11 @@ public final class BatchFormatter {
         sb.append( verb );
         return sb.toString();
     }
+
     public static void main( String[] args ) throws Exception {
         BatchFormatterOptions opts = BatchFormatterOptions.parseArgs( args );
-        boolean success = BatchFormatter.formatFiles( opts.files );
+        Optional<String> configPath = opts.config == null ? Optional.empty() : Optional.of( opts.config );
+        boolean success = BatchFormatter.formatFiles( opts.files, configPath );
         System.exit( success ? 0 : 1 );
     }
 

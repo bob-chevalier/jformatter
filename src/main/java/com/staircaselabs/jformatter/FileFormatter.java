@@ -1,5 +1,6 @@
 package com.staircaselabs.jformatter;
 
+import com.staircaselabs.jformatter.core.Config;
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.Indent;
 import com.staircaselabs.jformatter.core.Padding;
@@ -17,20 +18,31 @@ public class FileFormatter implements Callable<Boolean> {
     private String originalText;
     private String workingText;
 
-    public FileFormatter( Path path ) {
+    private final Indent indent;
+    private final Padding padding;
+    private final int maxLineWidth;
+    private final boolean cuddleBraces;
+
+    public FileFormatter( Path path, Config config ) {
         this.path = path;
+        indent = config.convertTabsToSpaces
+                ? Indent.spaces( config.tabWidth, config.numTabsAfterLineWrap )
+                : Indent.tabs( config.tabWidth, config.numTabsAfterLineWrap );
+        padding = new Padding.Builder()
+                .methodArg( config.methodArguments )
+                .parenGrouping( config.groupingParentheses )
+                .typeCast( config.typeCasts )
+                .typeParam( config.typeParameters )
+                .array( config.arrays )
+                .methodName( config.trailingMethodNames )
+                .build();
+        maxLineWidth = config.maxLineWidth;
+        cuddleBraces = config.cuddleBraces;
     }
 
     @Override
     //  public String call() throws FormatterException {
     public Boolean call() throws FormatException {
-        boolean cuddleBraces = true;
-        Padding padding = new Padding.Builder().build();
-        int tabWidth = 4;
-        int numLineWrapTabs = 2;
-        Indent indent = Indent.spaces( tabWidth, numLineWrapTabs );
-        int maxLineWidth = 60;
-
         try {
             originalText = workingText = readFileToString( path );
 

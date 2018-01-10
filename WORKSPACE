@@ -82,3 +82,9 @@ maven_jar(
 #    sha1 = "cce0823396aa693798f8882e64213b1772032b09",
 )
 
+maven_jar(
+    name = "yamlbeans",
+    artifact = "com.esotericsoftware.yamlbeans:yamlbeans:1.13",
+#    sha1 = "cce0823396aa693798f8882e64213b1772032b09",
+)
+

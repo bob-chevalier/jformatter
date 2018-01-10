@@ -62,53 +62,70 @@ public abstract class LineSegment {
         while( !tokens.isEmpty() ) {
             TextToken token = tokens.peek();
 
-            if( token.getLineBreakType() == BreakType.ASSIGNMENT ) {
-                segment = createNewParent( segment, BreakType.ASSIGNMENT );
-                segment.add( create( tokens, segment ) );
-            } else if( token.getLineBreakType() == BreakType.METHOD_ARG ) {
-                if( segment.openParens > 0 ) {
-                    if( segment.getType() == BreakType.METHOD_ARG ) {
-                        segment.add( create( tokens, segment ) );
+            switch( token.getLineBreakType() ) {
+                case ASSIGNMENT:
+                    segment = createNewParent( segment, BreakType.ASSIGNMENT );
+                    segment.add( create( tokens, segment ) );
+                    break;
+                case METHOD_ARG:
+                    if( segment.openParens > 0 ) {
+                        if( segment.getType() == BreakType.METHOD_ARG ) {
+                            segment.add( create( tokens, segment ) );
+                        } else {
+                            segment = createNewParent( segment, BreakType.METHOD_ARG );
+                            segment.add( create( tokens, segment ) );
+                        }
                     } else {
-                        segment = createNewParent( segment, BreakType.METHOD_ARG );
-                        segment.add( create( tokens, segment ) );
+                        return segment;
                     }
-                } else {
-                    return segment;
-                }
-            } else if( token.getLineBreakType() == BreakType.METHOD_INVOCATION ) {
-                if( segment.openParens == 0 ) {
-                    if( segment.getType() == BreakType.METHOD_INVOCATION ) {
+                    break;
+                case METHOD_INVOCATION:
+                    if( segment.openParens == 0 ) {
+                        if( segment.getType() == BreakType.METHOD_INVOCATION ) {
+                            segment.add( create( tokens, segment ) );
+                        } else {
+                            if( segment.parent != null && segment.parent.getType() == BreakType.METHOD_INVOCATION ) {
+                                return segment;
+                            } else {
+                                segment = createNewParent( segment, BreakType.METHOD_INVOCATION );
+                                segment.add( create( tokens, segment ) );
+                            }
+                        }
+                    } else if( segment.openParens < 0 ) {
+                        return segment;
+                    }
+                    break;
+                case NON_BREAKING:
+                    if (token.getType() == TokenType.RIGHT_PAREN) {
+                        if (segment.openParens == 0) {
+                            return segment;
+                        } else if (segment.openParens > 0 && segment.getType() != BreakType.NON_BREAKING) {
+                            segment.add(create(tokens, segment));
+                        } else {
+                            if (segment.isLeaf()) {
+                                segment.add(tokens.remove());
+                            } else {
+                                segment.add(create(tokens, segment));
+                            }
+                        }
+                    } else {
+                        segment.add(tokens.remove());
+                    }
+                    break;
+                case TERNARY:
+                    if( segment.getType() == BreakType.TERNARY ) {
                         segment.add( create( tokens, segment ) );
                     } else {
-                        if( segment.parent.getType() == BreakType.METHOD_INVOCATION ) {
+                        if( segment.parent != null && segment.parent.getType() == BreakType.TERNARY ) {
                             return segment;
                         } else {
-                            segment = createNewParent( segment, BreakType.METHOD_INVOCATION );
+                            segment = createNewParent( segment, BreakType.TERNARY );
                             segment.add( create( tokens, segment ) );
                         }
                     }
-                } else if( segment.openParens < 0 ) {
-                    return segment;
-                }
-            } else if( token.getLineBreakType() == BreakType.NON_BREAKING ) {
-                if( token.getType() == TokenType.RIGHT_PAREN ) {
-                    if( segment.openParens == 0 ) {
-                        return segment;
-                    } else if (segment.openParens > 0 && segment.getType() != BreakType.NON_BREAKING) {
-                        segment.add(create(tokens, segment));
-                    } else {
-                        if( segment.isLeaf() ) {
-                            segment.add( tokens.remove() );
-                        } else {
-                            segment.add(create(tokens, segment));
-                        }
-                    }
-                } else {
-                    segment.add( tokens.remove() );
-                }
-            } else {
-                throw new RuntimeException( "Missing case for line break: " + token.getLineBreakType().toString() );
+                    break;
+                default:
+                    throw new RuntimeException( "Missing case for line break: " + token.getLineBreakType().name() );
             }
         }
 

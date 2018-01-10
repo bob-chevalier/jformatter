@@ -1,0 +1,17 @@
+# indentation
+convertTabsToSpaces: true
+tabWidth: 4
+numTabsAfterLineWrap: 2
+
+# padding
+methodArguments: 1
+groupingParentheses: 1
+typeCasts: 1
+typeParameters: 1
+arrays: 1
+trailingMethodNames: 1
+
+# miscellaneous
+maxLineWidth: 80
+cuddleBraces: true
+

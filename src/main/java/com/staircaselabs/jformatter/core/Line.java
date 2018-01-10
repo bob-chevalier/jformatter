@@ -85,7 +85,7 @@ public class Line {
     }
 
     public Deque<Line> wrap(String newline ) {
-        List<LineSegment> segments = segment.split( newline, indent.getLineWrapTabs() );
+        List<LineSegment> segments = segment.split( newline, indent.getNumTabsAfterLineWrap() );
 
         // replace this line's segment with the first segment
         segment = segments.get( 0 );

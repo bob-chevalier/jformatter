@@ -6,12 +6,12 @@ public class Indent {
 
     private final String indentText;
     private final int tabWidth;
-    private final int numLineWrapTabs;
+    private final int numTabsAfterLineWrap;
 
-    private Indent( String indentText, int tabWidth, int numLineWrapTabs ) {
+    private Indent( String indentText, int tabWidth, int numTabsAfterLineWrap ) {
         this.indentText = indentText;
         this.tabWidth = tabWidth;
-        this.numLineWrapTabs = numLineWrapTabs;
+        this.numTabsAfterLineWrap = numTabsAfterLineWrap;
     }
 
     public static Indent spaces( int tabWidth, int numLineWrapTabs ) {
@@ -30,8 +30,8 @@ public class Indent {
         return numIndents * tabWidth;
     }
 
-    public int getLineWrapTabs() {
-        return numLineWrapTabs;
+    public int getNumTabsAfterLineWrap() {
+        return numTabsAfterLineWrap;
     }
 
 }
