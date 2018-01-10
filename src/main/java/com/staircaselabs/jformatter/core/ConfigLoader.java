@@ -13,9 +13,7 @@ public class ConfigLoader {
         try {
             Path fullPath = Paths.get(configPath).toRealPath();
             YamlReader reader = new YamlReader(new FileReader(fullPath.toString()));
-            Config config = reader.read(Config.class);
-
-            return new Config();
+            return reader.read(Config.class);
         } catch( IOException ex ) {
             throw new RuntimeException( "Unable to parse config: " + configPath, ex );
         }
