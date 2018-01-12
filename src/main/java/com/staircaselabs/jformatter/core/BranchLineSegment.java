@@ -1,25 +1,20 @@
 package com.staircaselabs.jformatter.core;
 
-import com.staircaselabs.jformatter.core.TextToken.TokenType;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class BranchLineSegment extends LineSegment {
 
-    private final BreakType type;
+    private final String label;
     private List<LineSegment> branches = new ArrayList<>();
 
-    public BranchLineSegment( LineSegment parent, BreakType type ) {
+    public BranchLineSegment( LineSegment parent, String label ) {
         super( parent );
-        this.type = type;
+        this.label = label;
     }
 
     @Override
@@ -32,14 +27,6 @@ public class BranchLineSegment extends LineSegment {
         segment.parent = this;
         branches.add( segment );
         width += segment.getWidth();
-
-        // keep track of the number of left/right parentheses that we encounter
-        openParens += segment.openParens;
-    }
-
-    @Override
-    public BreakType getType() {
-        return type;
     }
 
     @Override
@@ -48,11 +35,11 @@ public class BranchLineSegment extends LineSegment {
     }
 
     @Override
-    public Queue<TextToken> getTokens() {
+    public List<TextToken> getTokens() {
         return branches.stream()
                 .map( LineSegment::getTokens )
                 .flatMap( Collection::stream )
-                .collect( Collectors.toCollection( LinkedList::new ) );
+                .collect( Collectors.toList() );
     }
 
     @Override
@@ -66,11 +53,6 @@ public class BranchLineSegment extends LineSegment {
     }
 
     @Override
-    public void updateIndentOffset( int amount ) {
-        branches.get( 0 ).updateIndentOffset( amount );
-    }
-
-    @Override
     public boolean isLeaf() {
         return false;
     }
@@ -81,20 +63,11 @@ public class BranchLineSegment extends LineSegment {
     }
 
     @Override
-    public List<LineSegment> split(String newline, int numLineWrapTabs ) {
+    public List<LineSegment> split(String newline ) {
         // append linebreaks to each segment, except the last, which already has one
         IntStream.range( 0, branches.size() - 1 )
                 .mapToObj( branches::get )
                 .forEach( s -> s.appendLineBreak( newline ) );
-
-        // indent second segment (which corresponds to what will be the first wrapped line)
-        branches.get( 1 ).updateIndentOffset( numLineWrapTabs );
-
-        // if necessary, unindent the final segment (which corresponds to what will be final wrapped line)
-        TextToken startOfLastSegment = branches.get( branches.size() - 1 ).getFirstToken();
-        if( startOfLastSegment.getLineBreakType() == BreakType.NON_BREAKING ) {
-            startOfLastSegment.updateIndentOffset( -numLineWrapTabs );
-        }
 
         return branches;
     }
@@ -104,8 +77,7 @@ public class BranchLineSegment extends LineSegment {
         // generate a unique ID for this node and remove any dashes
         String uuid = UUID.randomUUID().toString();
 
-        // use the linebreak type as this node's label
-        dotfile.addNode( uuid, type.toString() );
+        dotfile.addNode( uuid, label );
 
         // add an edge from parent to this node
         if( parentId != null ) {

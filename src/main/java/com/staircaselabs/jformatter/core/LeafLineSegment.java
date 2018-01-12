@@ -3,18 +3,13 @@ package com.staircaselabs.jformatter.core;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class LeafLineSegment extends LineSegment {
 
-    private final Queue<TextToken> tokens = new LinkedList<>();
+    private final List<TextToken> tokens = new ArrayList<>();
 
     public LeafLineSegment( LineSegment parent ) {
         super( parent );
@@ -24,10 +19,6 @@ public class LeafLineSegment extends LineSegment {
     public void add( TextToken token ) {
         tokens.add( token );
         width += token.getWidth();
-
-        // keep track of the number of left/right parentheses that we encounter
-        openParens += token.getType() == TokenType.LEFT_PAREN ? 1 : 0;
-        openParens += token.getType() == TokenType.RIGHT_PAREN ? -1 : 0;
     }
 
     @Override
@@ -36,17 +27,12 @@ public class LeafLineSegment extends LineSegment {
     }
 
     @Override
-    public BreakType getType() {
-        return BreakType.NON_BREAKING;
-    }
-
-    @Override
     public TextToken getFirstToken() {
-        return tokens.peek();
+        return tokens.get( 0 );
     }
 
     @Override
-    public Queue<TextToken> getTokens() {
+    public List<TextToken> getTokens() {
         return tokens;
     }
 
@@ -57,12 +43,7 @@ public class LeafLineSegment extends LineSegment {
 
     @Override
     public int getIndentOffset() {
-        return tokens.peek().getIndentOffset();
-    }
-
-    @Override
-    public void updateIndentOffset( int amount ) {
-        tokens.peek().updateIndentOffset(amount);
+        return getFirstToken().getIndentOffset();
     }
 
     @Override
@@ -76,7 +57,7 @@ public class LeafLineSegment extends LineSegment {
     }
 
     @Override
-    public List<LineSegment> split(String newline, int numLineWrapTabs ) {
+    public List<LineSegment> split(String newline ) {
         throw new UnsupportedOperationException( "LeafLineSegments cannot be split" );
     }
 

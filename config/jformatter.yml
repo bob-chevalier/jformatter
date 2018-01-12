@@ -9,9 +9,9 @@ groupingParentheses: 1
 typeCasts: 1
 typeParameters: 1
 arrays: 1
-trailingMethodNames: 1
+trailingMethodNames: 0
 
 # miscellaneous
-maxLineWidth: 80
+maxLineWidth: 120
 cuddleBraces: true
 

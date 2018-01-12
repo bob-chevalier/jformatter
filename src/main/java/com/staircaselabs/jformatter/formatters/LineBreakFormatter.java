@@ -1,10 +1,12 @@
 package com.staircaselabs.jformatter.formatters;
 
-import com.staircaselabs.jformatter.core.BreakType;
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.Indent;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Line;
+import com.staircaselabs.jformatter.core.LineWrap;
+import com.staircaselabs.jformatter.core.LineWrapPriority.Strategy;
+import com.staircaselabs.jformatter.core.LineWrapTag;
 import com.staircaselabs.jformatter.core.MarkupTool;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
@@ -35,11 +37,14 @@ import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Queue;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
@@ -69,13 +74,16 @@ public class LineBreakFormatter {
 
         // group tokens into lines
         List<Line> lines = new ArrayList<>();
-        Queue<TextToken> lineTokens = new LinkedList<>();
+        List<TextToken> lineTokens = new ArrayList<>();
         int prevLineIndentLevel = 0;
         for( TextToken token : tokens ) {
             lineTokens.add( token );
 
             if( token.getType() == TokenType.NEWLINE ) {
-                Line line = new Line( indent, prevLineIndentLevel, lineTokens );
+                // if there are any memember select line wrap tags, we need to group them
+                groupMemberSelectTags( lineTokens );
+
+                Line line = new Line( indent, prevLineIndentLevel, lineTokens, Strategy.PRIMARY );
                 lines.add( line );
                 prevLineIndentLevel = line.getIndentLevel();
                 lineTokens = new LinkedList<>();
@@ -89,29 +97,68 @@ public class LineBreakFormatter {
         ListIterator<Line> iter = lines.listIterator();
         while( iter.hasNext() ) {
             Line line = iter.next();
-            Deque<Line> extraLines = new ArrayDeque<>();
+            List<TextToken> originalTokens = line.getTokens();
 
-            // if necessary, wrap line to ensure that it fits within max line width
-            while( line.getWidth() > maxLineWidth && line.canBeSplit() ) {
-                // add additional lines in reverse order to the front of the extra lines deque
-                line.wrap( input.newline ).descendingIterator().forEachRemaining( extraLines::addFirst );
-            }
+            List<Line> wrappedLines = generateWrappedLines( line, input.newline );
+            if( wrappedLines.size() > 1 ) {
+                // try a different line-wrap strategy
+                Line secondary = new Line( indent, line.getParentIndentLevel(), originalTokens, Strategy.SECONDARY );
+                List<Line> secondaryWrappedLines = generateWrappedLines( secondary, input.newline );
 
-            // recursively expand any extra lines that were generated from original line
-            Line extraLine = extraLines.pollFirst();
-            while( extraLine != null ) {
-                while( extraLine.getWidth() > maxLineWidth && extraLine.canBeSplit() ) {
-                    // add additional lines in reverse order to the front of the extra lines deque
-                    extraLine.wrap( input.newline ).descendingIterator().forEachRemaining( extraLines::addFirst );
+                // choose whichever strategy results in the fewest number of wrapped lines
+                if( secondaryWrappedLines.size() < wrappedLines.size() ) {
+                    iter.set( secondary );
+                    wrappedLines = secondaryWrappedLines;
                 }
-
-                // head of extra line is now either sufficiently trimmed or at least as small as it's going to get
-                iter.add( extraLine );
-                extraLine = extraLines.pollFirst();
             }
+            wrappedLines.forEach( iter::add );
         }
 
         return lines.stream().map( Line::toString ).collect( Collectors.joining() );
+    }
+
+    private List<Line> generateWrappedLines( Line line, String newline ) {
+        Deque<Line> unevaluatedStack = new ArrayDeque<>();
+
+        // if necessary, wrap line to ensure that it fits within max line width
+        while( line.getWidth() > maxLineWidth && line.canBeSplit() ) {
+            // add additional lines in reverse order to the front of the unevaluated stack
+            line.wrap( newline ).descendingIterator().forEachRemaining( unevaluatedStack::addFirst );
+        }
+
+        List<Line> wrappedLines = new ArrayList<>();
+
+        // recursively expand any extra lines that were generated from original line
+        Line nextLine = unevaluatedStack.pollFirst();
+        while( nextLine != null ) {
+            while( nextLine.getWidth() > maxLineWidth && nextLine.canBeSplit() ) {
+                // add additional lines in reverse order to the front of the unevaluated stack
+                nextLine.wrap( newline ).descendingIterator().forEachRemaining( unevaluatedStack::addFirst );
+            }
+
+            // head of extra line is now either sufficiently trimmed or at least as small as it's going to get
+            wrappedLines.add( nextLine );
+            nextLine = unevaluatedStack.pollFirst();
+        }
+
+        return wrappedLines;
+    }
+
+    private void groupMemberSelectTags( List<TextToken> tokens ) {
+        int openParens = 0;
+        Map<Integer, String> groups = new HashMap<>();
+        for( TextToken token : tokens ) {
+            openParens += token.getType() == TokenType.LEFT_PAREN ? 1 : 0;
+            openParens += token.getType() == TokenType.RIGHT_PAREN ? -1 : 0;
+
+            Optional<LineWrapTag> tag = token.getLineWrapTag();
+            if( tag.isPresent()  && tag.get().getType() == LineWrap.MEMBER_SELECT) {
+                if( !groups.containsKey( openParens ) ) {
+                    groups.put( openParens, UUID.randomUUID().toString() );
+                }
+                tag.get().setGroupId( groups.get( openParens ) );
+            }
+        }
     }
 
     private static class LineBreakScanner extends TreePathScanner<Void, Input> {
@@ -185,7 +232,7 @@ public class LineBreakFormatter {
 
         @Override
         public Void visitAssignment(AssignmentTree node, Input input) {
-            new MarkupTool( node, input ).tagLineBreak(BreakType.ASSIGNMENT, node.getExpression(), "visitAssignment");
+            new MarkupTool( node, input ).tagLineWrap(LineWrap.ASSIGNMENT, node.getExpression(), "visitAssignment");
             return super.visitAssignment(node, input);
         }
 
@@ -196,7 +243,7 @@ public class LineBreakFormatter {
             int right = input.getFirstTokenIndex( node.getRightOperand() );
             int operator = input.findNext( left, right, TokenUtils.tokenTypeFromBinaryOperator( node.getKind() ) )
                     .orElseThrow( () -> new RuntimeException( "Missing binary operator." ) );
-            input.tokens.get( operator ).setLineBreakTag( BreakType.ASSIGNMENT, "visitBinary" );
+            input.tokens.get( operator ).allowLineWrap( new LineWrapTag( LineWrap.ASSIGNMENT, "visitBinary" ) );
 
             return super.visitBinary( node, input );
         }
@@ -205,12 +252,13 @@ public class LineBreakFormatter {
         public Void visitClass(ClassTree node, Input input) {
             MarkupTool markup = new MarkupTool(node, input);
             if (node.getExtendsClause() != null) {
-                markup.tagLineBreak(BreakType.EXTENDS, TokenType.EXTENDS, "visitClass");
+                markup.tagLineWrap( LineWrap.EXTENDS, TokenType.EXTENDS, "visitClass");
             }
 
             if (!node.getImplementsClause().isEmpty()) {
-                markup.tagLineBreak(BreakType.IMPLEMENTS, TokenType.IMPLEMENTS, "visitClass");
+                markup.tagLineWrap( LineWrap.IMPLEMENTS, TokenType.IMPLEMENTS, "visitClass");
             }
+            //TODO tag all implemented classes using unbounded_list?
 
             if (!node.getMembers().isEmpty()) {
                 int classStart = input.getFirstTokenIndex(node);
@@ -248,12 +296,14 @@ public class LineBreakFormatter {
             // add a line-break before the question mark
             int question = input.findNext( condition, trueExprBegin, TokenType.QUESTION )
                     .orElseThrow( () -> new RuntimeException( "Missing expected ?." ) );
-            input.tokens.get( question ).setLineBreakTag( BreakType.TERNARY, "visitConditionalExpr" );
+            LineWrapTag tag = new LineWrapTag( LineWrap.TERNARY, "visitConditionalExpr" );
+            input.tokens.get( question ).allowLineWrap( tag );
 
             // ensure that if a line-break is inserted before question mark, one is also inserted before colon
             int colon = input.findNext( trueExprEnd, falseExpr, TokenType.COLON )
                     .orElseThrow( () -> new RuntimeException( "Missing expected :." ) );
-            input.tokens.get( colon ).setLineBreakTag( BreakType.TERNARY, "visitConditionalExpr" );
+            input.tokens.get( colon )
+                    .allowLineWrap( new LineWrapTag( tag.getGroupId(), LineWrap.TERNARY, "visitConditionalExpr" ) );
 
             return super.visitConditionalExpression( node, input );
         }
@@ -314,11 +364,17 @@ public class LineBreakFormatter {
 
         @Override
         public Void visitMemberSelect(MemberSelectTree node, Input input ) {
-            if( node.getExpression().getKind() != Tree.Kind.IDENTIFIER ) {
+            //TODO should we just filter on kind == METHHOD_INVOCATION?
+            if( node.getExpression().getKind() != Tree.Kind.IDENTIFIER
+                    && node.getExpression().getKind() != Tree.Kind.NEW_CLASS ) {
+                //TODO will exprEnd always be the same as dot?
                 int exprEnd = input.getLastTokenIndex( node.getExpression() );
                 int dot = input.findNext( exprEnd, input.getLastTokenIndex( node ), TokenType.DOT )
                         .orElseThrow( () -> new RuntimeException( "Missing dot." ) );
-                input.tokens.get( dot ).setLineBreakTag( BreakType.METHOD_INVOCATION, "visitMemberSelect" );
+
+                // this tag's groupId will be overwritten later when the token is added to a Line
+                input.tokens.get( dot )
+                        .allowLineWrap( new LineWrapTag( LineWrap.MEMBER_SELECT, "visitMemberSelect" ) );
             }
 
             return super.visitMemberSelect( node, input );
@@ -327,10 +383,11 @@ public class LineBreakFormatter {
         @Override
         public Void visitMethod(MethodTree node, Input input) {
             MarkupTool markup = new MarkupTool(node, input);
-            markup.tagLineBreaks(BreakType.METHOD_ARG, node.getParameters(), "visitMethod");
+            markup.tagLineWrapGroupWithClosingParen( LineWrap.METHOD_ARG, node.getParameters(), "visitMethod" );
+
             if (!node.getThrows().isEmpty()) {
-                markup.tagLineBreak( BreakType.THROWS, TokenType.THROWS, "visitMethod");
-                markup.tagLineBreaks(BreakType.UNBOUND_LIST_ITEM, node.getThrows(), "visitMethod");
+                markup.tagLineWrap( LineWrap.THROWS, TokenType.THROWS, "visitMethod" );
+                markup.tagLineWrapGroup( LineWrap.UNBOUND_LIST_ITEM, node.getThrows(), "visitMethod" );
             }
 
             markup.indentBracedBlock(node.getBody());
@@ -341,7 +398,7 @@ public class LineBreakFormatter {
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Input input) {
             MarkupTool markup = new MarkupTool(node, input);
-            markup.tagLineBreaks(BreakType.METHOD_ARG, node.getArguments(), "visitMethodInvocation" );
+            markup.tagLineWrapGroupWithClosingParen( LineWrap.METHOD_ARG, node.getArguments(), "visitMethodInvocation" );
 
             return super.visitMethodInvocation(node, input);
         }
@@ -392,7 +449,7 @@ public class LineBreakFormatter {
         @Override
         public Void visitNewClass(NewClassTree node, Input input ) {
             MarkupTool markup = new MarkupTool(node, input);
-            markup.tagLineBreaks(BreakType.METHOD_ARG, node.getArguments(), "visitNewClass" );
+            markup.tagLineWrapGroupWithClosingParen( LineWrap.METHOD_ARG, node.getArguments(), "visitNewClass" );
 
             return super.visitNewClass( node, input );
         }
@@ -447,7 +504,7 @@ public class LineBreakFormatter {
 
             // allow line-breaks between resources
             if (node.getResources() != null && !node.getResources().isEmpty()) {
-                markup.tagLineBreaks(BreakType.METHOD_ARG, node.getResources(), "visitTry");
+                markup.tagLineWrapGroup( LineWrap.METHOD_ARG, node.getResources(), "visitTry");
             }
 
             // indent try-block
@@ -489,7 +546,7 @@ public class LineBreakFormatter {
         public Void visitVariable(VariableTree node, Input input) {
             if (isValid(node.getInitializer())) {
                 MarkupTool markup = new MarkupTool(node, input);
-                markup.tagLineBreak(BreakType.ASSIGNMENT, node.getInitializer(), "visitVariable");
+                markup.tagLineWrap( LineWrap.ASSIGNMENT, node.getInitializer(), "visitVariable");
             }
 
             return super.visitVariable(node, input);

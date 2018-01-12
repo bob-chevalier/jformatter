@@ -1,6 +1,7 @@
 package com.staircaselabs.jformatter.core;
 
 import java.text.DecimalFormat;
+import java.util.Optional;
 
 public class TextToken {
 
@@ -9,10 +10,9 @@ public class TextToken {
     public final int endExclusive;
     private final String text;
     private final TokenType type;
-    private BreakType lineBreakType = BreakType.NON_BREAKING;
-    private String lineBreakSource = "default";
+
     private int indentOffset = 0;
-    private static final boolean VERBOSE_MARKUP = false;
+    private Optional<LineWrapTag> lineWrapTag = Optional.empty();
 
     public TextToken( String text, TokenType type, int beginInclusive, int endExclusive ) {
         this.text = text;
@@ -25,15 +25,12 @@ public class TextToken {
         return type;
     }
 
-    public void setLineBreakTag(BreakType breakType, String source ) {
-//        if( this.lineBreakType.canBeOverriden( lineBreakType ) ) {
-            this.lineBreakType = breakType;
-            lineBreakSource = source;
-//        }
+    public void allowLineWrap( LineWrapTag lineWrapTag ) {
+        this.lineWrapTag = Optional.of( lineWrapTag );
     }
 
-    public BreakType getLineBreakType() {
-        return lineBreakType;
+    public Optional<LineWrapTag> getLineWrapTag() {
+        return lineWrapTag;
     }
 
     public void updateIndentOffset( int amount ) {
@@ -58,10 +55,11 @@ public class TextToken {
 
     public String toMarkupString() {
         String indentLabel = indentOffset == 0 ? "" : decimalFormat.format( indentOffset ) + ":";
-        String srcLabel = VERBOSE_MARKUP ? ":" + lineBreakSource : "";
-        String markupLabel = (indentOffset == 0 && lineBreakType == BreakType.NON_BREAKING)
+        String lineWrapLabel = lineWrapTag.map( LineWrapTag::toString ).orElse( "" );
+        String markupLabel = (indentOffset == 0 && !lineWrapTag.isPresent())
                 ? ""
-                : String.format( "[%s%s%s]", indentLabel, lineBreakType.toString(), srcLabel );
+                : String.format( "[%s%s]", indentLabel,  lineWrapLabel );
+
         return  markupLabel + toString();
     }
 
