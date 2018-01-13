@@ -1,7 +1,7 @@
 package com.staircaselabs.jformatter.formatters;
 
+import com.staircaselabs.jformatter.core.Config;
 import com.staircaselabs.jformatter.core.FormatException;
-import com.staircaselabs.jformatter.core.Indent;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.Line;
 import com.staircaselabs.jformatter.core.LineWrap;
@@ -55,13 +55,6 @@ public class LineBreakFormatter {
 
     private static final boolean VERBOSE = false;
     private static final boolean ENABLED = true;
-    private final Indent indent;
-    private final int maxLineWidth;
-
-    public LineBreakFormatter( Indent indent, int maxLineWidth ) {
-        this.indent = indent;
-        this.maxLineWidth = maxLineWidth;
-    }
 
     public String format( String text ) throws FormatException {
         List<TextToken> tokens = tokenizeText( text );
@@ -83,7 +76,7 @@ public class LineBreakFormatter {
                 // if there are any memember select line wrap tags, we need to group them
                 groupMemberSelectTags( lineTokens );
 
-                Line line = new Line( indent, prevLineIndentLevel, lineTokens, Strategy.PRIMARY );
+                Line line = new Line( prevLineIndentLevel, lineTokens, Strategy.PRIMARY );
                 lines.add( line );
                 prevLineIndentLevel = line.getIndentLevel();
                 lineTokens = new LinkedList<>();
@@ -102,7 +95,7 @@ public class LineBreakFormatter {
             List<Line> wrappedLines = generateWrappedLines( line, input.newline );
             if( wrappedLines.size() > 1 ) {
                 // try a different line-wrap strategy
-                Line secondary = new Line( indent, line.getParentIndentLevel(), originalTokens, Strategy.SECONDARY );
+                Line secondary = new Line( line.getParentIndentLevel(), originalTokens, Strategy.SECONDARY );
                 List<Line> secondaryWrappedLines = generateWrappedLines( secondary, input.newline );
 
                 // choose whichever strategy results in the fewest number of wrapped lines
@@ -121,7 +114,7 @@ public class LineBreakFormatter {
         Deque<Line> unevaluatedStack = new ArrayDeque<>();
 
         // if necessary, wrap line to ensure that it fits within max line width
-        while( line.getWidth() > maxLineWidth && line.canBeSplit() ) {
+        while( line.getWidth() > Config.INSTANCE.lineWrap.maxLineWidth && line.canBeSplit() ) {
             // add additional lines in reverse order to the front of the unevaluated stack
             line.wrap( newline ).descendingIterator().forEachRemaining( unevaluatedStack::addFirst );
         }
@@ -131,7 +124,7 @@ public class LineBreakFormatter {
         // recursively expand any extra lines that were generated from original line
         Line nextLine = unevaluatedStack.pollFirst();
         while( nextLine != null ) {
-            while( nextLine.getWidth() > maxLineWidth && nextLine.canBeSplit() ) {
+            while( nextLine.getWidth() > Config.INSTANCE.lineWrap.maxLineWidth && nextLine.canBeSplit() ) {
                 // add additional lines in reverse order to the front of the unevaluated stack
                 nextLine.wrap( newline ).descendingIterator().forEachRemaining( unevaluatedStack::addFirst );
             }

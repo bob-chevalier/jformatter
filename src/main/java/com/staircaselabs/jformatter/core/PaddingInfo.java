@@ -2,7 +2,7 @@ package com.staircaselabs.jformatter.core;
 
 import java.util.Collections;
 
-public class Padding {
+public class PaddingInfo {
 
     public final String methodName;
     public final String methodArg;
@@ -11,7 +11,7 @@ public class Padding {
     public final String typeParam;
     public final String array;
 
-    private Padding(
+    private PaddingInfo(
             int methodNameSpaces,
             int methodArgSpaces,
             int parenGroupingSpaces,
@@ -65,8 +65,8 @@ public class Padding {
             return this;
         }
 
-        public Padding build() {
-            return new Padding(
+        public PaddingInfo build() {
+            return new PaddingInfo(
                     methodNameSpaces,
                     methodArgSpaces,
                     parenGroupingSpaces,

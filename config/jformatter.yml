@@ -1,7 +1,6 @@
 # indentation
 convertTabsToSpaces: true
 tabWidth: 4
-numTabsAfterLineWrap: 2
 
 # padding
 methodArguments: 1
@@ -12,6 +11,10 @@ arrays: 1
 trailingMethodNames: 0
 
 # line-wrapping
-maxLineWidth: 120
+maxLineWidth: 60
+numTabsAfterLineWrap: 2
+closingParenthesesOnNewLine: true
+methodArgumentsOnNewLine: true
+
+# miscellaneous
 cuddleBraces: true
-closingParenthesesOnNewLine: false

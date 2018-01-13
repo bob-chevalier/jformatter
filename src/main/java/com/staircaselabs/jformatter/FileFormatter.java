@@ -1,10 +1,6 @@
 package com.staircaselabs.jformatter;
 
-import com.staircaselabs.jformatter.core.Config;
 import com.staircaselabs.jformatter.core.FormatException;
-import com.staircaselabs.jformatter.core.Indent;
-import com.staircaselabs.jformatter.core.MarkupTool;
-import com.staircaselabs.jformatter.core.Padding;
 import com.staircaselabs.jformatter.formatters.*;
 
 import java.io.IOException;
@@ -19,27 +15,8 @@ public class FileFormatter implements Callable<Boolean> {
     private String originalText;
     private String workingText;
 
-    private final Indent indent;
-    private final Padding padding;
-    private final int maxLineWidth;
-    private final boolean cuddleBraces;
-
-    public FileFormatter( Path path, Config config ) {
+    public FileFormatter( Path path ) {
         this.path = path;
-        indent = config.convertTabsToSpaces
-                ? Indent.spaces( config.tabWidth, config.numTabsAfterLineWrap )
-                : Indent.tabs( config.tabWidth, config.numTabsAfterLineWrap );
-        padding = new Padding.Builder()
-                .methodArg( config.methodArguments )
-                .parenGrouping( config.groupingParentheses )
-                .typeCast( config.typeCasts )
-                .typeParam( config.typeParameters )
-                .array( config.arrays )
-                .methodName( config.trailingMethodNames )
-                .build();
-        maxLineWidth = config.maxLineWidth;
-        MarkupTool.setClosingParensOnNewLine( config.closingParenthesesOnNewLine );
-        cuddleBraces = config.cuddleBraces;
     }
 
     @Override
@@ -53,9 +30,9 @@ public class FileFormatter implements Callable<Boolean> {
             workingText = new SortedImportsFormatter().format( workingText );
             workingText = new ModifierFormatter().format( workingText );
             workingText = new VariableFormatter().format( workingText );
-            workingText = new ParenthesesFormatter( padding ).format( workingText );
-            workingText = new LayoutFormatter( padding, cuddleBraces ).format( workingText );
-            workingText = new LineBreakFormatter( indent, maxLineWidth ).format( workingText );
+            workingText = new ParenthesesFormatter().format( workingText );
+            workingText = new LayoutFormatter().format( workingText );
+            workingText = new LineBreakFormatter().format( workingText );
             workingText = new WhitespaceFormatter( false ).format( workingText );
 
 //            System.out.println( "============" );

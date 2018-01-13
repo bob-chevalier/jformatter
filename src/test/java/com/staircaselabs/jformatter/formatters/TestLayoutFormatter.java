@@ -3,10 +3,9 @@ package com.staircaselabs.jformatter.formatters;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.staircaselabs.jformatter.core.FormatException;
-import com.staircaselabs.jformatter.core.Padding;
-import com.staircaselabs.jformatter.formatters.LayoutFormatter;
+
 import java.io.IOException;
-import java.nio.file.Paths;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,7 +28,7 @@ public class TestLayoutFormatter {
 
     @Before
     public void clearScanner() {
-        formatter = new LayoutFormatter( new Padding.Builder().build(), true );
+        formatter = new LayoutFormatter();
     }
 
     @Test

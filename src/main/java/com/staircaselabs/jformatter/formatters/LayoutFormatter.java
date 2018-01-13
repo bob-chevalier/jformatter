@@ -1,8 +1,8 @@
 package com.staircaselabs.jformatter.formatters;
 
 import com.staircaselabs.jformatter.core.CommentedTree;
+import com.staircaselabs.jformatter.core.Config;
 import com.staircaselabs.jformatter.core.Input;
-import com.staircaselabs.jformatter.core.Padding;
 import com.staircaselabs.jformatter.core.Replacement;
 import com.staircaselabs.jformatter.core.ReplacementFormatter;
 import com.staircaselabs.jformatter.core.ReplacementScanner;
@@ -76,8 +76,8 @@ import static java.util.stream.Collectors.partitioningBy;
 // 8. add java.util.Logging
 public class LayoutFormatter extends ReplacementFormatter {
 
-    public LayoutFormatter( Padding padding, boolean cuddleBraces ) {
-        super( new LayoutScanner( padding, cuddleBraces ) );
+    public LayoutFormatter() {
+        super( new LayoutScanner() );
     }
 
     private static class LayoutScanner extends ReplacementScanner {
@@ -108,14 +108,6 @@ public class LayoutFormatter extends ReplacementFormatter {
                 TokenType.LEFT_BRACKET
         };
 
-        private final Padding padding;
-        private final boolean cuddleBraces;
-
-        private LayoutScanner(Padding padding, boolean cuddleBraces ) {
-            this.padding = padding;
-            this.cuddleBraces = cuddleBraces;
-        }
-
         @Override
         public Void visitAnnotatedType( AnnotatedTypeTree node, Input input ) {
             if( VERBOSE ) System.out.println( "======visitAnnotatedType======" );
@@ -145,9 +137,9 @@ public class LayoutFormatter extends ReplacementFormatter {
                 List<Tree> argsList = args.stream().map( Tree.class::cast ).collect( Collectors.toList() );
 
                 replacement.append( TokenType.LEFT_PAREN )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .appendList( argsList, TokenType.COMMA, true )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .append( TokenType.RIGHT_PAREN );
             }
 
@@ -162,9 +154,9 @@ public class LayoutFormatter extends ReplacementFormatter {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayAccess" )
                         .append( node.getExpression() )
                         .append( TokenType.LEFT_BRACKET )
-                        .append( padding.array )
+                        .append( Config.INSTANCE.padding.array )
                         .append( node.getIndex() )
-                        .append( padding.array )
+                        .append( Config.INSTANCE.padding.array )
                         .append( TokenType.RIGHT_BRACKET );
 
                 int afterRightBracket = replacement.getCurrentPosInclusive();
@@ -178,9 +170,9 @@ public class LayoutFormatter extends ReplacementFormatter {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayAccess" )
                         .setCurrentPositionInclusive( prevRightBracket + 1 )
                         .append( TokenType.LEFT_BRACKET )
-                        .append( padding.array )
+                        .append( Config.INSTANCE.padding.array )
                         .append( node.getIndex() )
-                        .append( padding.array )
+                        .append( Config.INSTANCE.padding.array )
                         .append( TokenType.RIGHT_BRACKET );
                 if( ENABLED ) replacement.build( (prevRightBracket + 1), end ).ifPresent( this::addReplacement );
             }
@@ -321,11 +313,11 @@ public class LayoutFormatter extends ReplacementFormatter {
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Catch" )
                     .append( TokenType.CATCH )
                     .append( TokenType.LEFT_PAREN )
-                    .append( padding.methodArg )
+                    .append( Config.INSTANCE.padding.methodArg )
                     .append( node.getParameter() )
-                    .append( padding.methodArg )
+                    .append( Config.INSTANCE.padding.methodArg )
                     .append( TokenType.RIGHT_PAREN )
-                    .appendOpeningBrace( cuddleBraces )
+                    .appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                     .appendBracedBlock( node.getBlock(), input.newline )
                     .append( TokenType.RIGHT_BRACE );
             if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
@@ -368,9 +360,9 @@ public class LayoutFormatter extends ReplacementFormatter {
             List<Tree> typeParams = node.getTypeParameters().stream().map( Tree.class::cast ).collect( Collectors.toList() );
             if( !typeParams.isEmpty() ) {
                 replacement.append( TokenType.LESS_THAN )
-                        .append( padding.typeParam )
+                        .append( Config.INSTANCE.padding.typeParam )
                         .appendList( typeParams, TokenType.COMMA, true )
-                        .append( padding.typeParam )
+                        .append( Config.INSTANCE.padding.typeParam )
                         .append( TokenType.GREATER_THAN );
             }
 
@@ -391,7 +383,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .appendList( interfaces, TokenType.COMMA );
             }
 
-            replacement.append( cuddleBraces ? SPACE : input.newline )
+            replacement.append( Config.INSTANCE.cuddleBraces ? SPACE : input.newline )
                     .append( TokenType.LEFT_BRACE );
 
             if( !node.getMembers().isEmpty() ) {
@@ -540,16 +532,16 @@ public class LayoutFormatter extends ReplacementFormatter {
             } else {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "DoWhileLoop" )
                         .append( TokenType.DO )
-                        .appendOpeningBrace( cuddleBraces )
+                        .appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE )
-                        .append( cuddleBraces ? SPACE : input.newline )
+                        .append( Config.INSTANCE.cuddleBraces ? SPACE : input.newline )
                         .append( TokenType.WHILE )
-                        .append( padding.methodName )
+                        .append( Config.INSTANCE.padding.methodName )
                         .append( TokenType.LEFT_PAREN )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .stripParenthesesAndAppend( node.getCondition() )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .append( TokenType.RIGHT_PAREN )
                         .append( TokenType.SEMICOLON );
 
@@ -578,17 +570,17 @@ public class LayoutFormatter extends ReplacementFormatter {
             } else {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "EnhancedForLoop" )
                         .append( TokenType.FOR )
-                        .append( padding.methodName )
+                        .append( Config.INSTANCE.padding.methodName )
                         .append( TokenType.LEFT_PAREN )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .append( node.getVariable() )
                         .append( SPACE )
                         .append( TokenType.COLON )
                         .append( SPACE )
                         .append( node.getExpression() )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .append( TokenType.RIGHT_PAREN )
-                        .appendOpeningBrace( cuddleBraces )
+                        .appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
 
@@ -620,9 +612,9 @@ public class LayoutFormatter extends ReplacementFormatter {
 
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ForLoop" )
                         .append( TokenType.FOR )
-                        .append( padding.methodName )
+                        .append( Config.INSTANCE.padding.methodName )
                         .append( TokenType.LEFT_PAREN )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .appendList( initializers, SPACE )
                         .append( TokenType.SEMICOLON )
                         .append( SPACE )
@@ -630,9 +622,9 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( TokenType.SEMICOLON )
                         .append( SPACE )
                         .appendList( updates, SPACE )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .append( TokenType.RIGHT_PAREN )
-                        .appendOpeningBrace( cuddleBraces )
+                        .appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
 
@@ -668,18 +660,18 @@ public class LayoutFormatter extends ReplacementFormatter {
             } else {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "If" )
                         .append( TokenType.IF )
-                        .append( padding.methodName );
+                        .append( Config.INSTANCE.padding.methodName );
 
-                // insert appropriate padding inside of parentheses
-                padParentheses( node.getCondition(), input, padding.methodArg, replacement );
+                // insert appropriate Config.INSTANCE.padding inside of parentheses
+                padParentheses( node.getCondition(), input, Config.INSTANCE.padding.methodArg, replacement );
 
-                replacement.appendOpeningBrace( cuddleBraces )
+                replacement.appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getThenStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
 
                 StatementTree elseStatement = node.getElseStatement();
                 if( elseStatement != null ) {
-                    replacement.append( cuddleBraces ? SPACE : input.newline )
+                    replacement.append( Config.INSTANCE.cuddleBraces ? SPACE : input.newline )
                             .append( TokenType.ELSE );
 
                     if( elseStatement.getKind() == Kind.IF ) {
@@ -688,7 +680,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                                 .append( elseStatement );
                     } else {
                         // this is just an else block
-                        replacement.appendOpeningBrace( cuddleBraces )
+                        replacement.appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                             .appendBracedBlock( elseStatement, input.newline )
                             .append( TokenType.RIGHT_BRACE );
                     }
@@ -758,11 +750,11 @@ public class LayoutFormatter extends ReplacementFormatter {
 
                 if( node.getParameters().size() != 1 ) {
                     replacement.append(TokenType.LEFT_PAREN)
-                            .append(padding.methodArg);
+                            .append(Config.INSTANCE.padding.methodArg);
                 }
                 replacement.appendList( params, TokenType.COMMA, true );
                 if( node.getParameters().size() != 1 ) {
-                    replacement.append(padding.methodArg)
+                    replacement.append(Config.INSTANCE.padding.methodArg)
                             .append(TokenType.RIGHT_PAREN);
                 }
 
@@ -848,9 +840,9 @@ public class LayoutFormatter extends ReplacementFormatter {
             List<Tree> typeParams = node.getTypeParameters().stream().map( Tree.class::cast ).collect( Collectors.toList() );
             if( !typeParams.isEmpty() ) {
                 replacement.append( TokenType.LESS_THAN )
-                        .append( padding.typeParam )
+                        .append( Config.INSTANCE.padding.typeParam )
                         .appendList( typeParams, TokenType.COMMA, true )
-                        .append( padding.typeParam )
+                        .append( Config.INSTANCE.padding.typeParam )
                         .append( TokenType.GREATER_THAN )
                         .append( SPACE );
             }
@@ -868,14 +860,14 @@ public class LayoutFormatter extends ReplacementFormatter {
                 name = input.tokens.get( nameIdx ).toString();
             }
             replacement.append( name )
-                    .append( padding.methodName )
+                    .append( Config.INSTANCE.padding.methodName )
                     .append( TokenType.LEFT_PAREN );
 
             List<Tree> params = node.getParameters().stream().map( Tree.class::cast ).collect( Collectors.toList() );
             if( !params.isEmpty() ) {
-                replacement.append( padding.methodArg )
+                replacement.append( Config.INSTANCE.padding.methodArg )
                         .appendList( params, TokenType.COMMA, true )
-                        .append( padding.methodArg );
+                        .append( Config.INSTANCE.padding.methodArg );
             }
             replacement.append( TokenType.RIGHT_PAREN );
 
@@ -897,7 +889,7 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( node.getBody() == null ) {
                 replacement.append( TokenType.SEMICOLON );
             } else {
-                replacement.appendOpeningBrace( cuddleBraces )
+                replacement.appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getBody(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
             }
@@ -911,14 +903,14 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( VERBOSE ) System.out.println( "======visitMethodInvocation======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "MethodInvocation" )
                     .append( node.getMethodSelect() )
-                    .append( padding.methodName )
+                    .append( Config.INSTANCE.padding.methodName )
                     .append( TokenType.LEFT_PAREN );
 
             List<Tree> args = node.getArguments().stream().map( Tree.class::cast ).collect( Collectors.toList() );
             if( !args.isEmpty() ) {
-                replacement.append( padding.methodArg )
+                replacement.append( Config.INSTANCE.padding.methodArg )
                         .appendList( args, TokenType.COMMA, true )
-                        .append( padding.methodArg );
+                        .append( Config.INSTANCE.padding.methodArg );
             }
 
             replacement.append( TokenType.RIGHT_PAREN );
@@ -939,9 +931,9 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .collect( Collectors.toList() );
 
                 replacement.append( TokenType.LEFT_BRACE )
-                        .append( padding.array )
+                        .append( Config.INSTANCE.padding.array )
                         .appendList( initializers, TokenType.COMMA, true )
-                        .append( padding.array )
+                        .append( Config.INSTANCE.padding.array )
                         .append( TokenType.RIGHT_BRACE );
             } else {
                 replacement.append( TokenType.NEW )
@@ -959,9 +951,9 @@ public class LayoutFormatter extends ReplacementFormatter {
                     }
 
                     replacement.append( TokenType.LEFT_BRACKET )
-                            .append( padding.array )
+                            .append( Config.INSTANCE.padding.array )
                             .append( dims.next() )
-                            .append( padding.array )
+                            .append( Config.INSTANCE.padding.array )
                             .append( TokenType.RIGHT_BRACKET );
                 }
             }
@@ -981,14 +973,14 @@ public class LayoutFormatter extends ReplacementFormatter {
 
             List<Tree> args = node.getArguments().stream().map( Tree.class::cast ).collect( Collectors.toList() );
             if( !args.isEmpty() ) {
-                replacement.append( padding.methodArg )
+                replacement.append( Config.INSTANCE.padding.methodArg )
                         .appendList( args, TokenType.COMMA, true )
-                        .append( padding.methodArg );
+                        .append( Config.INSTANCE.padding.methodArg );
             }
             replacement.append( TokenType.RIGHT_PAREN );
 
             if( node.getClassBody() != null ) {
-                replacement.appendOpeningBrace( cuddleBraces )
+                replacement.appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getClassBody(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
             }
@@ -1012,7 +1004,7 @@ public class LayoutFormatter extends ReplacementFormatter {
 
             List<Tree> args = node.getTypeArguments().stream().map( Tree.class::cast ).collect( Collectors.toList() );
             if( !args.isEmpty() ) {
-                replacement.append( padding.typeParam )
+                replacement.append( Config.INSTANCE.padding.typeParam )
                         .appendList( args, TokenType.COMMA );
             }
             replacement.append( TokenType.GREATER_THAN );
@@ -1045,12 +1037,12 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( VERBOSE ) System.out.println( "======visitSwitch======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Switch" )
                     .append( TokenType.SWITCH )
-                    .append( padding.methodName );
+                    .append( Config.INSTANCE.padding.methodName );
 
-            // insert appropriate padding inside of parentheses
-            padParentheses( node.getExpression(), input, padding.methodArg, replacement );
+            // insert appropriate Config.INSTANCE.padding inside of parentheses
+            padParentheses( node.getExpression(), input, Config.INSTANCE.padding.methodArg, replacement );
 
-            replacement.appendOpeningBrace( cuddleBraces )
+            replacement.appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                     .appendList( node.getCases(), TokenType.NEWLINE )
                     .appendWithLeadingNewlines( TokenType.RIGHT_BRACE, 1 );
 
@@ -1063,12 +1055,12 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( VERBOSE ) System.out.println( "======visitSynchronized======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayType" )
                     .append( TokenType.SYNCHRONIZED )
-                    .append( padding.methodName );
+                    .append( Config.INSTANCE.padding.methodName );
 
-            // insert appropriate padding inside of parentheses
-            padParentheses( node.getExpression(), input, padding.methodArg, replacement );
+            // insert appropriate Config.INSTANCE.padding inside of parentheses
+            padParentheses( node.getExpression(), input, Config.INSTANCE.padding.methodArg, replacement );
 
-            replacement.appendOpeningBrace( cuddleBraces )
+            replacement.appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                     .appendBracedBlock( node.getBlock(), input.newline )
                     .append( TokenType.RIGHT_BRACE );
 
@@ -1097,25 +1089,25 @@ public class LayoutFormatter extends ReplacementFormatter {
 
             List<Tree> resources = node.getResources().stream().map( Tree.class::cast ).collect( Collectors.toList() );
             if( resources != null && !resources.isEmpty() ) {
-                replacement.append( padding.methodName )
+                replacement.append( Config.INSTANCE.padding.methodName )
                         .append( TokenType.LEFT_PAREN )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .appendList( resources, TokenType.SEMICOLON )
-                        .append( padding.methodArg )
+                        .append( Config.INSTANCE.padding.methodArg )
                         .append( TokenType.RIGHT_PAREN );
             }
 
             List<Tree> catches = node.getCatches().stream().map( Tree.class::cast ).collect( Collectors.toList() );
-            replacement.appendOpeningBrace( cuddleBraces )
+            replacement.appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                     .appendBracedBlock( node.getBlock(), input.newline )
                     .append( TokenType.RIGHT_BRACE )
-                    .append( cuddleBraces ? SPACE : input.newline )
+                    .append( Config.INSTANCE.cuddleBraces ? SPACE : input.newline )
                     .appendList( catches, SPACE );
 
             if( isValid( node.getFinallyBlock() ) ) {
-                replacement.append( cuddleBraces ? SPACE : input.newline )
+                replacement.append( Config.INSTANCE.cuddleBraces ? SPACE : input.newline )
                         .append( TokenType.FINALLY )
-                        .appendOpeningBrace( cuddleBraces )
+                        .appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getFinallyBlock(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
             }
@@ -1129,9 +1121,9 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( VERBOSE ) System.out.println( "======visitTypeCast======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "TypeCast" )
                     .append( TokenType.LEFT_PAREN )
-                    .append( padding.typeCast )
+                    .append( Config.INSTANCE.padding.typeCast )
                     .append( node.getType() )
-                    .append( padding.typeCast )
+                    .append( Config.INSTANCE.padding.typeCast )
                     .append( TokenType.RIGHT_PAREN )
                     .append( node.getExpression() );
 
@@ -1214,9 +1206,9 @@ public class LayoutFormatter extends ReplacementFormatter {
             } else {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "WhileLoop" )
                         .append( TokenType.WHILE )
-                        .append( padding.methodName )
+                        .append( Config.INSTANCE.padding.methodName )
                         .append( node.getCondition() )
-                        .appendOpeningBrace( cuddleBraces )
+                        .appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
                 if( ENABLED ) replacement.build().ifPresent( this::addReplacement );

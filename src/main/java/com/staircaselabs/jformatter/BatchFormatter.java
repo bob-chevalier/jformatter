@@ -1,10 +1,8 @@
 package com.staircaselabs.jformatter;
 
-import com.staircaselabs.jformatter.core.Config;
-import com.staircaselabs.jformatter.core.ConfigLoader;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import com.staircaselabs.jformatter.core.Config;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -31,8 +29,8 @@ public final class BatchFormatter {
         PrintWriter outWriter = new PrintWriter( new OutputStreamWriter( System.out, UTF_8 ) );
         PrintWriter errWriter = new PrintWriter( new OutputStreamWriter( System.err, UTF_8 ) );
 
-        // parse config file if one was provided, otherwise just create a default configuration object
-        Config config = configPath.map( ConfigLoader::parse ).orElse( new Config() );
+        // parse config file if one was provided
+        configPath.ifPresent( Config.INSTANCE::load );
 
         // convert filenames to paths and filter out non-java files and duplicates
         Set<Path> uniquePaths = new HashSet<>();
@@ -59,7 +57,7 @@ public final class BatchFormatter {
         for( Path path : uniquePaths ) {
             results.put(
                 path,
-                executorService.submit( new FileFormatter( path, config ) )
+                executorService.submit( new FileFormatter( path ) )
             );
         }
 

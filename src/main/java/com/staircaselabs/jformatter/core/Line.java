@@ -9,20 +9,18 @@ import java.util.stream.Collectors;
 
 public class Line {
 
-    private final Indent indent;
     private int parentIndentLevel;
     private int lineWrapIndentOffset;
     private LineSegment segment;
 
-    public Line( Indent indent, int parentIndentLevel, LineSegment segment ) {
-        this.indent = indent;
+    public Line( int parentIndentLevel, LineSegment segment ) {
         this.parentIndentLevel = parentIndentLevel;
         this.lineWrapIndentOffset = 0;
         this.segment = segment;
     }
 
-    public Line( Indent indent, int parentIndentLevel, List<TextToken> tokens, Strategy strategy ) {
-        this( indent, parentIndentLevel, LineSegment.create( tokens, null, strategy ) );
+    public Line( int parentIndentLevel, List<TextToken> tokens, Strategy strategy ) {
+        this( parentIndentLevel, LineSegment.create( tokens, null, strategy ) );
     }
 
     public void printMarkup() {
@@ -53,12 +51,12 @@ public class Line {
     public String toString() {
         return getWidth() == 0
                 ? ""
-                : indent.getText( getIndentLevel() ) + segment.toString();
+                : Config.INSTANCE.indent.getText( getIndentLevel() ) + segment.toString();
     }
 
     public int getWidth() {
         int segmentWidth = segment.getWidth();
-        return segmentWidth == 0 ? 0 : segmentWidth + indent.getWidth(getIndentLevel());
+        return segmentWidth == 0 ? 0 : segmentWidth + Config.INSTANCE.indent.getWidth(getIndentLevel());
     }
 
     public Deque<Line> wrap(String newline ) {
@@ -71,15 +69,15 @@ public class Line {
         Deque<Line> extraLines = new ArrayDeque<>();
         int prevIndentLevel = getIndentLevel();
         for( int i = 1; i < segments.size(); i++ ) {
-            Line extraLine = new Line( indent, prevIndentLevel, segments.get( i ) );
+            Line extraLine = new Line( prevIndentLevel, segments.get( i ) );
 
             if( i == 1 ) {
                 // add an indent offset to the first wrapped line
-               extraLine.setLineWrapIndentOffset( indent.getNumTabsAfterLineWrap() );
+               extraLine.setLineWrapIndentOffset( Config.INSTANCE.lineWrap.numTabsAfterLineBreak );
             } else if( i == segments.size() - 1 ) {
                 // if necessary, unindent the last wrapped line
                 if( segments.get( i ).getFirstToken().getType() == TextToken.TokenType.RIGHT_PAREN ) {
-                    extraLine.setLineWrapIndentOffset( -indent.getNumTabsAfterLineWrap() );
+                    extraLine.setLineWrapIndentOffset( -Config.INSTANCE.lineWrap.numTabsAfterLineBreak );
                 }
             }
 
