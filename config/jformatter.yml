@@ -12,9 +12,8 @@ trailingMethodNames: 0
 
 # line-wrapping
 maxLineWidth: 60
-numTabsAfterLineWrap: 2
-methodArgumentsOnNewLine: true
-closingParenthesesOnNewLine: true
+oneMethodArgumentPerLine: false
+closingParenthesesOnNewLine: false
 
 # number of tabs to insert after line-wrapping various tokens
 assignmentLineWrapTabs: 2

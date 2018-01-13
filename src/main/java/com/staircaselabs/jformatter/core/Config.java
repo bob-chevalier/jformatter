@@ -39,8 +39,7 @@ public enum Config {
 
             lineWrap = new LineWrapInfo.Builder()
                     .maxLineWidth( cfg.maxLineWidth )
-                    .numTabsAfterLineBreak( cfg.numTabsAfterLineWrap )
-                    .methodArgsOnNewLine( cfg.methodArgumentsOnNewLine )
+                    .oneMethodArgPerLine( cfg.oneMethodArgumentPerLine )
                     .closingParensOnNewLine( cfg.closingParenthesesOnNewLine )
                     .assignmentLineWrapTabs( cfg.assignmentLineWrapTabs )
                     .extendsLineWrapTabs( cfg.extendsLineWrapTabs )
@@ -78,8 +77,7 @@ public enum Config {
 
         // line-wrapping
         public int maxLineWidth = 120;
-        public int numTabsAfterLineWrap = 2;
-        public boolean methodArgumentsOnNewLine = true;
+        public boolean oneMethodArgumentPerLine = true;
         public boolean closingParenthesesOnNewLine = true;
 
         // number of tabs to insert when wrapping various tokens

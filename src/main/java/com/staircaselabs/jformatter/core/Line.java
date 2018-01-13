@@ -63,7 +63,7 @@ public class Line {
     }
 
     public Deque<Line> wrap(String newline ) {
-        boolean isMethodArgSegment = segment.getType() == LineWrap.METHOD_ARG;
+        LineWrap wrapType = segment.getType();
 
         // replace this line's segment with the first child segment
         List<LineSegment> branches = segment.getChildren();
@@ -74,8 +74,8 @@ public class Line {
             segment.appendLineBreak(newline);
         }
 
-        if( isMethodArgSegment && !Config.INSTANCE.lineWrap.methodArgsOnNewLine ) {
-            branches = flattenSegments( branches );
+        if( wrapType == LineWrap.METHOD_ARG && !Config.INSTANCE.lineWrap.oneMethodArgPerLine ) {
+            branches = flattenSegments( branches, wrapType );
         }
 
         // append linebreaks to each remaining segment, except the last, which already has one
@@ -91,7 +91,7 @@ public class Line {
 
             if( i == 0 ) {
                 // add an indent offset to the first wrapped line
-               extraLine.setLineWrapIndentOffset( Config.INSTANCE.lineWrap.numTabsAfterLineBreak );
+               extraLine.setLineWrapIndentOffset( Config.INSTANCE.lineWrap.tabsToInsert( wrapType ) );
             } else if( i == branches.size() - 1 ) {
                 // if necessary, unindent the last wrapped line
                 boolean isGroupClosingSymbol = branches.get( i ).getFirstToken()
@@ -99,7 +99,7 @@ public class Line {
                                 .map( LineWrapTag::isGroupClosingSymbol )
                                 .orElse( false );
                 if( isGroupClosingSymbol ) {
-                    extraLine.setLineWrapIndentOffset( -Config.INSTANCE.lineWrap.numTabsAfterLineBreak );
+                    extraLine.setLineWrapIndentOffset( -Config.INSTANCE.lineWrap.tabsToInsert( wrapType ) );
                 }
             }
 
@@ -116,11 +116,11 @@ public class Line {
         dotfile.write( path );
     }
 
-    private List<LineSegment> flattenSegments( List<LineSegment> segments ) {
+    private List<LineSegment> flattenSegments( List<LineSegment> segments, LineWrap wrapType ) {
         List<LineSegment> flattenedSegments = new ArrayList<>();
 
         int indentWidth = Config.INSTANCE.indent.getWidth( getIndentLevel() )
-                + Config.INSTANCE.lineWrap.numTabsAfterLineBreak;
+                + Config.INSTANCE.lineWrap.tabsToInsert( wrapType );
         LineSegment leaf = new LeafLineSegment( null );
 
         // if the last segment is a closing parenthesis, then we don't want to flatten it

@@ -2,25 +2,19 @@ package com.staircaselabs.jformatter.core;
 
 import com.sun.istack.internal.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class LineWrapInfo {
 
     public final int maxLineWidth;
-    public final int numTabsAfterLineBreak;
-    public final boolean methodArgsOnNewLine;
+    public final boolean oneMethodArgPerLine;
     public final boolean closingParensOnNewLine;
-    public final int assignmentLineWrapTabs;
-    public final int extendsLineWrapTabs;
-    public final int implementsLineWrapTabs;
-    public final int memberSelectLineWrapTabs;
-    public final int methodArgumentLineWrapTabs;
-    public final int ternaryLineWrapTabs;
-    public final int throwsLineWrapTabs;
-    public final int unboundListItemLineWrapTabs;
+    private final Map<LineWrap, Integer> numTabs = new HashMap<>();
 
     private LineWrapInfo(
             @NotNull Integer maxLineWidth,
-            @NotNull Integer numTabsAfterLineBreak,
-            @NotNull Boolean methodArgsOnNewLine,
+            @NotNull Boolean oneMethodArgPerLine,
             @NotNull Boolean closingParensOnNewLine,
             @NotNull Integer assignmentLineWrapTabs,
             @NotNull Integer extendsLineWrapTabs,
@@ -32,23 +26,25 @@ public class LineWrapInfo {
             @NotNull Integer unboundListItemLineWrapTabs
     ) {
         this.maxLineWidth = maxLineWidth;
-        this.numTabsAfterLineBreak = numTabsAfterLineBreak;
-        this.methodArgsOnNewLine = methodArgsOnNewLine;
+        this.oneMethodArgPerLine = oneMethodArgPerLine;
         this.closingParensOnNewLine = closingParensOnNewLine;
-        this.assignmentLineWrapTabs = assignmentLineWrapTabs;
-        this.extendsLineWrapTabs = extendsLineWrapTabs;
-        this.implementsLineWrapTabs = implementsLineWrapTabs;
-        this.memberSelectLineWrapTabs = memberSelectLineWrapTabs;
-        this.methodArgumentLineWrapTabs = methodArgumentLineWrapTabs;
-        this.ternaryLineWrapTabs = ternaryLineWrapTabs;
-        this.throwsLineWrapTabs = throwsLineWrapTabs;
-        this.unboundListItemLineWrapTabs = unboundListItemLineWrapTabs;
+        numTabs.put( LineWrap.ASSIGNMENT, assignmentLineWrapTabs );
+        numTabs.put( LineWrap.EXTENDS, extendsLineWrapTabs );
+        numTabs.put( LineWrap.IMPLEMENTS, implementsLineWrapTabs );
+        numTabs.put( LineWrap.MEMBER_SELECT, memberSelectLineWrapTabs );
+        numTabs.put( LineWrap.METHOD_ARG, methodArgumentLineWrapTabs );
+        numTabs.put( LineWrap.TERNARY, ternaryLineWrapTabs );
+        numTabs.put( LineWrap.THROWS, throwsLineWrapTabs );
+        numTabs.put( LineWrap.UNBOUND_LIST_ITEM, unboundListItemLineWrapTabs );
+    }
+
+    public int tabsToInsert( LineWrap type ) {
+        return numTabs.get(type);
     }
 
     public static class Builder {
         private Integer maxLineWidth = null;
-        private Integer numTabsAfterLineBreak = null;
-        private Boolean methodArgsOnNewLine = null;
+        private Boolean oneMethodArgPerLine = null;
         private Boolean closingParensOnNewLine = null;
         private Integer assignmentLineWrapTabs = null;
         private Integer extendsLineWrapTabs = null;
@@ -64,13 +60,8 @@ public class LineWrapInfo {
             return this;
         }
 
-        public Builder numTabsAfterLineBreak( int numTabsAfterLineBreak ) {
-            this.numTabsAfterLineBreak = numTabsAfterLineBreak;
-            return this;
-        }
-
-        public Builder methodArgsOnNewLine( boolean methodArgsOnNewLine ) {
-            this.methodArgsOnNewLine = methodArgsOnNewLine;
+        public Builder oneMethodArgPerLine( boolean oneMethodArgPerLine ) {
+            this.oneMethodArgPerLine = oneMethodArgPerLine;
             return this;
         }
 
@@ -122,8 +113,7 @@ public class LineWrapInfo {
         public LineWrapInfo build() {
             return new LineWrapInfo(
                 maxLineWidth,
-                numTabsAfterLineBreak,
-                methodArgsOnNewLine,
+                oneMethodArgPerLine,
                 closingParensOnNewLine,
                 assignmentLineWrapTabs,
                 extendsLineWrapTabs,
