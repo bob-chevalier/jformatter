@@ -3,6 +3,7 @@ package com.staircaselabs.jformatter;
 import com.staircaselabs.jformatter.core.Config;
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.Indent;
+import com.staircaselabs.jformatter.core.MarkupTool;
 import com.staircaselabs.jformatter.core.Padding;
 import com.staircaselabs.jformatter.formatters.*;
 
@@ -37,6 +38,7 @@ public class FileFormatter implements Callable<Boolean> {
                 .methodName( config.trailingMethodNames )
                 .build();
         maxLineWidth = config.maxLineWidth;
+        MarkupTool.setClosingParensOnNewLine( config.closingParenthesesOnNewLine );
         cuddleBraces = config.cuddleBraces;
     }
 

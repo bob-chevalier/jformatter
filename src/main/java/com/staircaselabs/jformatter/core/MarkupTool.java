@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 
 public class MarkupTool {
 
+    private static boolean closingParensOnNewLine = true;
     private final Input input;
     private int currentInclusive;
     private int endExclusive;
@@ -18,6 +19,10 @@ public class MarkupTool {
         this.input = input;
         this.currentInclusive = input.getFirstTokenIndex( enclosingTree );
         this.endExclusive = input.getLastTokenIndex( enclosingTree );
+    }
+
+    public static void setClosingParensOnNewLine( boolean putClosingParensOnNewLine ) {
+        closingParensOnNewLine = putClosingParensOnNewLine;
     }
 
     //TODO determine if this is ever called
@@ -40,7 +45,7 @@ public class MarkupTool {
 
     public void tagLineWrapGroupWithClosingParen( LineWrap wrapType, List<? extends Tree> list, String source ) {
         Optional<String> groupId = tagLineWrapGroup( wrapType, list, source );
-        if( groupId.isPresent() ) {
+        if( groupId.isPresent() && closingParensOnNewLine ) {
             tagToken( new LineWrapTag( groupId.get(), wrapType, source ), TokenType.RIGHT_PAREN );
         }
     }

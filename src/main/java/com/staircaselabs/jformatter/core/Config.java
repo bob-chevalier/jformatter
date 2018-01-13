@@ -15,9 +15,10 @@ public class Config {
     public int arrays = 1;
     public int trailingMethodNames = 1;
 
-    // miscellaneous parameters
+    // line-wrapping
     public int maxLineWidth = 120;
     public boolean cuddleBraces = true;
+    public boolean closingParenthesesOnNewLine = true;
 
 }
 

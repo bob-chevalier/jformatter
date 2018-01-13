@@ -11,7 +11,7 @@ typeParameters: 1
 arrays: 1
 trailingMethodNames: 0
 
-# miscellaneous
+# line-wrapping
 maxLineWidth: 120
 cuddleBraces: true
-
+closingParenthesesOnNewLine: false
