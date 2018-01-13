@@ -41,6 +41,9 @@ public enum Config {
                     .maxLineWidth( cfg.maxLineWidth )
                     .oneMethodArgPerLine( cfg.oneMethodArgumentPerLine )
                     .closingParensOnNewLine( cfg.closingParenthesesOnNewLine )
+                    .allowLineWrapAtMethodInvocationMemberSelect( cfg.allowLineWrapAtMethodInvocationMemberSelect )
+                    .allowLineWrapAtNewClassMemberSelect( cfg.allowLineWrapAtNewClassMemberSelect )
+                    .allowLineWrapAtIdentifierMemberSelect( cfg.allowLineWrapAtIdentifierMemberSelect )
                     .assignmentLineWrapTabs( cfg.assignmentLineWrapTabs )
                     .extendsLineWrapTabs( cfg.extendsLineWrapTabs )
                     .implementsLineWrapTabs( cfg.implementsLineWrapTabs )
@@ -79,6 +82,9 @@ public enum Config {
         public int maxLineWidth = 120;
         public boolean oneMethodArgumentPerLine = true;
         public boolean closingParenthesesOnNewLine = true;
+        public boolean allowLineWrapAtMethodInvocationMemberSelect = true;
+        public boolean allowLineWrapAtNewClassMemberSelect = false;
+        public boolean allowLineWrapAtIdentifierMemberSelect = false;
 
         // number of tabs to insert when wrapping various tokens
         public int assignmentLineWrapTabs = 2;

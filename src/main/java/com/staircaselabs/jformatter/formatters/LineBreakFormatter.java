@@ -358,8 +358,7 @@ public class LineBreakFormatter {
         @Override
         public Void visitMemberSelect(MemberSelectTree node, Input input ) {
             //TODO should we just filter on kind == METHHOD_INVOCATION?
-            if( node.getExpression().getKind() != Tree.Kind.IDENTIFIER
-                    && node.getExpression().getKind() != Tree.Kind.NEW_CLASS ) {
+            if( Config.INSTANCE.lineWrap.allowMemberSelectLineWrap( node.getExpression().getKind() ) ) {
                 //TODO will exprEnd always be the same as dot?
                 int exprEnd = input.getLastTokenIndex( node.getExpression() );
                 int dot = input.findNext( exprEnd, input.getLastTokenIndex( node ), TokenType.DOT )

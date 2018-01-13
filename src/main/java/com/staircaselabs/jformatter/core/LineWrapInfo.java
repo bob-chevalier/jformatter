@@ -1,9 +1,12 @@
 package com.staircaselabs.jformatter.core;
 
 import com.sun.istack.internal.NotNull;
+import com.sun.source.tree.Tree.Kind;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class LineWrapInfo {
 
@@ -11,11 +14,15 @@ public class LineWrapInfo {
     public final boolean oneMethodArgPerLine;
     public final boolean closingParensOnNewLine;
     private final Map<LineWrap, Integer> numTabs = new HashMap<>();
+    private final Set<Kind> wrappableMemberSelectTypes = new HashSet<>();
 
     private LineWrapInfo(
             @NotNull Integer maxLineWidth,
             @NotNull Boolean oneMethodArgPerLine,
             @NotNull Boolean closingParensOnNewLine,
+            @NotNull Boolean allowLineWrapAtMethodInvocationMemberSelect,
+            @NotNull Boolean allowLineWrapAtNewClassMemberSelect,
+            @NotNull Boolean allowLineWrapAtIdentifierMemberSelect,
             @NotNull Integer assignmentLineWrapTabs,
             @NotNull Integer extendsLineWrapTabs,
             @NotNull Integer implementsLineWrapTabs,
@@ -28,6 +35,7 @@ public class LineWrapInfo {
         this.maxLineWidth = maxLineWidth;
         this.oneMethodArgPerLine = oneMethodArgPerLine;
         this.closingParensOnNewLine = closingParensOnNewLine;
+
         numTabs.put( LineWrap.ASSIGNMENT, assignmentLineWrapTabs );
         numTabs.put( LineWrap.EXTENDS, extendsLineWrapTabs );
         numTabs.put( LineWrap.IMPLEMENTS, implementsLineWrapTabs );
@@ -36,16 +44,33 @@ public class LineWrapInfo {
         numTabs.put( LineWrap.TERNARY, ternaryLineWrapTabs );
         numTabs.put( LineWrap.THROWS, throwsLineWrapTabs );
         numTabs.put( LineWrap.UNBOUND_LIST_ITEM, unboundListItemLineWrapTabs );
+
+        if( allowLineWrapAtMethodInvocationMemberSelect ) {
+            wrappableMemberSelectTypes.add( Kind.METHOD_INVOCATION );
+        }
+        if( allowLineWrapAtNewClassMemberSelect ) {
+            wrappableMemberSelectTypes.add( Kind.NEW_CLASS );
+        }
+        if( allowLineWrapAtIdentifierMemberSelect ) {
+            wrappableMemberSelectTypes.add( Kind.IDENTIFIER );
+        }
     }
 
     public int tabsToInsert( LineWrap type ) {
         return numTabs.get(type);
     }
 
+    public boolean allowMemberSelectLineWrap( Kind memberSelectKind ) {
+        return wrappableMemberSelectTypes.contains( memberSelectKind );
+    }
+
     public static class Builder {
         private Integer maxLineWidth = null;
         private Boolean oneMethodArgPerLine = null;
         private Boolean closingParensOnNewLine = null;
+        private Boolean allowLineWrapAtMethodInvocationMemberSelect = null;
+        private Boolean allowLineWrapAtNewClassMemberSelect = null;
+        private Boolean allowLineWrapAtIdentifierMemberSelect = null;
         private Integer assignmentLineWrapTabs = null;
         private Integer extendsLineWrapTabs = null;
         private Integer implementsLineWrapTabs = null;
@@ -67,6 +92,21 @@ public class LineWrapInfo {
 
         public Builder closingParensOnNewLine( boolean closingParensOnNewLine ) {
             this.closingParensOnNewLine = closingParensOnNewLine;
+            return this;
+        }
+
+        public Builder allowLineWrapAtMethodInvocationMemberSelect( boolean isAllowed ) {
+            this.allowLineWrapAtMethodInvocationMemberSelect = isAllowed;
+            return this;
+        }
+
+        public Builder allowLineWrapAtNewClassMemberSelect( boolean isAllowed ) {
+            this.allowLineWrapAtNewClassMemberSelect = isAllowed;
+            return this;
+        }
+
+        public Builder allowLineWrapAtIdentifierMemberSelect( boolean isAllowed ) {
+            this.allowLineWrapAtIdentifierMemberSelect = isAllowed;
             return this;
         }
 
@@ -115,6 +155,9 @@ public class LineWrapInfo {
                 maxLineWidth,
                 oneMethodArgPerLine,
                 closingParensOnNewLine,
+                allowLineWrapAtMethodInvocationMemberSelect,
+                allowLineWrapAtNewClassMemberSelect,
+                allowLineWrapAtIdentifierMemberSelect,
                 assignmentLineWrapTabs,
                 extendsLineWrapTabs,
                 implementsLineWrapTabs,

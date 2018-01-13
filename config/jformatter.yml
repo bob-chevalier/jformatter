@@ -14,6 +14,9 @@ trailingMethodNames: 0
 maxLineWidth: 60
 oneMethodArgumentPerLine: false
 closingParenthesesOnNewLine: false
+allowLineWrapAtMethodInvocationMemberSelect: true
+allowLineWrapAtNewClassMemberSelect: true
+allowLineWrapAtIdentifierMemberSelect: false
 
 # number of tabs to insert after line-wrapping various tokens
 assignmentLineWrapTabs: 2
