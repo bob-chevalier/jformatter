@@ -34,6 +34,7 @@ public enum Config {
             lineWrap = new LineWrapInfo.Builder()
                     .maxLineWidth( cfg.maxLineWidth )
                     .numTabsAfterLineBreak( cfg.numTabsAfterLineWrap )
+                    .methodArgsOnNewLine( cfg.methodArgumentsOnNewLine )
                     .closingParensOnNewLine( cfg.closingParenthesesOnNewLine )
                     .build();
 
@@ -60,8 +61,8 @@ public enum Config {
         // line-wrapping
         public int maxLineWidth = 120;
         public int numTabsAfterLineWrap = 2;
-        public boolean closingParenthesesOnNewLine = true;
         public boolean methodArgumentsOnNewLine = true;
+        public boolean closingParenthesesOnNewLine = true;
 
         // miscellaneous
         public boolean cuddleBraces = true;

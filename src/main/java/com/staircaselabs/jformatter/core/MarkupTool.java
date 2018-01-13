@@ -29,7 +29,7 @@ public class MarkupTool {
 
             // tag all remaining trees, using the group ID from the first tag
             for( int i = 1; i < list.size(); i++ ) {
-               tagTree( new LineWrapTag( tag.getGroupId(), wrapType, source ), list.get( i ) );
+                tagTree(new LineWrapTag(tag.getGroupId(), wrapType, source), list.get(i));
             }
 
             return Optional.of( tag.getGroupId() );

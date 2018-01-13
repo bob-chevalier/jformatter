@@ -13,8 +13,8 @@ trailingMethodNames: 0
 # line-wrapping
 maxLineWidth: 60
 numTabsAfterLineWrap: 2
-closingParenthesesOnNewLine: true
 methodArgumentsOnNewLine: true
+closingParenthesesOnNewLine: true
 
 # miscellaneous
 cuddleBraces: true

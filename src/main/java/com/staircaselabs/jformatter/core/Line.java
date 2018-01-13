@@ -1,11 +1,14 @@
 package com.staircaselabs.jformatter.core;
 
 import com.staircaselabs.jformatter.core.LineWrapPriority.Strategy;
+import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Line {
 
@@ -44,7 +47,7 @@ public class Line {
     }
 
     public boolean canBeSplit() {
-        return segment.canBeSplit();
+        return !segment.isLeaf();
     }
 
     @Override
@@ -60,23 +63,38 @@ public class Line {
     }
 
     public Deque<Line> wrap(String newline ) {
-        List<LineSegment> segments = segment.split( newline );
+        boolean isMethodArgSegment = segment.getType() == LineWrap.METHOD_ARG;
 
-        // replace this line's segment with the first segment
-        segment = segments.get( 0 );
+        // replace this line's segment with the first child segment
+        List<LineSegment> branches = segment.getChildren();
+        segment = branches.remove( 0 );
+
+        // append a new line-break to the first child, unless there's only one child, in which case it already has one
+        if( !branches.isEmpty() ) {
+            segment.appendLineBreak(newline);
+        }
+
+        if( isMethodArgSegment && !Config.INSTANCE.lineWrap.methodArgsOnNewLine ) {
+            branches = flattenSegments( branches );
+        }
+
+        // append linebreaks to each remaining segment, except the last, which already has one
+        IntStream.range( 0, branches.size() - 1 )
+                .mapToObj( branches::get )
+                .forEach( s -> s.appendLineBreak( newline ) );
 
         // wrap each remaining segment in a new line
         Deque<Line> extraLines = new ArrayDeque<>();
         int prevIndentLevel = getIndentLevel();
-        for( int i = 1; i < segments.size(); i++ ) {
-            Line extraLine = new Line( prevIndentLevel, segments.get( i ) );
+        for( int i = 0; i < branches.size(); i++ ) {
+            Line extraLine = new Line( prevIndentLevel, branches.get( i ) );
 
-            if( i == 1 ) {
+            if( i == 0 ) {
                 // add an indent offset to the first wrapped line
                extraLine.setLineWrapIndentOffset( Config.INSTANCE.lineWrap.numTabsAfterLineBreak );
-            } else if( i == segments.size() - 1 ) {
+            } else if( i == branches.size() - 1 ) {
                 // if necessary, unindent the last wrapped line
-                if( segments.get( i ).getFirstToken().getType() == TextToken.TokenType.RIGHT_PAREN ) {
+                if( branches.get( i ).getFirstToken().getType() == TextToken.TokenType.RIGHT_PAREN ) {
                     extraLine.setLineWrapIndentOffset( -Config.INSTANCE.lineWrap.numTabsAfterLineBreak );
                 }
             }
@@ -92,6 +110,55 @@ public class Line {
         DotFile dotfile = new DotFile();
         segment.loadDotFile( null, dotfile );
         dotfile.write( path );
+    }
+
+    private List<LineSegment> flattenSegments( List<LineSegment> segments ) {
+        List<LineSegment> flattenedSegments = new ArrayList<>();
+
+        int indentWidth = Config.INSTANCE.indent.getWidth( getIndentLevel() )
+                + Config.INSTANCE.lineWrap.numTabsAfterLineBreak;
+        LineSegment leaf = new LeafLineSegment( null );
+
+        // if the last segment is a closing parenthesis, then we don't want to flatten it
+        boolean hasClosingParen = segments.get( segments.size() - 1 ).getFirstToken().getType() == TokenType.RIGHT_PAREN;
+        int stopPos =  hasClosingParen ? segments.size() - 1 : segments.size();
+
+        for( int i = 0; i < stopPos; i++ ) {
+            LineSegment segment = segments.get( i );
+
+            if( indentWidth + leaf.getWidth() + segment.getWidth() > Config.INSTANCE.lineWrap.maxLineWidth ) {
+                // adding this segment will push us over the max line width
+                if( !leaf.getTokens().isEmpty() ) {
+                    // we've already added some segments to the leaf so add it to list and create a new leaf
+                    flattenedSegments.add( leaf );
+                    leaf = new LeafLineSegment( null );
+                }
+
+                // now that we've potentially created a new leaf, check whether this segment will fit again
+                if( indentWidth + leaf.getWidth() + segment.getWidth() <= Config.INSTANCE.lineWrap.maxLineWidth ) {
+                    // it fits so flatten it and add it to the leaf
+                    segment.getTokens().forEach( leaf::add );
+                } else {
+                    // it still doesn't fit so just add it as a separate segment
+                    flattenedSegments.add( segment );
+                }
+            } else {
+                // there's room for this segment so flatten it and add it to the leaf
+                segment.getTokens().forEach( leaf::add );
+            }
+        }
+
+        // add the final leaf node, unless it's empty
+        if( !leaf.getTokens().isEmpty() ) {
+            flattenedSegments.add( leaf );
+        }
+
+        // add closing parenthesis segment, if it exists
+        if( hasClosingParen ) {
+            flattenedSegments.add( segments.get( segments.size() - 1 ) );
+        }
+
+        return flattenedSegments;
     }
 
 }

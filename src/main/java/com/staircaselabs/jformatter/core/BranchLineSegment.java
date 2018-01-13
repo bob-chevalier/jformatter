@@ -9,12 +9,12 @@ import java.util.stream.IntStream;
 
 public class BranchLineSegment extends LineSegment {
 
-    private final String label;
+    private final LineWrap type;
     private List<LineSegment> branches = new ArrayList<>();
 
-    public BranchLineSegment( LineSegment parent, String label ) {
+    public BranchLineSegment( LineSegment parent, LineWrap type ) {
         super( parent );
-        this.label = label;
+        this.type = type;
     }
 
     @Override
@@ -58,8 +58,8 @@ public class BranchLineSegment extends LineSegment {
     }
 
     @Override
-    public boolean canBeSplit() {
-        return branches.size() > 1;
+    public LineWrap getType() {
+        return type;
     }
 
     @Override
@@ -73,11 +73,16 @@ public class BranchLineSegment extends LineSegment {
     }
 
     @Override
+    public List<LineSegment> getChildren() {
+        return branches;
+    }
+
+    @Override
     public void loadDotFile( String parentId, DotFile dotfile ) {
         // generate a unique ID for this node and remove any dashes
         String uuid = UUID.randomUUID().toString();
 
-        dotfile.addNode( uuid, label );
+        dotfile.addNode( uuid, type.toString() );
 
         // add an edge from parent to this node
         if( parentId != null ) {

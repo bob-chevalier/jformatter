@@ -52,13 +52,18 @@ public class LeafLineSegment extends LineSegment {
     }
 
     @Override
-    public boolean canBeSplit() {
-        return false;
+    public LineWrap getType() {
+        throw new UnsupportedOperationException( "LeafLineSegments do not have an associated LineWrap type" );
     }
 
     @Override
     public List<LineSegment> split(String newline ) {
         throw new UnsupportedOperationException( "LeafLineSegments cannot be split" );
+    }
+
+    @Override
+    public List<LineSegment> getChildren() {
+        throw new UnsupportedOperationException( "LeafLineSegments do not have child nodes" );
     }
 
     @Override

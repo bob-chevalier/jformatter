@@ -31,9 +31,11 @@ public abstract class LineSegment {
 
     public abstract boolean isLeaf();
 
-    public abstract boolean canBeSplit();
+    public abstract LineWrap getType();
 
     public abstract List<LineSegment> split( String newline );
+
+    public abstract List<LineSegment> getChildren();
 
     public abstract void loadDotFile( String parentId, DotFile dotfile );
 
@@ -70,7 +72,7 @@ public abstract class LineSegment {
         LineSegment node = null;
 
         if( maxPriorityTag.isPresent() ) {
-            node = new BranchLineSegment( parent, maxPriorityTag.get().getType().toString() );
+            node = new BranchLineSegment( parent, maxPriorityTag.get().getType() );
             int pos = 0;
             for( int nextSegmentStart : positions ) {
                 node.add( create( tokens.subList( pos, nextSegmentStart ), node, strategy ) );
