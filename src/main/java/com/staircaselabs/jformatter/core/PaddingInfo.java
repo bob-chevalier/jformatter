@@ -1,5 +1,7 @@
 package com.staircaselabs.jformatter.core;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.Collections;
 
 public class PaddingInfo {
@@ -12,12 +14,12 @@ public class PaddingInfo {
     public final String array;
 
     private PaddingInfo(
-            int methodNameSpaces,
-            int methodArgSpaces,
-            int parenGroupingSpaces,
-            int typeCastSpaces,
-            int typeParamSpaces,
-            int arraySpaces
+            @NotNull Integer methodNameSpaces,
+            @NotNull Integer methodArgSpaces,
+            @NotNull Integer parenGroupingSpaces,
+            @NotNull Integer typeCastSpaces,
+            @NotNull Integer typeParamSpaces,
+            @NotNull Integer arraySpaces
     ) {
         methodName = String.join( "", Collections.nCopies( methodNameSpaces, " " ) );
         methodArg = String.join( "", Collections.nCopies( methodArgSpaces, " " ) );
@@ -28,12 +30,12 @@ public class PaddingInfo {
     }
 
     public static class Builder {
-        private int methodNameSpaces = 0;
-        private int methodArgSpaces = 1;
-        private int parenGroupingSpaces = 0;
-        private int typeCastSpaces = 0;
-        private int typeParamSpaces = 0;
-        private int arraySpaces = 1;
+        private Integer methodNameSpaces = null;
+        private Integer methodArgSpaces = null;
+        private Integer parenGroupingSpaces = null;
+        private Integer typeCastSpaces = null;
+        private Integer typeParamSpaces = null;
+        private Integer arraySpaces = null;
 
         public Builder methodName( int numSpaces ) {
             methodNameSpaces = numSpaces;

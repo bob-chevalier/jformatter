@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 public enum Config {
     INSTANCE;
@@ -14,11 +15,16 @@ public enum Config {
     public LineWrapInfo lineWrap;
     public boolean cuddleBraces;
 
-    public void load( String configPath ) {
+    public void load( Optional<String> configPath ) {
         try {
-            Path fullPath = Paths.get(configPath).toRealPath();
-            YamlReader reader = new YamlReader(new FileReader(fullPath.toString()));
-            ConfigFile cfg = reader.read(ConfigFile.class);
+            ConfigFile cfg;
+            if( configPath.isPresent() ) {
+                Path fullPath = Paths.get( configPath.get() ).toRealPath();
+                YamlReader reader = new YamlReader(new FileReader(fullPath.toString()));
+                cfg = reader.read(ConfigFile.class);
+            } else {
+                cfg = new ConfigFile();
+            }
 
             indent = cfg.convertTabsToSpaces ? IndentInfo.spaces( cfg.tabWidth  ) : IndentInfo.tabs( cfg.tabWidth );
 
@@ -36,6 +42,14 @@ public enum Config {
                     .numTabsAfterLineBreak( cfg.numTabsAfterLineWrap )
                     .methodArgsOnNewLine( cfg.methodArgumentsOnNewLine )
                     .closingParensOnNewLine( cfg.closingParenthesesOnNewLine )
+                    .assignmentLineWrapTabs( cfg.assignmentLineWrapTabs )
+                    .extendsLineWrapTabs( cfg.extendsLineWrapTabs )
+                    .implementsLineWrapTabs( cfg.implementsLineWrapTabs )
+                    .memberSelectLineWrapTabs( cfg.memberSelectLineWrapTabs )
+                    .methodArgumentLineWrapTabs( cfg.methodArgumentLineWrapTabs )
+                    .ternaryLineWrapTabs( cfg.ternaryLineWrapTabs )
+                    .throwsLineWrapTabs( cfg.throwsLineWrapTabs )
+                    .unboundListItemLineWrapTabs( cfg.unboundListItemLineWrapTabs )
                     .build();
 
             cuddleBraces = cfg.cuddleBraces;
@@ -44,6 +58,10 @@ public enum Config {
         }
     }
 
+    /**
+     * Object that YAML configuration files are parsed into.
+     * If no YAML file is provided, the defaults provided in this object will be used.
+     */
     public static class ConfigFile {
 
         // indentation parameters
@@ -52,17 +70,27 @@ public enum Config {
 
         // padding parameters
         public int methodArguments = 1;
-        public int groupingParentheses = 1;
-        public int typeCasts = 1;
-        public int typeParameters = 1;
+        public int groupingParentheses = 0;
+        public int typeCasts = 0;
+        public int typeParameters = 0;
         public int arrays = 1;
-        public int trailingMethodNames = 1;
+        public int trailingMethodNames = 0;
 
         // line-wrapping
         public int maxLineWidth = 120;
         public int numTabsAfterLineWrap = 2;
         public boolean methodArgumentsOnNewLine = true;
         public boolean closingParenthesesOnNewLine = true;
+
+        // number of tabs to insert when wrapping various tokens
+        public int assignmentLineWrapTabs = 2;
+        public int extendsLineWrapTabs = 2;
+        public int implementsLineWrapTabs = 2;
+        public int memberSelectLineWrapTabs = 2;
+        public int methodArgumentLineWrapTabs = 2;
+        public int ternaryLineWrapTabs = 2;
+        public int throwsLineWrapTabs = 2;
+        public int unboundListItemLineWrapTabs = 2;
 
         // miscellaneous
         public boolean cuddleBraces = true;

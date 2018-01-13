@@ -30,7 +30,7 @@ public final class BatchFormatter {
         PrintWriter errWriter = new PrintWriter( new OutputStreamWriter( System.err, UTF_8 ) );
 
         // parse config file if one was provided
-        configPath.ifPresent( Config.INSTANCE::load );
+        Config.INSTANCE.load( configPath );
 
         // convert filenames to paths and filter out non-java files and duplicates
         Set<Path> uniquePaths = new HashSet<>();

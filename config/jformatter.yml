@@ -4,9 +4,9 @@ tabWidth: 4
 
 # padding
 methodArguments: 1
-groupingParentheses: 1
-typeCasts: 1
-typeParameters: 1
+groupingParentheses: 0
+typeCasts: 0
+typeParameters: 0
 arrays: 1
 trailingMethodNames: 0
 
@@ -15,6 +15,16 @@ maxLineWidth: 60
 numTabsAfterLineWrap: 2
 methodArgumentsOnNewLine: true
 closingParenthesesOnNewLine: true
+
+# number of tabs to insert after line-wrapping various tokens
+assignmentLineWrapTabs: 2
+extendsLineWrapTabs: 2
+implementsLineWrapTabs: 2
+memberSelectLineWrapTabs: 1
+methodArgumentLineWrapTabs: 2
+ternaryLineWrapTabs: 2
+throwsLineWrapTabs: 2
+unboundListItemLineWrapTabs: 2
 
 # miscellaneous
 cuddleBraces: true
