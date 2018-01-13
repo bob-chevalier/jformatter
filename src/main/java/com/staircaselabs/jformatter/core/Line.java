@@ -94,7 +94,11 @@ public class Line {
                extraLine.setLineWrapIndentOffset( Config.INSTANCE.lineWrap.numTabsAfterLineBreak );
             } else if( i == branches.size() - 1 ) {
                 // if necessary, unindent the last wrapped line
-                if( branches.get( i ).getFirstToken().getType() == TextToken.TokenType.RIGHT_PAREN ) {
+                boolean isGroupClosingSymbol = branches.get( i ).getFirstToken()
+                                .getLineWrapTag()
+                                .map( LineWrapTag::isGroupClosingSymbol )
+                                .orElse( false );
+                if( isGroupClosingSymbol ) {
                     extraLine.setLineWrapIndentOffset( -Config.INSTANCE.lineWrap.numTabsAfterLineBreak );
                 }
             }
@@ -120,8 +124,12 @@ public class Line {
         LineSegment leaf = new LeafLineSegment( null );
 
         // if the last segment is a closing parenthesis, then we don't want to flatten it
-        boolean hasClosingParen = segments.get( segments.size() - 1 ).getFirstToken().getType() == TokenType.RIGHT_PAREN;
-        int stopPos =  hasClosingParen ? segments.size() - 1 : segments.size();
+        boolean hasGroupClosingSymbol = segments.get( segments.size() - 1 ).getFirstToken()
+                .getLineWrapTag()
+                .map( LineWrapTag::isGroupClosingSymbol )
+                .orElse( false );
+
+        int stopPos = hasGroupClosingSymbol ? segments.size() - 1 : segments.size();
 
         for( int i = 0; i < stopPos; i++ ) {
             LineSegment segment = segments.get( i );
@@ -153,8 +161,8 @@ public class Line {
             flattenedSegments.add( leaf );
         }
 
-        // add closing parenthesis segment, if it exists
-        if( hasClosingParen ) {
+        // add closing symbol segment (i.e. right-paren or right-brace), if it exists
+        if( hasGroupClosingSymbol ) {
             flattenedSegments.add( segments.get( segments.size() - 1 ) );
         }
 

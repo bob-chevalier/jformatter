@@ -41,7 +41,9 @@ public class MarkupTool {
     public void tagLineWrapGroupWithClosingParen( LineWrap wrapType, List<? extends Tree> list, String source ) {
         Optional<String> groupId = tagLineWrapGroup( wrapType, list, source );
         if( groupId.isPresent() && Config.INSTANCE.lineWrap.closingParensOnNewLine ) {
-            tagToken( new LineWrapTag( groupId.get(), wrapType, source ), TokenType.RIGHT_PAREN );
+            LineWrapTag tag = new LineWrapTag( groupId.get(), wrapType, source );
+            tag.setIsGroupClosingSymbol( true );
+            tagToken( tag, TokenType.RIGHT_PAREN );
         }
     }
 
