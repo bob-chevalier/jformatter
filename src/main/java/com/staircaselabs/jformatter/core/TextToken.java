@@ -42,10 +42,8 @@ public class TextToken {
     }
 
     public int getWidth() {
-        // ignore newlines when calculating the width of a line
-        return (type == TokenType.NEWLINE
-                ? 0
-                : endExclusive - beginInclusive);
+        // ignore newlines when calculating width
+        return (type == TokenType.NEWLINE  ? 0 : endExclusive - beginInclusive);
     }
 
     @Override

@@ -9,29 +9,30 @@ import java.util.stream.IntStream;
 
 public class BranchLineSegment extends LineSegment {
 
-    private final LineWrap type;
-    private List<LineSegment> branches = new ArrayList<>();
+    protected final LineWrap type;
+
+    protected final List<LineSegment> branches = new ArrayList<>();
 
     public BranchLineSegment( LineSegment parent, LineWrap type ) {
         super( parent );
         this.type = type;
     }
 
-    @Override
-    public void add( TextToken token ) {
-        throw new UnsupportedOperationException( "Adding a TextToken is not a valid BranchLineSegment operation" );
-    }
-
-    @Override
     public void add( LineSegment segment ) {
         segment.parent = this;
         branches.add( segment );
-        width += segment.getWidth();
+
+        // we want this node's offset to be equal to the last branch's offset
+        offset = segment.offset;
     }
 
-    @Override
-    public TextToken getFirstToken() {
-        return branches.get( 0 ).getFirstToken();
+    public void insertLineBreaks( String newline ) {
+        // append linebreaks to each segment, except the last
+        IntStream.range( 0, branches.size() - 1 )
+                .mapToObj( branches::get )
+                .map( LineSegment::getLastLeaf )
+                .map( LeafLineSegment.class::cast )
+                .forEach( s -> s.appendLineBreak( newline ) );
     }
 
     @Override
@@ -43,38 +44,23 @@ public class BranchLineSegment extends LineSegment {
     }
 
     @Override
-    public void appendLineBreak( String newline ) {
-        branches.get( branches.size() - 1 ).appendLineBreak( newline );
-    }
-
-    @Override
-    public int getIndentOffset() {
-        return branches.get( 0 ).getIndentOffset();
-    }
-
-    @Override
     public boolean isLeaf() {
         return false;
     }
 
     @Override
-    public LineWrap getType() {
-        return type;
+    public int getLeafCount() {
+        return branches.stream().mapToInt( LineSegment::getLeafCount ).sum();
     }
 
     @Override
-    public List<LineSegment> split(String newline ) {
-        // append linebreaks to each segment, except the last, which already has one
-        IntStream.range( 0, branches.size() - 1 )
-                .mapToObj( branches::get )
-                .forEach( s -> s.appendLineBreak( newline ) );
-
-        return branches;
+    public LineSegment getFirstLeaf() {
+        return branches.get( 0 ).getFirstLeaf();
     }
 
     @Override
-    public List<LineSegment> getChildren() {
-        return branches;
+    public LineSegment getLastLeaf() {
+        return branches.get( branches.size() - 1 ).getLastLeaf();
     }
 
     @Override
@@ -82,7 +68,7 @@ public class BranchLineSegment extends LineSegment {
         // generate a unique ID for this node and remove any dashes
         String uuid = UUID.randomUUID().toString();
 
-        dotfile.addNode( uuid, type.toString() );
+        dotfile.addNode( uuid, "(" + offset + ")" + type.toString() );
 
         // add an edge from parent to this node
         if( parentId != null ) {
@@ -91,6 +77,11 @@ public class BranchLineSegment extends LineSegment {
 
         // process any branches
         branches.forEach( b -> b.loadDotFile( uuid, dotfile ) );
+    }
+
+    @Override
+    public String toString() {
+        return branches.stream().map( LineSegment::toString ).collect( Collectors.joining() );
     }
 
 }

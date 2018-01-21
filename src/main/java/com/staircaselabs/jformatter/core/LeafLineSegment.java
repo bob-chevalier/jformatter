@@ -9,26 +9,37 @@ import java.util.stream.Collectors;
 
 public class LeafLineSegment extends LineSegment {
 
-    private final List<TextToken> tokens = new ArrayList<>();
+    protected final List<TextToken> tokens = new ArrayList<>();
+    protected int width = 0;
 
-    public LeafLineSegment( LineSegment parent ) {
-        super( parent );
+    public LeafLineSegment(int prevOffset, List<TextToken> tokens, LineSegment parent) {
+        super(parent);
+        this.tokens.addAll( tokens );
+        offset = prevOffset + tokens.get( 0 ).getIndentOffset();
+        width = tokens.stream().mapToInt( TextToken::getWidth ).sum();
     }
 
-    @Override
-    public void add( TextToken token ) {
-        tokens.add( token );
-        width += token.getWidth();
+    public LeafLineSegment(int prevOffset, LineSegment parent) {
+        super(parent);
+        offset = prevOffset;
     }
 
-    @Override
-    public void add( LineSegment segment ) {
-       throw new UnsupportedOperationException( "Adding a LineSegment is not a valid LeafLineSegment operation" );
+    public void addTokens(List<TextToken> tokens) {
+        this.tokens.addAll( tokens );
+        offset += tokens.get( 0 ).getIndentOffset();
+        width += tokens.stream().mapToInt( TextToken::getWidth ).sum();
     }
 
-    @Override
-    public TextToken getFirstToken() {
-        return tokens.get( 0 );
+    public void appendLineBreak(String newline) {
+        tokens.add(new TextToken(newline, TokenType.NEWLINE, 0, 0));
+    }
+
+    public int getWidth() {
+        return offset + width;
+    }
+
+    public boolean isEmpty() {
+        return tokens.isEmpty();
     }
 
     @Override
@@ -37,51 +48,48 @@ public class LeafLineSegment extends LineSegment {
     }
 
     @Override
-    public void appendLineBreak( String newline ) {
-        tokens.add( new TextToken( newline, TokenType.NEWLINE, 0, 0 ) );
-    }
-
-    @Override
-    public int getIndentOffset() {
-        return getFirstToken().getIndentOffset();
-    }
-
-    @Override
     public boolean isLeaf() {
         return true;
     }
 
     @Override
-    public LineWrap getType() {
-        throw new UnsupportedOperationException( "LeafLineSegments do not have an associated LineWrap type" );
+    public int getLeafCount() {
+        return 1;
     }
 
     @Override
-    public List<LineSegment> split(String newline ) {
-        throw new UnsupportedOperationException( "LeafLineSegments cannot be split" );
+    public LineSegment getFirstLeaf() {
+        return this;
     }
 
     @Override
-    public List<LineSegment> getChildren() {
-        throw new UnsupportedOperationException( "LeafLineSegments do not have child nodes" );
+    public LineSegment getLastLeaf() {
+        return this;
     }
 
     @Override
-    public void loadDotFile( String parentId, DotFile dotfile ) {
+    public void loadDotFile(String parentId, DotFile dotfile) {
         // generate a unique ID for this node and remove any dashes
         String uuid = UUID.randomUUID().toString();
 
         // strip off any newlines and double-quotes because Graphviz doesn't like them
-        String label = tokens.stream().map( TextToken::toString ).collect( Collectors.joining() );
-        label = label.replace( "\"", "" );
+        String label = tokens.stream().map(TextToken::toString).collect(Collectors.joining());
+        label = label.replace("\"", "");
+        label = "(" + offset + ")" + label;
 
         // add a label entry for this node
-        dotfile.addNode( uuid, label );
+        dotfile.addNode(uuid, label);
 
         // add an edge from parent to this node
-        if( parentId != null ) {
-            dotfile.addEdge( parentId, uuid );
+        if (parentId != null) {
+            dotfile.addEdge(parentId, uuid);
         }
+    }
+
+    @Override
+    public String toString() {
+        String indentText = width == 0 ? "" : Config.INSTANCE.indent.getText( offset );
+        return indentText + tokens.stream().map(TextToken::toString).collect(Collectors.joining());
     }
 
 }

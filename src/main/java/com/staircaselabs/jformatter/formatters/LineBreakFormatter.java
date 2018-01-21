@@ -34,13 +34,10 @@ import com.sun.source.tree.WhileLoopTree;
 import com.sun.source.util.TreePathScanner;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -73,68 +70,29 @@ public class LineBreakFormatter {
             lineTokens.add( token );
 
             if( token.getType() == TokenType.NEWLINE ) {
-                // if there are any memember select line wrap tags, we need to group them
+                // if there are any member select line wrap tags, we need to group them
                 groupMemberSelectTags( lineTokens );
 
-                Line line = new Line( prevLineIndentLevel, lineTokens, Strategy.PRIMARY );
+                Line line = new Line( prevLineIndentLevel, lineTokens, input.newline, Strategy.PRIMARY );
+                if( line.isWrapped() ) {
+                    // line will be wrapped so see if we can do any better with another wrapping strategy
+                    int wrapCount = line.getLineWrapCount();
+                    Line alternate = new Line( prevLineIndentLevel, lineTokens, input.newline, Strategy.SECONDARY );
+                    if( alternate.getLineWrapCount() < wrapCount ) {
+                        line = alternate;
+                    }
+                }
+
                 lines.add( line );
                 prevLineIndentLevel = line.getIndentLevel();
                 lineTokens = new LinkedList<>();
             }
         }
 
-//        lines.forEach( Line::printMarkup );
-//        lines.get( 3 ).writeDotFile( "/Users/rchevalier/bob.dot" );
-
-        // insert additional line-breaks where necessary to enforce maximum line width
-        ListIterator<Line> iter = lines.listIterator();
-        while( iter.hasNext() ) {
-            Line line = iter.next();
-            List<TextToken> originalTokens = line.getTokens();
-
-            List<Line> wrappedLines = generateWrappedLines( line, input.newline );
-            if( wrappedLines.size() > 1 ) {
-                // try a different line-wrap strategy
-                Line secondary = new Line( line.getParentIndentLevel(), originalTokens, Strategy.SECONDARY );
-                List<Line> secondaryWrappedLines = generateWrappedLines( secondary, input.newline );
-
-                // choose whichever strategy results in the fewest number of wrapped lines
-                if( secondaryWrappedLines.size() < wrappedLines.size() ) {
-                    iter.set( secondary );
-                    wrappedLines = secondaryWrappedLines;
-                }
-            }
-            wrappedLines.forEach( iter::add );
-        }
+        lines.forEach( Line::printMarkup );
+        lines.get( 3 ).writeDotFile( "/Users/rchevalier/bob.dot" );
 
         return lines.stream().map( Line::toString ).collect( Collectors.joining() );
-    }
-
-    private List<Line> generateWrappedLines( Line line, String newline ) {
-        Deque<Line> unevaluatedStack = new ArrayDeque<>();
-
-        // if necessary, wrap line to ensure that it fits within max line width
-        while( line.getWidth() > Config.INSTANCE.lineWrap.maxLineWidth && line.canBeSplit() ) {
-            // add additional lines in reverse order to the front of the unevaluated stack
-            line.wrap( newline ).descendingIterator().forEachRemaining( unevaluatedStack::addFirst );
-        }
-
-        List<Line> wrappedLines = new ArrayList<>();
-
-        // recursively expand any extra lines that were generated from original line
-        Line nextLine = unevaluatedStack.pollFirst();
-        while( nextLine != null ) {
-            while( nextLine.getWidth() > Config.INSTANCE.lineWrap.maxLineWidth && nextLine.canBeSplit() ) {
-                // add additional lines in reverse order to the front of the unevaluated stack
-                nextLine.wrap( newline ).descendingIterator().forEachRemaining( unevaluatedStack::addFirst );
-            }
-
-            // head of extra line is now either sufficiently trimmed or at least as small as it's going to get
-            wrappedLines.add( nextLine );
-            nextLine = unevaluatedStack.pollFirst();
-        }
-
-        return wrappedLines;
     }
 
     private void groupMemberSelectTags( List<TextToken> tokens ) {

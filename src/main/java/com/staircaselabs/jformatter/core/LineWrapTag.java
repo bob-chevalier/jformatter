@@ -12,8 +12,11 @@ public class LineWrapTag {
     /** Unique ID of the group that this tag belongs to. */
     private String groupUuid;
 
-    /** Indicates that this is a group-closing symbol such as a right-parens or right-brace that will be unindented */
-    private boolean isGroupClosingSymbol = false;
+//    /** Indicates that this is the first in a group of line-wrap tags */
+//    private boolean opensGroup = false;
+
+    /** Indicates that this is the last in a group of line-wrap tags */
+    private boolean closesGroup = false;
 
     /** Used for debugging.  Identifies the method that created this tag. **/
     private String source;
@@ -50,12 +53,20 @@ public class LineWrapTag {
         this.groupUuid = groupUuid;
     }
 
-    public boolean isGroupClosingSymbol() {
-        return isGroupClosingSymbol;
+//    public boolean opensGroup() {
+//        return opensGroup;
+//    }
+
+//    public void openGroup() {
+//        opensGroup = true;
+//    }
+
+    public boolean closesGroup() {
+        return closesGroup;
     }
 
-    public void setIsGroupClosingSymbol( boolean isGroupClosingSymbol ) {
-        this.isGroupClosingSymbol = isGroupClosingSymbol;
+    public void closeGroup() {
+        closesGroup = true;
     }
 
     public String getSource() {
