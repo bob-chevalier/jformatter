@@ -12,6 +12,7 @@ import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.staircaselabs.jformatter.core.TokenUtils;
 import com.sun.source.tree.ArrayAccessTree;
+import com.sun.source.tree.ArrayTypeTree;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CaseTree;
@@ -25,6 +26,7 @@ import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.SwitchTree;
 import com.sun.source.tree.Tree;
@@ -147,8 +149,8 @@ public class LineBreakFormatter {
             return super.visitArrayAccess( node, input );
         }
 
-//        @Override
-//        public Void visitArrayType( ArrayTypeTree node, Input input ) {
+        @Override
+        public Void visitArrayType(ArrayTypeTree node, Input input ) {
 //            if( VERBOSE ) System.out.println( "======visitArrayType======" );
 //            int start = input.getFirstTokenIndex( node );
 //            int end = input.getLastTokenIndex( node );
@@ -178,8 +180,8 @@ public class LineBreakFormatter {
 //            }
 //
 //            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
-//            return super.visitArrayType( node, input );
-//        }
+            return super.visitArrayType( node, input );
+        }
 
         @Override
         public Void visitAssignment(AssignmentTree node, Input input) {
@@ -315,7 +317,7 @@ public class LineBreakFormatter {
 
         @Override
         public Void visitMemberSelect(MemberSelectTree node, Input input ) {
-            //TODO should we just filter on kind == METHHOD_INVOCATION?
+            //TODO should we just filter on kind == METHOD_INVOCATION?
             if( Config.INSTANCE.lineWrap.allowMemberSelectLineWrap( node.getExpression().getKind() ) ) {
                 //TODO will exprEnd always be the same as dot?
                 int exprEnd = input.getLastTokenIndex( node.getExpression() );
@@ -353,48 +355,15 @@ public class LineBreakFormatter {
             return super.visitMethodInvocation(node, input);
         }
 
-//        @Override
-//        public Void visitNewArray( NewArrayTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitNewArray======" );
-//            //TODO what about top-level annotations?
-//            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "NewArray");
-//
-//            if( node.getInitializers() != null ) {
-//                List<Tree> initializers = node.getInitializers().stream()
-//                        .map( Tree.class::cast )
-//                        .collect( Collectors.toList() );
-//
-//                replacement.append( TokenType.LEFT_BRACE )
-//                        .append( padding.array )
-//                        .appendList( initializers, TokenType.COMMA, true )
-//                        .append( padding.array )
-//                        .append( TokenType.RIGHT_BRACE );
-//            } else {
-//                replacement.append( TokenType.NEW )
-//                        .append( SPACE )
-//                        .append( node.getType() );
-//
-//                Iterator<? extends List<? extends AnnotationTree>> dimAnnos = node.getDimAnnotations().iterator();
-//                Iterator<? extends ExpressionTree> dims = node.getDimensions().iterator();
-//                while( dimAnnos.hasNext() && dims.hasNext() ) {
-//                    List<Tree> annos = dimAnnos.next().stream().map( Tree.class::cast ).collect( Collectors.toList() );
-//                    if( !annos.isEmpty() ) {
-//                        replacement.append( SPACE )
-//                                .appendList( annos, SPACE )
-//                                .append( SPACE );
-//                    }
-//
-//                    replacement.append( TokenType.LEFT_BRACKET )
-//                            .append( padding.array )
-//                            .append( dims.next() )
-//                            .append( padding.array )
-//                            .append( TokenType.RIGHT_BRACKET );
-//                }
-//            }
-//
-//            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
-//            return super.visitNewArray( node, input );
-//        }
+        @Override
+        public Void visitNewArray(NewArrayTree node, Input input ) {
+            if( node.getInitializers() != null ) {
+                new MarkupTool( node, input )
+                        .tagLineWrapGroupWithClosingBrace( LineWrap.ARRAY, node.getInitializers(), "visitNewArrayTree" );
+            }
+
+            return super.visitNewArray( node, input );
+        }
 
         @Override
         public Void visitNewClass(NewClassTree node, Input input ) {

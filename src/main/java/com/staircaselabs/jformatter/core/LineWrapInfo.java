@@ -11,18 +11,23 @@ import java.util.Set;
 public class LineWrapInfo {
 
     public final int maxLineWidth;
+    public final boolean oneArrayElementPerLine;
     public final boolean oneMethodArgPerLine;
+    public final boolean closingBracesOnNewLine;
     public final boolean closingParensOnNewLine;
     private final Map<LineWrap, Integer> numTabs = new HashMap<>();
     private final Set<Kind> wrappableMemberSelectTypes = new HashSet<>();
 
     private LineWrapInfo(
             @NotNull Integer maxLineWidth,
+            @NotNull Boolean oneArrayElementPerLine,
             @NotNull Boolean oneMethodArgPerLine,
+            @NotNull Boolean closingBracesOnNewLine,
             @NotNull Boolean closingParensOnNewLine,
             @NotNull Boolean allowLineWrapAtMethodInvocationMemberSelect,
             @NotNull Boolean allowLineWrapAtNewClassMemberSelect,
             @NotNull Boolean allowLineWrapAtIdentifierMemberSelect,
+            @NotNull Integer arrayLineWrapTabs,
             @NotNull Integer assignmentLineWrapTabs,
             @NotNull Integer extendsLineWrapTabs,
             @NotNull Integer implementsLineWrapTabs,
@@ -33,9 +38,12 @@ public class LineWrapInfo {
             @NotNull Integer unboundListItemLineWrapTabs
     ) {
         this.maxLineWidth = maxLineWidth;
+        this.oneArrayElementPerLine = oneArrayElementPerLine;
         this.oneMethodArgPerLine = oneMethodArgPerLine;
+        this.closingBracesOnNewLine = closingBracesOnNewLine ;
         this.closingParensOnNewLine = closingParensOnNewLine;
 
+        numTabs.put( LineWrap.ARRAY, arrayLineWrapTabs );
         numTabs.put( LineWrap.ASSIGNMENT, assignmentLineWrapTabs );
         numTabs.put( LineWrap.EXTENDS, extendsLineWrapTabs );
         numTabs.put( LineWrap.IMPLEMENTS, implementsLineWrapTabs );
@@ -66,11 +74,14 @@ public class LineWrapInfo {
 
     public static class Builder {
         private Integer maxLineWidth = null;
+        private Boolean oneArrayElementPerLine = null;
         private Boolean oneMethodArgPerLine = null;
+        private Boolean closingBracesOnNewLine = null;
         private Boolean closingParensOnNewLine = null;
         private Boolean allowLineWrapAtMethodInvocationMemberSelect = null;
         private Boolean allowLineWrapAtNewClassMemberSelect = null;
         private Boolean allowLineWrapAtIdentifierMemberSelect = null;
+        private Integer arrayLineWrapTabs = null;
         private Integer assignmentLineWrapTabs = null;
         private Integer extendsLineWrapTabs = null;
         private Integer implementsLineWrapTabs = null;
@@ -85,8 +96,18 @@ public class LineWrapInfo {
             return this;
         }
 
+        public Builder oneArrayElementPerLine( boolean oneArrayElementPerLine ) {
+            this.oneArrayElementPerLine = oneArrayElementPerLine;
+            return this;
+        }
+
         public Builder oneMethodArgPerLine( boolean oneMethodArgPerLine ) {
             this.oneMethodArgPerLine = oneMethodArgPerLine;
+            return this;
+        }
+
+        public Builder closingBracesOnNewLine( boolean closingBracesOnNewLine ) {
+            this.closingBracesOnNewLine = closingBracesOnNewLine;
             return this;
         }
 
@@ -107,6 +128,11 @@ public class LineWrapInfo {
 
         public Builder allowLineWrapAtIdentifierMemberSelect( boolean isAllowed ) {
             this.allowLineWrapAtIdentifierMemberSelect = isAllowed;
+            return this;
+        }
+
+        public Builder arrayLineWrapTabs( int numTabs ) {
+            this.arrayLineWrapTabs = numTabs;
             return this;
         }
 
@@ -153,11 +179,14 @@ public class LineWrapInfo {
         public LineWrapInfo build() {
             return new LineWrapInfo(
                 maxLineWidth,
+                oneArrayElementPerLine,
                 oneMethodArgPerLine,
+                closingBracesOnNewLine,
                 closingParensOnNewLine,
                 allowLineWrapAtMethodInvocationMemberSelect,
                 allowLineWrapAtNewClassMemberSelect,
                 allowLineWrapAtIdentifierMemberSelect,
+                arrayLineWrapTabs,
                 assignmentLineWrapTabs,
                 extendsLineWrapTabs,
                 implementsLineWrapTabs,

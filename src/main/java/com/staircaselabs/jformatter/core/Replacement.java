@@ -176,7 +176,7 @@ public class Replacement {
             // find final leading comment before given tree, excluding newlines and whitespace
             OptionalInt leadingComments =
                     input.findPrevByExclusion( currentPosInclusive, stopPos, TokenType.NEWLINE, TokenType.WHITESPACE );
-            leadingComments.ifPresent( this::append );
+            leadingComments.ifPresent( c -> appendComments( c + 1 ) );
 
             // skip over any newlines or whitespace between leading comments and token
             setCurrentPositionInclusive( stopPos );

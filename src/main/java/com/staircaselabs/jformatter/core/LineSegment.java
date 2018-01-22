@@ -78,7 +78,8 @@ public abstract class LineSegment {
                 // update the base offset for any additional wrapped lines using first child's offset and wrap type
                 int wrapOffset = firstChild.offset + Config.INSTANCE.lineWrap.tabsToInsert( wrapType );
 
-                if( wrapType == LineWrap.METHOD_ARG && !Config.INSTANCE.lineWrap.oneMethodArgPerLine ) {
+                if( (wrapType == LineWrap.METHOD_ARG && !Config.INSTANCE.lineWrap.oneMethodArgPerLine)
+                        || (wrapType == LineWrap.ARRAY && !Config.INSTANCE.lineWrap.oneArrayElementPerLine) ) {
                     // try to fit as many segments as possible on a single line
                     addMinimalNumberOfSegments(
                             start,
@@ -92,7 +93,7 @@ public abstract class LineSegment {
                     );
                 } else {
                     // add a child for each remaining split position
-                    addOneSegmentPerSplit(
+                    addSegmentForEverySplit(
                             start,
                             splitPositions.subList( 1, splitPositions.size() ),
                             tokens,
@@ -114,7 +115,7 @@ public abstract class LineSegment {
         }
     }
 
-    private static void addOneSegmentPerSplit(
+    private static void addSegmentForEverySplit(
             int start,
             List<Integer> splits,
             List<TextToken> tokens,

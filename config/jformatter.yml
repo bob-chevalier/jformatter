@@ -11,14 +11,17 @@ arrays: 1
 trailingMethodNames: 0
 
 # line-wrapping
-maxLineWidth: 60
+maxLineWidth: 80
 oneMethodArgumentPerLine: false
+oneArrayElementPerLine: false
+closingBracesOnNewLine: true
 closingParenthesesOnNewLine: false
 allowLineWrapAtMethodInvocationMemberSelect: true
 allowLineWrapAtNewClassMemberSelect: true
 allowLineWrapAtIdentifierMemberSelect: false
 
 # number of tabs to insert after line-wrapping various tokens
+arrayLineWrapTabs: 2
 assignmentLineWrapTabs: 2
 extendsLineWrapTabs: 2
 implementsLineWrapTabs: 2

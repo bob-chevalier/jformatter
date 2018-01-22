@@ -39,11 +39,14 @@ public enum Config {
 
             lineWrap = new LineWrapInfo.Builder()
                     .maxLineWidth( cfg.maxLineWidth )
+                    .oneArrayElementPerLine( cfg.oneArrayElementPerLine )
                     .oneMethodArgPerLine( cfg.oneMethodArgumentPerLine )
+                    .closingBracesOnNewLine( cfg.closingBracesOnNewLine )
                     .closingParensOnNewLine( cfg.closingParenthesesOnNewLine )
                     .allowLineWrapAtMethodInvocationMemberSelect( cfg.allowLineWrapAtMethodInvocationMemberSelect )
                     .allowLineWrapAtNewClassMemberSelect( cfg.allowLineWrapAtNewClassMemberSelect )
                     .allowLineWrapAtIdentifierMemberSelect( cfg.allowLineWrapAtIdentifierMemberSelect )
+                    .arrayLineWrapTabs( cfg.arrayLineWrapTabs )
                     .assignmentLineWrapTabs( cfg.assignmentLineWrapTabs )
                     .extendsLineWrapTabs( cfg.extendsLineWrapTabs )
                     .implementsLineWrapTabs( cfg.implementsLineWrapTabs )
@@ -80,13 +83,16 @@ public enum Config {
 
         // line-wrapping
         public int maxLineWidth = 120;
+        public boolean oneArrayElementPerLine = true;
         public boolean oneMethodArgumentPerLine = true;
+        public boolean closingBracesOnNewLine = true;
         public boolean closingParenthesesOnNewLine = true;
         public boolean allowLineWrapAtMethodInvocationMemberSelect = true;
         public boolean allowLineWrapAtNewClassMemberSelect = false;
         public boolean allowLineWrapAtIdentifierMemberSelect = false;
 
         // number of tabs to insert when wrapping various tokens
+        public int arrayLineWrapTabs = 2;
         public int assignmentLineWrapTabs = 2;
         public int extendsLineWrapTabs = 2;
         public int implementsLineWrapTabs = 2;

@@ -25,7 +25,6 @@ public class MarkupTool {
         if( !list.isEmpty() ) {
             // create a tag with a new group ID for the first tree in the list
             LineWrapTag tag = new LineWrapTag( wrapType, source );
-//            tag.openGroup();
             tagTree( tag, list.get( 0 ) );
 
             // tag all remaining trees, using the group ID from the first tag
@@ -37,6 +36,15 @@ public class MarkupTool {
         }
 
         return Optional.empty();
+    }
+
+    public void tagLineWrapGroupWithClosingBrace( LineWrap wrapType, List<? extends Tree> list, String source ) {
+        Optional<String> groupId = tagLineWrapGroup( wrapType, list, source );
+        if( groupId.isPresent() && Config.INSTANCE.lineWrap.closingBracesOnNewLine ) {
+            LineWrapTag tag = new LineWrapTag( groupId.get(), wrapType, source );
+            tag.closeGroup();
+            tagToken( tag, TokenType.RIGHT_BRACE );
+        }
     }
 
     public void tagLineWrapGroupWithClosingParen( LineWrap wrapType, List<? extends Tree> list, String source ) {

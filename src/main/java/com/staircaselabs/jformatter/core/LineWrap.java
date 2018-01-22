@@ -4,6 +4,7 @@ import com.staircaselabs.jformatter.core.LineWrapPriority.Primary;
 import com.staircaselabs.jformatter.core.LineWrapPriority.Secondary;
 
 public enum LineWrap {
+    ARRAY( "AR", Primary.ARRAY, Secondary.ARRAY ),
     ASSIGNMENT( "A", Primary.ASSIGNMENT, Secondary.ASSIGNMENT ),
     EXTENDS( "E", Primary.EXTENDS, Secondary.EXTENDS ),
     IMPLEMENTS( "I", Primary.IMPLEMENTS, Secondary.IMPLEMENTS ),
