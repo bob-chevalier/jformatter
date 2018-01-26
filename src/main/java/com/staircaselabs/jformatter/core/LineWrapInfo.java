@@ -12,6 +12,7 @@ public class LineWrapInfo {
 
     public final int maxLineWidth;
     public final boolean oneArrayElementPerLine;
+    public final boolean oneUnionElementPerLine;
     public final boolean oneMethodArgPerLine;
     public final boolean closingBracesOnNewLine;
     public final boolean closingParensOnNewLine;
@@ -21,6 +22,7 @@ public class LineWrapInfo {
     private LineWrapInfo(
             @NotNull Integer maxLineWidth,
             @NotNull Boolean oneArrayElementPerLine,
+            @NotNull Boolean oneUnionElementPerLine,
             @NotNull Boolean oneMethodArgPerLine,
             @NotNull Boolean closingBracesOnNewLine,
             @NotNull Boolean closingParensOnNewLine,
@@ -40,6 +42,7 @@ public class LineWrapInfo {
     ) {
         this.maxLineWidth = maxLineWidth;
         this.oneArrayElementPerLine = oneArrayElementPerLine;
+        this.oneUnionElementPerLine = oneUnionElementPerLine;
         this.oneMethodArgPerLine = oneMethodArgPerLine;
         this.closingBracesOnNewLine = closingBracesOnNewLine ;
         this.closingParensOnNewLine = closingParensOnNewLine;
@@ -77,6 +80,7 @@ public class LineWrapInfo {
     public static class Builder {
         private Integer maxLineWidth = null;
         private Boolean oneArrayElementPerLine = null;
+        private Boolean oneUnionElementPerLine = null;
         private Boolean oneMethodArgPerLine = null;
         private Boolean closingBracesOnNewLine = null;
         private Boolean closingParensOnNewLine = null;
@@ -101,6 +105,11 @@ public class LineWrapInfo {
 
         public Builder oneArrayElementPerLine( boolean oneArrayElementPerLine ) {
             this.oneArrayElementPerLine = oneArrayElementPerLine;
+            return this;
+        }
+
+        public Builder oneUnionElementPerLine( boolean oneUnionElementPerLine ) {
+            this.oneUnionElementPerLine = oneUnionElementPerLine;
             return this;
         }
 
@@ -188,6 +197,7 @@ public class LineWrapInfo {
             return new LineWrapInfo(
                 maxLineWidth,
                 oneArrayElementPerLine,
+                oneUnionElementPerLine,
                 oneMethodArgPerLine,
                 closingBracesOnNewLine,
                 closingParensOnNewLine,

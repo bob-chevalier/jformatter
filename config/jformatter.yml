@@ -13,6 +13,7 @@ trailingMethodNames: 0
 # line-wrapping
 maxLineWidth: 80
 oneMethodArgumentPerLine: false
+oneUnionElementPerLine: false
 oneArrayElementPerLine: false
 closingBracesOnNewLine: true
 closingParenthesesOnNewLine: false

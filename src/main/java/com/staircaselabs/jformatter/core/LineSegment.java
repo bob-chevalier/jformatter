@@ -79,6 +79,7 @@ public abstract class LineSegment {
                 int wrapOffset = firstChild.offset + Config.INSTANCE.lineWrap.tabsToInsert( wrapType );
 
                 if( (wrapType == LineWrap.METHOD_ARG && !Config.INSTANCE.lineWrap.oneMethodArgPerLine)
+                        || (wrapType == LineWrap.UNION && !Config.INSTANCE.lineWrap.oneUnionElementPerLine)
                         || (wrapType == LineWrap.ARRAY && !Config.INSTANCE.lineWrap.oneArrayElementPerLine) ) {
                     // try to fit as many segments as possible on a single line
                     addMinimalNumberOfSegments(

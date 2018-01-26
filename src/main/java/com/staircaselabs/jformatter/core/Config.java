@@ -40,6 +40,7 @@ public enum Config {
             lineWrap = new LineWrapInfo.Builder()
                     .maxLineWidth( cfg.maxLineWidth )
                     .oneArrayElementPerLine( cfg.oneArrayElementPerLine )
+                    .oneUnionElementPerLine( cfg.oneUnionElementPerLine )
                     .oneMethodArgPerLine( cfg.oneMethodArgumentPerLine )
                     .closingBracesOnNewLine( cfg.closingBracesOnNewLine )
                     .closingParensOnNewLine( cfg.closingParenthesesOnNewLine )
@@ -85,6 +86,7 @@ public enum Config {
         // line-wrapping
         public int maxLineWidth = 120;
         public boolean oneArrayElementPerLine = true;
+        public boolean oneUnionElementPerLine = true;
         public boolean oneMethodArgumentPerLine = true;
         public boolean closingBracesOnNewLine = true;
         public boolean closingParenthesesOnNewLine = true;
