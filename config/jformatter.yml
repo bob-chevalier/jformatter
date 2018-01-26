@@ -29,6 +29,7 @@ memberSelectLineWrapTabs: 1
 methodArgumentLineWrapTabs: 2
 ternaryLineWrapTabs: 2
 throwsLineWrapTabs: 2
+unionLineWrapTabs: 2
 unboundListItemLineWrapTabs: 2
 
 # miscellaneous

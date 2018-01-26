@@ -35,6 +35,7 @@ public class LineWrapInfo {
             @NotNull Integer methodArgumentLineWrapTabs,
             @NotNull Integer ternaryLineWrapTabs,
             @NotNull Integer throwsLineWrapTabs,
+            @NotNull Integer unionLineWrapTabs,
             @NotNull Integer unboundListItemLineWrapTabs
     ) {
         this.maxLineWidth = maxLineWidth;
@@ -51,6 +52,7 @@ public class LineWrapInfo {
         numTabs.put( LineWrap.METHOD_ARG, methodArgumentLineWrapTabs );
         numTabs.put( LineWrap.TERNARY, ternaryLineWrapTabs );
         numTabs.put( LineWrap.THROWS, throwsLineWrapTabs );
+        numTabs.put( LineWrap.UNION, unionLineWrapTabs );
         numTabs.put( LineWrap.UNBOUND_LIST_ITEM, unboundListItemLineWrapTabs );
 
         if( allowLineWrapAtMethodInvocationMemberSelect ) {
@@ -89,6 +91,7 @@ public class LineWrapInfo {
         private Integer methodArgumentLineWrapTabs = null;
         private Integer ternaryLineWrapTabs = null;
         private Integer throwsLineWrapTabs = null;
+        private Integer unionLineWrapTabs = null;
         private Integer unboundListItemLineWrapTabs = null;
 
         public Builder maxLineWidth( int maxLineWidth ) {
@@ -171,6 +174,11 @@ public class LineWrapInfo {
             return this;
         }
 
+        public Builder unionLineWrapTabs( int numTabs ) {
+            this.unionLineWrapTabs = numTabs;
+            return this;
+        }
+
         public Builder unboundListItemLineWrapTabs( int numTabs ) {
             this.unboundListItemLineWrapTabs = numTabs;
             return this;
@@ -194,6 +202,7 @@ public class LineWrapInfo {
                 methodArgumentLineWrapTabs,
                 ternaryLineWrapTabs,
                 throwsLineWrapTabs,
+                unionLineWrapTabs,
                 unboundListItemLineWrapTabs
             );
         }

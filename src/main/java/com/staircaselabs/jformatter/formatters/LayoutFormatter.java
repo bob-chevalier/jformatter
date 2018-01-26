@@ -1053,7 +1053,7 @@ public class LayoutFormatter extends ReplacementFormatter {
         @Override
         public Void visitSynchronized( SynchronizedTree node, Input input ) {
             if( VERBOSE ) System.out.println( "======visitSynchronized======" );
-            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayType" )
+            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Synchronized" )
                     .append( TokenType.SYNCHRONIZED )
                     .append( Config.INSTANCE.padding.methodName );
 

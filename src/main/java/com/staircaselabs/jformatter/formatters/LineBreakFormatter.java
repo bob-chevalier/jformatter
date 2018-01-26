@@ -16,6 +16,7 @@ import com.sun.source.tree.ArrayTypeTree;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CaseTree;
+import com.sun.source.tree.CatchTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ConditionalExpressionTree;
 import com.sun.source.tree.DoWhileLoopTree;
@@ -31,6 +32,7 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.SwitchTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TryTree;
+import com.sun.source.tree.UnionTypeTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.tree.WhileLoopTree;
 import com.sun.source.util.TreePathScanner;
@@ -115,73 +117,6 @@ public class LineBreakFormatter {
     }
 
     private static class LineBreakScanner extends TreePathScanner<Void, Input> {
-
-        @Override
-        public Void visitArrayAccess(ArrayAccessTree node, Input input ) {
-            if( node.getExpression().getKind() == Tree.Kind.IDENTIFIER ) {
-//                Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayAccess" )
-//                        .append( node.getExpression() )
-//                        .append( TokenType.LEFT_BRACKET )
-//                        .append( padding.array )
-//                        .append( node.getIndex() )
-//                        .append( padding.array )
-//                        .append( TokenType.RIGHT_BRACKET );
-//
-//                int afterRightBracket = replacement.getCurrentPosInclusive();
-//                int start = input.getFirstTokenIndex( node );
-//                if( ENABLED ) replacement.build( start, afterRightBracket ).ifPresent( this::addReplacement );
-            } else {
-//                System.out.println( "BFC NOT IDENTIFIER" );
-//                int arrayIndex = input.getFirstTokenIndex( node.getIndex() );
-//                int prevRightBracket = input.findPrev( arrayIndex, TokenType.RIGHT_BRACKET ).getAsInt();
-//                int end = input.getLastTokenIndex( node );
-//
-//                Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayAccess" )
-//                        .setCurrentPositionInclusive( prevRightBracket + 1 )
-//                        .append( TokenType.LEFT_BRACKET )
-//                        .append( padding.array )
-//                        .append( node.getIndex() )
-//                        .append( padding.array )
-//                        .append( TokenType.RIGHT_BRACKET );
-//                if( ENABLED ) replacement.build( (prevRightBracket + 1), end ).ifPresent( this::addReplacement );
-            }
-
-            return super.visitArrayAccess( node, input );
-        }
-
-        @Override
-        public Void visitArrayType(ArrayTypeTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitArrayType======" );
-//            int start = input.getFirstTokenIndex( node );
-//            int end = input.getLastTokenIndex( node );
-//            int pos = input.findNext( start, WS_NEWLINE_COMMENT_OR_BRACKET ).getAsInt();
-//
-//            // append array type
-//            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayType" );
-//            replacement.append( input.stringifyTokens( start, pos ) );
-//
-//            OptionalInt leftBracket = input.findNext( pos, TokenType.LEFT_BRACKET );
-//            while( leftBracket.isPresent() ) {
-//                // append any annotations
-//                int leftBracketIdx = leftBracket.getAsInt();
-//                OptionalInt annotationStart = input.findNext( pos, leftBracketIdx, TokenType.AT );
-//                if( annotationStart.isPresent() ) {
-//                    int annotationEnd = input.findPrevByExclusion( leftBracketIdx, WS_NEWLINE_OR_COMMENT ).getAsInt();
-//                    replacement.append( SPACE )
-//                            .append( input.stringifyTokens( annotationStart.getAsInt(), (annotationEnd + 1) ) )
-//                            .append( SPACE )
-//                            .setCurrentPositionInclusive( annotationEnd + 1 );
-//                }
-//
-//                // append brackets
-//                replacement.append( TokenType.LEFT_BRACKET ).append( TokenType.RIGHT_BRACKET );
-//                pos = replacement.getCurrentPosInclusive();
-//                leftBracket = input.findNext( pos, end, TokenType.LEFT_BRACKET );
-//            }
-//
-//            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
-            return super.visitArrayType( node, input );
-        }
 
         @Override
         public Void visitAssignment(AssignmentTree node, Input input) {
@@ -399,38 +334,26 @@ public class LineBreakFormatter {
             return super.visitSwitch(node, input);
         }
 
-//        @Override
-//        public Void visitSynchronized( SynchronizedTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitSynchronized======" );
-//            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayType" )
-//                    .append( TokenType.SYNCHRONIZED )
-//                    .append( padding.methodName );
-//
-//            // insert appropriate padding inside of parentheses
-//            padParentheses( node.getExpression(), input, padding.methodArg, replacement );
-//
-//            replacement.appendOpeningBrace( cuddleBraces )
-//                    .appendBracedBlock( node.getBlock(), input.newline )
-//                    .append( TokenType.RIGHT_BRACE );
-//
-//            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
-//            return super.visitSynchronized( node, input );
-//        }
-
         @Override
         public Void visitTry(TryTree node, Input input) {
             MarkupTool markup = new MarkupTool(node, input);
 
             // allow line-breaks between resources
-            if (node.getResources() != null && !node.getResources().isEmpty()) {
-                markup.tagLineWrapGroup( LineWrap.METHOD_ARG, node.getResources(), "visitTry");
-            }
+            markup.tagLineWrapGroup( LineWrap.METHOD_ARG, node.getResources(), "visitTry");
 
             // indent try-block
             markup.indentBracedBlock(node.getBlock());
 
             // indent each catch-block
             node.getCatches().stream().forEach(c -> markup.indentBracedBlock(c.getBlock()));
+
+            for( CatchTree cTree : node.getCatches() ) {
+                if( cTree.getParameter().getType().getKind() == Tree.Kind.UNION_TYPE ) {
+                    // allow line-breaks between unioned catch elements
+                    new MarkupTool(cTree, input)
+                            .tagLineWrapGroupWithClosingParen( LineWrap.UNION, TokenType.OR, "visitTry");
+                }
+            }
 
             // indent finally-block
             if (isValid(node.getFinallyBlock())) {
@@ -439,27 +362,6 @@ public class LineBreakFormatter {
 
             return super.visitTry(node, input);
         }
-
-//        @Override
-//        public Void visitUnionType( UnionTypeTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitUnionType======" );
-//            Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "UnionType" );
-//
-//            List<Tree> alternatives =
-//                    node.getTypeAlternatives().stream().map( Tree.class::cast ).collect( Collectors.toList() );
-//            if( !alternatives.isEmpty() ) {
-//                replacement.append( alternatives.get( 0 ) );
-//                for( int idx = 1; idx < alternatives.size(); idx++ ) {
-//                    replacement.append( SPACE )
-//                            .append( TokenType.OR )
-//                            .append( SPACE )
-//                            .append( alternatives.get( idx ) );
-//                }
-//            }
-//
-//            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
-//            return super.visitUnionType( node, input );
-//        }
 
         @Override
         public Void visitVariable(VariableTree node, Input input) {

@@ -22,17 +22,16 @@ public class MarkupTool {
 
     //TODO determine if this is ever called
     public Optional<String> tagLineWrapGroup( LineWrap wrapType, List<? extends Tree> list, String source ) {
-        if( !list.isEmpty() ) {
+        if( list != null && !list.isEmpty() ) {
             // create a tag with a new group ID for the first tree in the list
-            LineWrapTag tag = new LineWrapTag( wrapType, source );
-            tagTree( tag, list.get( 0 ) );
+            String groupId = tagLineWrap( wrapType, list.get( 0 ), source );
 
             // tag all remaining trees, using the group ID from the first tag
             for( int i = 1; i < list.size(); i++ ) {
-                tagTree(new LineWrapTag(tag.getGroupId(), wrapType, source), list.get(i));
+                tagTree(new LineWrapTag(groupId, wrapType, source), list.get(i));
             }
 
-            return Optional.of( tag.getGroupId() );
+            return Optional.of( groupId );
         }
 
         return Optional.empty();
@@ -56,12 +55,34 @@ public class MarkupTool {
         }
     }
 
-    public void tagLineWrap( LineWrap wrapType, Tree tree, String source ) {
-        tagTree( new LineWrapTag( wrapType, source ), tree );
+    public void tagLineWrapGroupWithClosingParen( LineWrap wrapType, TokenType type, String source ) {
+        // tag first instance of token in the group
+        String groupId = tagLineWrap( wrapType, type, source );
+
+        // tag additional instances of token
+        LineWrapTag tag = null;
+        do {
+            tag = new LineWrapTag( groupId, wrapType, source );
+        } while( tagToken( tag, type ) );
+
+        // tag closing parenthesis, if appropriate
+        if( Config.INSTANCE.lineWrap.closingParensOnNewLine ) {
+            tag = new LineWrapTag( groupId, wrapType, source );
+            tag.closeGroup();
+            tagToken( tag, TokenType.RIGHT_PAREN );
+        }
     }
 
-    public void tagLineWrap( LineWrap wrapType, TokenType tokenType, String source ) {
-        tagToken( new LineWrapTag( wrapType, source ), tokenType );
+    public String tagLineWrap( LineWrap wrapType, Tree tree, String source ) {
+        LineWrapTag tag = new LineWrapTag( wrapType, source );
+        tagTree( tag, tree );
+        return tag.getGroupId();
+    }
+
+    public String tagLineWrap( LineWrap wrapType, TokenType tokenType, String source ) {
+        LineWrapTag tag = new LineWrapTag( wrapType, source );
+        tagToken( tag, tokenType );
+        return tag.getGroupId();
     }
 
     public void indentBracedBlock( Tree tree ) {
@@ -116,12 +137,15 @@ public class MarkupTool {
         currentInclusive = input.getLastTokenIndex( tree );
     }
 
-    private void tagToken( LineWrapTag tag, TokenType tokenType ) {
-        Optional<TextToken> token = input.findNextToken( currentInclusive, endExclusive, tokenType );
-        if( token.isPresent() ) {
-            token.get().allowLineWrap( tag );
-            currentInclusive = token.get().endExclusive;
+    private boolean tagToken( LineWrapTag tag, TokenType tokenType ) {
+        OptionalInt pos = input.findNext( currentInclusive, endExclusive, tokenType );
+        if( pos.isPresent() ) {
+            input.tokens.get( pos.getAsInt() ).allowLineWrap( tag );
+            currentInclusive = pos.getAsInt() + 1;
+            return true;
         }
+
+        return false;
     }
 
 }

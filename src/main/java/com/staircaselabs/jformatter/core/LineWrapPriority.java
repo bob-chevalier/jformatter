@@ -20,6 +20,7 @@ public class LineWrapPriority {
         EXTENDS,
         IMPLEMENTS,
         THROWS,
+        UNION,
         UNBOUND_LIST_ITEM
     }
 
@@ -36,6 +37,7 @@ public class LineWrapPriority {
         EXTENDS,
         IMPLEMENTS,
         THROWS,
+        UNION,
         UNBOUND_LIST_ITEM
     }
 

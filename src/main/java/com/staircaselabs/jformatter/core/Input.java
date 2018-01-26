@@ -93,11 +93,6 @@ public class Input {
         return TokenUtils.contains( tokens, startInclusive, endExclusive, types );
     }
 
-    public Optional<TextToken> findNextToken( int startInclusive, int endExclusive, TokenType... types ) {
-        OptionalInt idx = findNext( startInclusive, endExclusive, types );
-        return idx.isPresent() ? Optional.of( tokens.get( idx.getAsInt() ) ) : Optional.empty();
-    }
-
     public OptionalInt findNext( int startInclusive, int endExclusive, TokenType... types ) {
         return TokenUtils.findNext( tokens, startInclusive, endExclusive, types );
     }

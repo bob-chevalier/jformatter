@@ -12,9 +12,6 @@ public class LineWrapTag {
     /** Unique ID of the group that this tag belongs to. */
     private String groupUuid;
 
-//    /** Indicates that this is the first in a group of line-wrap tags */
-//    private boolean opensGroup = false;
-
     /** Indicates that this is the last in a group of line-wrap tags */
     private boolean closesGroup = false;
 

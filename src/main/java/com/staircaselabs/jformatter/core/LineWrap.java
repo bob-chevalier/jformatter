@@ -12,6 +12,7 @@ public enum LineWrap {
     METHOD_ARG( "MA", Primary.METHOD_ARG, Secondary.METHOD_ARG ),
     TERNARY( "T", Primary.TERNARY, Secondary.TERNARY ),
     THROWS( "TH", Primary.THROWS, Secondary.THROWS ),
+    UNION( "U", Primary.UNION, Secondary.UNION ),
     UNBOUND_LIST_ITEM( "UL", Primary.UNBOUND_LIST_ITEM, Secondary.UNBOUND_LIST_ITEM );
 
     private final String shortName;

@@ -54,6 +54,7 @@ public enum Config {
                     .methodArgumentLineWrapTabs( cfg.methodArgumentLineWrapTabs )
                     .ternaryLineWrapTabs( cfg.ternaryLineWrapTabs )
                     .throwsLineWrapTabs( cfg.throwsLineWrapTabs )
+                    .unionLineWrapTabs( cfg.unionLineWrapTabs )
                     .unboundListItemLineWrapTabs( cfg.unboundListItemLineWrapTabs )
                     .build();
 
@@ -100,6 +101,7 @@ public enum Config {
         public int methodArgumentLineWrapTabs = 2;
         public int ternaryLineWrapTabs = 2;
         public int throwsLineWrapTabs = 2;
+        public int unionLineWrapTabs = 2;
         public int unboundListItemLineWrapTabs = 2;
 
         // miscellaneous
