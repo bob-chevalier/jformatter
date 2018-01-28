@@ -11,8 +11,6 @@ import com.staircaselabs.jformatter.core.MarkupTool;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.staircaselabs.jformatter.core.TokenUtils;
-import com.sun.source.tree.ArrayAccessTree;
-import com.sun.source.tree.ArrayTypeTree;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CaseTree;
@@ -32,7 +30,6 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.SwitchTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TryTree;
-import com.sun.source.tree.UnionTypeTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.tree.WhileLoopTree;
 import com.sun.source.util.TreePathScanner;
@@ -46,6 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilationUnit;
@@ -54,8 +52,7 @@ import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 
 public class LineBreakFormatter {
 
-    private static final boolean VERBOSE = false;
-    private static final boolean ENABLED = true;
+    private static final Logger log = Logger.getLogger( LineBreakFormatter.class.getName() );
 
     public String format( String text ) throws FormatException {
         List<TextToken> tokens = tokenizeText( text );
@@ -93,7 +90,9 @@ public class LineBreakFormatter {
             }
         }
 
-        lines.forEach( Line::printMarkup );
+        // debugging
+        log.fine( lines.stream().map( Line::getMarkupString ).collect( Collectors.joining() ) );
+        //TODO make this type of debugging configurable
         lines.get( 3 ).writeDotFile( "/Users/rchevalier/bob.dot" );
 
         return lines.stream().map( Line::toString ).collect( Collectors.joining() );

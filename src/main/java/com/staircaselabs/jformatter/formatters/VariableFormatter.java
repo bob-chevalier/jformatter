@@ -21,17 +21,14 @@ public class VariableFormatter extends ReplacementFormatter {
 
     private static class VariableScanner extends ReplacementScanner {
 
-        private static final boolean VERBOSE = false;
-        private static final boolean ENABLED = true;
         private static final String NAME = "VariableFormatter::";
 
         @Override
         public Void visitVariable( VariableTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitVariable======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Variable" );
             appendVariable( node, input, replacement, false );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitVariable( node, input );
         }
     }

@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class FileFormatter implements Callable<Boolean> {
+    private static final Logger log = Logger.getLogger( FileFormatter.class.getName() );
     private final Path path;
     private String originalText;
     private String workingText;
@@ -35,11 +37,9 @@ public class FileFormatter implements Callable<Boolean> {
             workingText = new LineBreakFormatter().format( workingText );
             workingText = new WhitespaceFormatter( false ).format( workingText );
 
-//            System.out.println( "============" );
-//            System.out.println( originalText );
-            System.out.println( "============" );
-            System.out.println( workingText );
-            System.out.println( "============" );
+            log.config( "============" );
+            log.config( workingText );
+            log.config( "============" );
         } catch ( FormatException ex ) {
             // add filename info to the exception
             throw new FormatException( ex.getMessage() + " in file: " + path.toString() );

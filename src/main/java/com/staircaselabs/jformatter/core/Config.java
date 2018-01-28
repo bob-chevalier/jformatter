@@ -3,9 +3,12 @@ package com.staircaselabs.jformatter.core;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.logging.LogManager;
 
 public enum Config {
     INSTANCE;
@@ -25,6 +28,13 @@ public enum Config {
             } else {
                 cfg = new ConfigFile();
             }
+
+            // set logging levels from properties file
+            if( cfg.loggingProps.startsWith( "~" ) ) {
+                cfg.loggingProps = System.getProperty( "user.home" ) + cfg.loggingProps.substring( 1 );
+            }
+            InputStream inStream = Files.newInputStream( Paths.get( cfg.loggingProps ).toRealPath() );
+            LogManager.getLogManager().readConfiguration( inStream );
 
             indent = cfg.convertTabsToSpaces ? IndentInfo.spaces( cfg.tabWidth  ) : IndentInfo.tabs( cfg.tabWidth );
 
@@ -108,6 +118,9 @@ public enum Config {
 
         // miscellaneous
         public boolean cuddleBraces = true;
+
+        // logging
+        public String loggingProps = "~/logging.properties";
     }
 }
 

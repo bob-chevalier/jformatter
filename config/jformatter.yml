@@ -35,3 +35,6 @@ unboundListItemLineWrapTabs: 2
 
 # miscellaneous
 cuddleBraces: true
+
+# logging
+loggingProps: ~/staircase/jformatter/config/logging.properties

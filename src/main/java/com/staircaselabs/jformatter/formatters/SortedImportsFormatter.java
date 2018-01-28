@@ -66,8 +66,6 @@ public class SortedImportsFormatter extends ReplacementFormatter {
 
     private static class SortedImportsScanner extends ReplacementScanner {
 
-        private static final boolean VERBOSE = false;
-        private static final boolean ENABLED = true;
         private static final String NAME = "SortedImportsFormatter::";
         private Set<String> usedNames;
         private String pkgName;
@@ -82,7 +80,6 @@ public class SortedImportsFormatter extends ReplacementFormatter {
 
         @Override
         public Void visitCompilationUnit( CompilationUnitTree node, Input input ) {
-            if (VERBOSE) System.out.println("======SortedImportsFormatter::visitCompUnit======");
             if( !node.getImports().isEmpty() ) {
                 int compUnitStart = input.getFirstTokenIndex( node );
                 int importsStart = input.getFirstTokenIndex( node.getImports().get( 0 ) );
@@ -137,7 +134,7 @@ public class SortedImportsFormatter extends ReplacementFormatter {
                 ).orElse( compUnitStop );
 
                 // only replace the imports, the rest of the compilation unit is formatted elsewhere
-                if (ENABLED) replacement.build( replaceStart, replaceStop ).ifPresent( this::addReplacement );
+                replacement.build( replaceStart, replaceStop ).ifPresent( this::addReplacement );
             }
 
             return super.visitCompilationUnit( node, input );

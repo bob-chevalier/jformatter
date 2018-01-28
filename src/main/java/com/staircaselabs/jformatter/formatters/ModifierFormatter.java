@@ -28,18 +28,15 @@ public class ModifierFormatter extends ReplacementFormatter {
 
     private static class ModifierScanner extends ReplacementScanner {
 
-        private static final boolean VERBOSE = false;
-        private static final boolean ENABLED = true;
         private static final String NAME = "ModifierFormatter::";
 
         @Override
         public Void visitModifiers( ModifiersTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitModifiers======" );
             if( isValid( node ) ) {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Modifiers" );
                 appendAnnotationsAndFlags( node, input, replacement, false );
 
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
 
             return super.visitModifiers( node, input );

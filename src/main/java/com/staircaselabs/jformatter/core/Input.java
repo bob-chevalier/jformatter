@@ -143,4 +143,27 @@ public class Input {
         return TokenUtils.stringifyTokens( tokens, startIdx, endIdx );
     }
 
+    public String getTokenTree( Tree tree ) {
+        int startPos = getFirstTokenIndex( tree );
+        int endPos = getLastTokenIndex( tree );
+
+        StringBuilder builder = new StringBuilder();
+        for( int pos=startPos; pos<endPos; pos++ ) {
+            builder.append( pos + ": [" );
+            builder.append( tokens.get( pos ).toString() );
+            builder.append( "]" );
+            builder.append( newline );
+        }
+        return builder.toString();
+    }
+
+    public String getBeforeAfterText( Tree tree, Input input, StringBuilder sb ) {
+        StringBuilder builder = new StringBuilder("++++++++++++++++++++++");
+        builder.append( "[" + stringifyTree( tree ) + "]" );
+        builder.append( "----------------------" );
+        builder.append( "[" + sb.toString() + "]");
+        builder.append( "++++++++++++++++++++++" );
+        return builder.toString();
+    }
+
 }

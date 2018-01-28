@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -73,8 +74,9 @@ import static java.util.stream.Collectors.partitioningBy;
 // 1. make sure comments are not being dropped
 // 4. check code coverage of all visit methods
 // 5. figure out how to handle exceptions
-// 8. add java.util.Logging
 public class LayoutFormatter extends ReplacementFormatter {
+
+    private static final Logger log = Logger.getLogger( LayoutFormatter.class.getName() );
 
     public LayoutFormatter() {
         super( new LayoutScanner() );
@@ -82,8 +84,6 @@ public class LayoutFormatter extends ReplacementFormatter {
 
     private static class LayoutScanner extends ReplacementScanner {
 
-        private static final boolean VERBOSE = false;
-        private static final boolean ENABLED = true;
         private static final String NAME = "LayoutFormatter::";
 
         private static final TokenType[] WS_OR_COMMENT = {
@@ -110,7 +110,7 @@ public class LayoutFormatter extends ReplacementFormatter {
 
         @Override
         public Void visitAnnotatedType( AnnotatedTypeTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitAnnotatedType======" );
+            log.finest("======visitAnnotatedType======");
             if( node.getUnderlyingType().getKind() != Kind.ARRAY_TYPE ) {
                 List<Tree> annotations =
                         node.getAnnotations().stream().map( Tree.class::cast ).collect( Collectors.toList() );
@@ -119,7 +119,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .appendList( annotations, SPACE )
                         .append( SPACE )
                         .append( node.getUnderlyingType() );
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
 
             return super.visitAnnotatedType( node, input );
@@ -127,7 +127,7 @@ public class LayoutFormatter extends ReplacementFormatter {
 
         @Override
         public Void visitAnnotation( AnnotationTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitAnnotation======" );
+            log.finest("======visitAnnotation======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Annotation" )
                     .append( TokenType.AT )
                     .append( node.getAnnotationType() );
@@ -143,13 +143,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( TokenType.RIGHT_PAREN );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitAnnotation( node, input );
         }
 
         @Override
         public Void visitArrayAccess( ArrayAccessTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitArrayAccess======" );
+            log.finest("======visitArrayAccess======");
             if( node.getExpression().getKind() == Kind.IDENTIFIER ) {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ArrayAccess" )
                         .append( node.getExpression() )
@@ -161,7 +161,7 @@ public class LayoutFormatter extends ReplacementFormatter {
 
                 int afterRightBracket = replacement.getCurrentPosInclusive();
                 int start = input.getFirstTokenIndex( node );
-                if( ENABLED ) replacement.build( start, afterRightBracket ).ifPresent( this::addReplacement );
+                replacement.build( start, afterRightBracket ).ifPresent( this::addReplacement );
             } else {
                 int arrayIndex = input.getFirstTokenIndex( node.getIndex() );
                 int prevRightBracket = input.findPrev( arrayIndex, TokenType.RIGHT_BRACKET ).getAsInt();
@@ -174,7 +174,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( node.getIndex() )
                         .append( Config.INSTANCE.padding.array )
                         .append( TokenType.RIGHT_BRACKET );
-                if( ENABLED ) replacement.build( (prevRightBracket + 1), end ).ifPresent( this::addReplacement );
+                replacement.build( (prevRightBracket + 1), end ).ifPresent( this::addReplacement );
             }
 
             return super.visitArrayAccess( node, input );
@@ -182,7 +182,7 @@ public class LayoutFormatter extends ReplacementFormatter {
 
         @Override
         public Void visitArrayType( ArrayTypeTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitArrayType======" );
+            log.finest("======visitArrayType======");
             int start = input.getFirstTokenIndex( node );
             int end = input.getLastTokenIndex( node );
             int pos = input.findNext( start, WS_NEWLINE_COMMENT_OR_BRACKET ).getAsInt();
@@ -210,33 +210,32 @@ public class LayoutFormatter extends ReplacementFormatter {
                 leftBracket = input.findNext( pos, end, TokenType.LEFT_BRACKET );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitArrayType( node, input );
         }
 
 //        @Override
 //        public Void visitAssert( AssertTree node, Input input ) {
-//            System.out.println( "======visitAssert======" );
 //            return super.visitAssert( node, input );
 //        }
 
         @Override
         public Void visitAssignment( AssignmentTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitAssignment======" );
+            log.finest("======visitAssignment======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Assignment" )
                     .append( node.getVariable() )
                     .append( SPACE )
                     .append( TokenType.ASSIGNMENT )
                     .append( SPACE )
                     .append( node.getExpression() );
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
 
             return super.visitAssignment( node, input );
         }
 
         @Override
         public Void visitBinary( BinaryTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitBinary======" );
+            log.finest("======visitBinary======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Binary" )
                     .append( node.getLeftOperand() )
                     .append( SPACE )
@@ -245,19 +244,18 @@ public class LayoutFormatter extends ReplacementFormatter {
                     .append( node.getRightOperand() );
 
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitBinary( node, input );
         }
 
 //        @Override
 //        public Void visitBlock(BlockTree node, Input input){
-//            System.out.println( "======visitBlock======" );
 //            return super.visitBlock( node, input );
 //        }
 
         @Override
         public Void visitBreak( BreakTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitBreak======" );
+            log.finest("======visitBreak======");
             // add break keyword
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Break" )
                     .append( TokenType.BREAK );
@@ -279,13 +277,13 @@ public class LayoutFormatter extends ReplacementFormatter {
             replacement.setCurrentPositionInclusive( lastAdded + 1 )
                     .append( TokenType.SEMICOLON );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitBreak( node, input );
         }
 
         @Override
         public Void visitCase( CaseTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitCase======" );
+            log.finest("======visitCase======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Case" );
             if( node.getExpression() != null ) {
                 replacement.append( TokenType.CASE )
@@ -303,13 +301,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( tree );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitCase( node, input );
         }
 
         @Override
         public Void visitCatch( CatchTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitCatch======" );
+            log.finest("======visitCatch======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Catch" )
                     .append( TokenType.CATCH )
                     .append( TokenType.LEFT_PAREN )
@@ -320,14 +318,14 @@ public class LayoutFormatter extends ReplacementFormatter {
                     .appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                     .appendBracedBlock( node.getBlock(), input.newline )
                     .append( TokenType.RIGHT_BRACE );
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
 
             return super.visitCatch( node, input );
         }
 
         @Override
         public Void visitClass( ClassTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitClass======" );
+            log.finest("======visitClass======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Class" );
 
             if( isValid( node.getModifiers() ) ) {
@@ -437,13 +435,13 @@ public class LayoutFormatter extends ReplacementFormatter {
             // append any remaining comments, followed by two newlines, and then the closing brace
             replacement.appendWithLeadingNewlines( TokenType.RIGHT_BRACE, 2 );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitClass( node, input );
         }
 
         @Override
         public Void visitCompilationUnit( CompilationUnitTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitCompUnit======" );
+            log.finest("======visitCompilationUnit======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "CompilationUnit" );
 
             // append package annotations and package name
@@ -456,27 +454,27 @@ public class LayoutFormatter extends ReplacementFormatter {
             int replaceStart = input.getFirstTokenIndex( node );
             int replaceStop = replacement.getCurrentPosInclusive();
 
-            if( ENABLED ) replacement.build( replaceStart, replaceStop ).ifPresent( this::addReplacement );
+            replacement.build( replaceStart, replaceStop ).ifPresent( this::addReplacement );
             return super.visitCompilationUnit( node, input );
         }
 
         @Override
         public Void visitCompoundAssignment( CompoundAssignmentTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======CompoundAssignment======" );
+            log.finest("======visitCompundAssignment======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "CompoundAssignment" )
                     .append( node.getVariable() )
                     .append( SPACE )
                     .append( TokenUtils.tokenTypeFromCompoundOperator( node.getKind() ) )
                     .append( SPACE )
                     .append( node.getExpression() );
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
 
             return super.visitCompoundAssignment( node, input );
         }
 
         @Override
         public Void visitConditionalExpression( ConditionalExpressionTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitConditionalExpression======" );
+            log.finest("======visitConditionalExpression======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ConditionalExpression" )
                     .append( node.getCondition() )
                     .append( SPACE )
@@ -488,13 +486,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                     .append( SPACE )
                     .append( node.getFalseExpression() );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitConditionalExpression( node, input );
         }
 
         @Override
         public Void visitContinue(ContinueTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitContinue======" );
+            log.finest("======visitContinue======");
             // add break keyword
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Continue" )
                     .append( TokenType.CONTINUE );
@@ -515,13 +513,13 @@ public class LayoutFormatter extends ReplacementFormatter {
             replacement.setCurrentPositionInclusive( lastAdded + 1 )
                     .append( TokenType.SEMICOLON );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitContinue( node, input );
         }
 
         @Override
         public Void visitDoWhileLoop(DoWhileLoopTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitDoWhileLoop======" );
+            log.finest("======visitDoWhileLoop======");
             // ensure that do-while body is surrounded by braces
             Optional<Replacement> braceReplacement = surroundWithBraces( node.getStatement(), input );
             if( braceReplacement.isPresent() ) {
@@ -545,7 +543,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( TokenType.RIGHT_PAREN )
                         .append( TokenType.SEMICOLON );
 
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
 
             return super.visitDoWhileLoop( node, input );
@@ -553,13 +551,12 @@ public class LayoutFormatter extends ReplacementFormatter {
 
 //        @Override
 //        public Void visitEmptyStatement(EmptyStatementTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitEmptyStatement======" );
 //            return super.visitEmptyStatement( node, input );
 //        }
 
         @Override
         public Void visitEnhancedForLoop(EnhancedForLoopTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitEnhancedForLoop======" );
+            log.finest("======visitEnhancedForLoop======");
             // ensure that for-loop body is surrounded by braces
             Optional<Replacement> braceReplacement = surroundWithBraces( node.getStatement(), input );
             if( braceReplacement.isPresent() ) {
@@ -584,7 +581,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .appendBracedBlock( node.getStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
 
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
 
             return super.visitEnhancedForLoop( node, input );
@@ -592,13 +589,12 @@ public class LayoutFormatter extends ReplacementFormatter {
 
 //        @Override
 //        public Void visitExpressionStatement(ExpressionStatementTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitExpressionStatement======" );
 //            return super.visitExpressionStatement( node, input );
 //        }
 
         @Override
         public Void visitForLoop(ForLoopTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitForLoop======" );
+            log.finest("======visitForLoop======");
             // verify that for-loop body is surrounded by braces
             Optional<Replacement> braceReplacement = surroundWithBraces( node.getStatement(), input );
             if( braceReplacement.isPresent() ) {
@@ -628,7 +624,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .appendBracedBlock( node.getStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
 
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
 
             return super.visitForLoop( node, input );
@@ -636,20 +632,17 @@ public class LayoutFormatter extends ReplacementFormatter {
 
 //        @Override
 //        public Void visitIdentifier(IdentifierTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitIdentifier======" );
 //            return super.visitIdentifier( node, input );
 //        }
 
 //        @Override
 //        public Void visitIntersectionType(IntersectionTypeTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitIntersection======" );
-//
 //            return super.visitIntersectionType( node, input );
 //        }
 
         @Override
         public Void visitIf(IfTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitIf======" );
+            log.finest("======visitIf======");
             // verify that if-block body is surrounded by braces
             Optional<Replacement> braceReplacement = surroundWithBraces( node.getThenStatement(), input );
             if( braceReplacement.isPresent() ) {
@@ -686,7 +679,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                     }
                 }
 
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
 
             return super.visitIf( node, input );
@@ -694,7 +687,7 @@ public class LayoutFormatter extends ReplacementFormatter {
 
         @Override
         public Void visitImport(ImportTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitImport======" );
+            log.finest("======visitImport======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Import" )
                     .append( TokenType.IMPORT )
                     .append( SPACE );
@@ -707,40 +700,40 @@ public class LayoutFormatter extends ReplacementFormatter {
             replacement.append( node.getQualifiedIdentifier() )
                     .append( TokenType.SEMICOLON );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitImport( node, input );
         }
 
         @Override
         public Void visitInstanceOf(InstanceOfTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitInstanceOf======" );
+            log.finest("======visitInstanceOf======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "InstanceOf" )
                     .append( node.getExpression() )
                     .append( SPACE )
                     .append( TokenType.INSTANCE_OF )
                     .append( SPACE )
                     .append( node.getType() );
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
 
             return super.visitInstanceOf( node, input );
         }
 
         @Override
         public Void visitLabeledStatement(LabeledStatementTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitLabeledStatement======" );
+            log.finest("======visitLabeledStatement======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "LabeledStatement" )
                     .append( node.getLabel().toString() )
                     .append( TokenType.COLON )
                     .append( input.newline )
                     .append( node.getStatement() );
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
 
             return super.visitLabeledStatement( node, input );
         }
 
         @Override
         public Void visitLambdaExpression(LambdaExpressionTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitLambdaExpression======" );
+            log.finest("======visitLambdaExpression======");
             // Statement lambdas don't appear to be parsed correctly, so we only handle expression lambdas
             if( node.getBodyKind() == BodyKind.EXPRESSION ) {
                 List<Tree> params =
@@ -762,7 +755,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( TokenType.ARROW )
                         .append( SPACE )
                         .append( node.getBody() );
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
 
             return super.visitLambdaExpression( node, input );
@@ -770,7 +763,7 @@ public class LayoutFormatter extends ReplacementFormatter {
 
         @Override
         public Void visitLiteral(LiteralTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitLiteral======" );
+            log.finest("======visitLiteral======");
             // A negative numeric literal -n is usually represented as unary minus on n,
             // but that doesn't work for integer or long MIN_VALUE. The parser works
             // around that by representing it directly as a singed literal. The
@@ -780,7 +773,7 @@ public class LayoutFormatter extends ReplacementFormatter {
             if( value != null && value.toString().startsWith( "-" ) ) {
                 Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Literal" )
                         .append( node.getValue().toString() );
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
 
             return super.visitLiteral( node, input );
@@ -788,7 +781,7 @@ public class LayoutFormatter extends ReplacementFormatter {
 
         @Override
         public Void visitMemberReference(MemberReferenceTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitMemberReference======" );
+            log.finest("======visitMemberReference======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "MemberReference" )
                     .append( node.getQualifierExpression() )
                     .append( TokenType.REFERENCE );
@@ -804,13 +797,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( node.getName().toString() );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitMemberReference( node, input );
         }
 
         @Override
         public Void visitMemberSelect( MemberSelectTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitMemberSelect======" );
+            log.finest("======visitMemberSelect======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "MemberSelect" )
                     .append( node.getExpression() )
                     .append( TokenType.DOT );
@@ -823,13 +816,13 @@ public class LayoutFormatter extends ReplacementFormatter {
             replacement.appendComments( identifier )
                     .append( node.getIdentifier().toString() );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitMemberSelect( node, input );
         }
 
         @Override
         public Void visitMethod( MethodTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitMethod======" );
+            log.finest("======visitMethod======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Method" );
 
             if( isValid( node.getModifiers() ) ) {
@@ -894,13 +887,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( TokenType.RIGHT_BRACE );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitMethod( node, input );
         }
 
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitMethodInvocation======" );
+            log.finest("======visitMethodInvocation======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "MethodInvocation" )
                     .append( node.getMethodSelect() )
                     .append( Config.INSTANCE.padding.methodName )
@@ -915,13 +908,13 @@ public class LayoutFormatter extends ReplacementFormatter {
 
             replacement.append( TokenType.RIGHT_PAREN );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitMethodInvocation( node, input );
         }
 
         @Override
         public Void visitNewArray( NewArrayTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitNewArray======" );
+            log.finest("======visitNewArray======");
             //TODO what about top-level annotations?
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "NewArray");
 
@@ -958,13 +951,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                 }
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitNewArray( node, input );
         }
 
         @Override
         public Void visitNewClass( NewClassTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitNewClass======" );
+            log.finest("======visitNewClass======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "NewClass" )
                     .append( TokenType.NEW )
                     .append( SPACE )
@@ -985,19 +978,18 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( TokenType.RIGHT_BRACE );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitNewClass( node, input );
         }
 
 //        @Override
 //        public Void visitOther( Tree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitOther======" );
 //            return super.visitOther( node, input );
 //        }
 
         @Override
         public Void visitParameterizedType( ParameterizedTypeTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitParameterizedType======" );
+            log.finest("======visitParameterizedType======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "ParameterizedType" )
                     .append( node.getType() )
                     .append( TokenType.LESS_THAN );
@@ -1009,32 +1001,31 @@ public class LayoutFormatter extends ReplacementFormatter {
             }
             replacement.append( TokenType.GREATER_THAN );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitParameterizedType( node, input );
         }
 
 //        @Override
 //        public Void visitPrimitiveType( PrimitiveTypeTree node, Input input ) {
-//            if( VERBOSE ) System.out.println( "======visitPrimitiveType======" );
 //            return super.visitPrimitiveType( node, input );
 //        }
 
         @Override
         public Void visitReturn( ReturnTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitReturn======" );
+            log.finest("======visitReturn======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Return" )
                     .append( TokenType.RETURN )
                     .append( SPACE )
                     .append( node.getExpression() )
                     .append( TokenType.SEMICOLON );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitReturn( node, input );
         }
 
         @Override
         public Void visitSwitch( SwitchTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitSwitch======" );
+            log.finest("======visitSwitch======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Switch" )
                     .append( TokenType.SWITCH )
                     .append( Config.INSTANCE.padding.methodName );
@@ -1046,13 +1037,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                     .appendList( node.getCases(), TokenType.NEWLINE )
                     .appendWithLeadingNewlines( TokenType.RIGHT_BRACE, 1 );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitSwitch( node, input );
         }
 
         @Override
         public Void visitSynchronized( SynchronizedTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitSynchronized======" );
+            log.finest("======visitSynchronized======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Synchronized" )
                     .append( TokenType.SYNCHRONIZED )
                     .append( Config.INSTANCE.padding.methodName );
@@ -1064,26 +1055,26 @@ public class LayoutFormatter extends ReplacementFormatter {
                     .appendBracedBlock( node.getBlock(), input.newline )
                     .append( TokenType.RIGHT_BRACE );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitSynchronized( node, input );
         }
 
         @Override
         public Void visitThrow( ThrowTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitThrow======" );
+            log.finest("======visitThrow======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Throw" )
                     .append( TokenType.THROW )
                     .append( SPACE )
                     .append( node.getExpression() )
                     .append( TokenType.SEMICOLON );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitThrow( node, input );
         }
 
         @Override
         public Void visitTry( TryTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitTry======" );
+            log.finest("======visitTry======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Try" )
                     .append( TokenType.TRY );
 
@@ -1112,13 +1103,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( TokenType.RIGHT_BRACE );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitTry( node, input );
         }
 
         @Override
         public Void visitTypeCast( TypeCastTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitTypeCast======" );
+            log.finest("======visitTypeCast======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "TypeCast" )
                     .append( TokenType.LEFT_PAREN )
                     .append( Config.INSTANCE.padding.typeCast )
@@ -1127,13 +1118,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                     .append( TokenType.RIGHT_PAREN )
                     .append( node.getExpression() );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitTypeCast( node, input );
         }
 
         @Override
         public Void visitTypeParameter( TypeParameterTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitTypeParameter======" );
+            log.finest("======visitTypeParameter======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "TypeParameter" );
 
             List<Tree> annotations = node.getAnnotations().stream().map( Tree.class::cast ).collect( Collectors.toList() );
@@ -1152,13 +1143,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .appendList( bounds, TokenType.COMMA );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitTypeParameter( node, input );
         }
 
         @Override
         public Void visitUnionType(UnionTypeTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitUnionType======" );
+            log.finest("======visitUnionType======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "UnionType" );
 
             List<Tree> alternatives =
@@ -1173,13 +1164,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                 }
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitUnionType( node, input );
         }
 
         @Override
         public Void visitUnary(UnaryTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitUnary======" );
+            log.finest("======visitUnary======");
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Unary" );
             if( node.getKind() == Kind.POSTFIX_DECREMENT || node.getKind() == Kind.POSTFIX_INCREMENT ) {
                 replacement.append( node.getExpression() )
@@ -1189,13 +1180,13 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .append( node.getExpression() );
             }
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitUnary( node, input );
         }
 
         @Override
         public Void visitWhileLoop(WhileLoopTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======visitWhileLoop======" );
+            log.finest("======visitWhileLoop======");
             // ensure that do-while body is surrounded by braces
             Optional<Replacement> braceReplacement = surroundWithBraces( node.getStatement(), input );
             if( braceReplacement.isPresent() ) {
@@ -1211,7 +1202,7 @@ public class LayoutFormatter extends ReplacementFormatter {
                         .appendOpeningBrace( Config.INSTANCE.cuddleBraces )
                         .appendBracedBlock( node.getStatement(), input.newline )
                         .append( TokenType.RIGHT_BRACE );
-                if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+                replacement.build().ifPresent( this::addReplacement );
             }
             return super.visitWhileLoop( node, input );
         }
@@ -1333,28 +1324,6 @@ public class LayoutFormatter extends ReplacementFormatter {
                     return "|=";
                 default: throw new Error();
             }
-        }
-
-        private void printTree( Tree tree, Input input ) {
-            int startIdx = input.getFirstTokenIndex( tree );
-            int endIdx = input.getLastTokenIndex( tree );
-            for( int pos=startIdx; pos<endIdx; pos++ ) {
-                System.out.println( pos + ": [" + input.tokens.get( pos ).toString() + "]" );
-            }
-        }
-
-        private void printBeforeAfter( Tree tree, Input input, StringBuilder sb ) {
-            System.out.println( "++++++++++++++++++++++" );
-            System.out.println( "[" + input.stringifyTree( tree ) + "]" );
-            System.out.println( "----------------------" );
-            System.out.println( "[" + sb.toString() + "]");
-            System.out.println( "++++++++++++++++++++++" );
-        }
-
-        private void printBeforeAfter( Tree tree, Input input, String newText ) {
-            System.out.println( input.stringifyTree( tree ) );
-            System.out.println( "----------------------" );
-            System.out.println( newText );
         }
     }
 

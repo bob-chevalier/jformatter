@@ -29,13 +29,10 @@ public class ParenthesesFormatter extends ReplacementFormatter {
 
     private static class ParenthesesScanner extends ReplacementScanner {
 
-        private static final boolean VERBOSE = false;
-        private static final boolean ENABLED = true;
         private static final String NAME = "ParenthesesFormatter::";
 
         @Override
         public Void visitParenthesized(ParenthesizedTree node, Input input ) {
-            if( VERBOSE ) System.out.println( "======ParenthesesFormatter::visitParenthesized======" );
             Replacement.Builder replacement = new Replacement.Builder( node, input, NAME + "Parenthesized" )
                     .append( TokenType.LEFT_PAREN )
                     .append( Config.INSTANCE.padding.parenGrouping )
@@ -43,7 +40,7 @@ public class ParenthesesFormatter extends ReplacementFormatter {
                     .append( Config.INSTANCE.padding.parenGrouping )
                     .append( TokenType.RIGHT_PAREN );
 
-            if( ENABLED ) replacement.build().ifPresent( this::addReplacement );
+            replacement.build().ifPresent( this::addReplacement );
             return super.visitParenthesized( node, input );
         }
     }

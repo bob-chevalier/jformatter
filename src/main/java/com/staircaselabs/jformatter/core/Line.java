@@ -13,8 +13,8 @@ public class Line {
         segment = LineSegment.create( prevLineOffset, tokens, newline, null, strategy );
     }
 
-    public void printMarkup() {
-        System.out.printf( segment.getTokens().stream().map( TextToken::toMarkupString ).collect( Collectors.joining() ) );
+    public String getMarkupString() {
+        return segment.getTokens().stream().map( TextToken::toMarkupString ).collect( Collectors.joining() );
     }
 
     public int getIndentLevel() {
