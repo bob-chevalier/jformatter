@@ -4,7 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-public final class ColorFormatter extends SimpleFormatter {
+public final class ColorLogger extends SimpleFormatter {
 
     protected static final String COLOR_RESET = "\u001b[0m";
 
