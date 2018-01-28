@@ -1,6 +1,8 @@
-package com.staircaselabs.jformatter.core;
+package com.staircaselabs.jformatter.formatters.linewrap;
 
+import com.staircaselabs.jformatter.core.DotFile;
 import com.staircaselabs.jformatter.core.LineWrapPriority.Strategy;
+import com.staircaselabs.jformatter.core.TextToken;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,7 +11,7 @@ public class Line {
 
     private LineSegment segment;
 
-    public Line( int prevLineOffset, List<TextToken> tokens, String newline, Strategy strategy ) {
+    public Line(int prevLineOffset, List<TextToken> tokens, String newline, Strategy strategy ) {
         segment = LineSegment.create( prevLineOffset, tokens, newline, null, strategy );
     }
 

@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.formatters;
+package com.staircaselabs.jformatter.formatters.modifier;
 
 import com.staircaselabs.jformatter.core.*;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;

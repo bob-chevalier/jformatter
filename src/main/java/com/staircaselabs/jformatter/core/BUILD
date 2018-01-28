@@ -1,6 +1,6 @@
 java_library(
     name = "core",
-    srcs = glob([ "*.java" ]),
+    srcs = glob([ "**/*.java" ]),
     deps = [
         "@yamlbeans//jar",
         "//sub-modules:langtools"

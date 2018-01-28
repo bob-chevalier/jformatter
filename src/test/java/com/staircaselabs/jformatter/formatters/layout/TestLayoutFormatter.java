@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.formatters;
+package com.staircaselabs.jformatter.formatters.layout;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -6,6 +6,7 @@ import com.staircaselabs.jformatter.core.FormatException;
 
 import java.io.IOException;
 
+import com.staircaselabs.jformatter.formatters.Helper;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

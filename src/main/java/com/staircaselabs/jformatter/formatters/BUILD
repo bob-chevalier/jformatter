@@ -1,6 +1,6 @@
 java_library(
     name = "formatters",
-    srcs = glob([ "*.java" ]),
+    srcs = glob(["**/*.java"]),
     deps = [
         "//sub-modules:langtools",
         "//src/main/java/com/staircaselabs/jformatter/core:core"

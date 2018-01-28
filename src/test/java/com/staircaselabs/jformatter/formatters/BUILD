@@ -1,6 +1,6 @@
 java_library(
     name = "formatters",
-    srcs = glob([ "*.java" ]),
+    srcs = glob([ "**/*.java" ]),
     deps = [
         "@junit4//jar",
         "@org_junit_platform_commons//jar",

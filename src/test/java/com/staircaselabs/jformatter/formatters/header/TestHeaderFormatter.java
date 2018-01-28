@@ -1,11 +1,11 @@
-package com.staircaselabs.jformatter.formatters;
+package com.staircaselabs.jformatter.formatters.header;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import com.staircaselabs.jformatter.core.FormatException;
-import com.staircaselabs.jformatter.formatters.HeaderFormatter;
 import java.io.IOException;
-import java.nio.file.Paths;
+
+import com.staircaselabs.jformatter.formatters.Helper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

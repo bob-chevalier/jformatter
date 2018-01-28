@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.core;
+package com.staircaselabs.jformatter.formatters.layout;
 
 import com.sun.source.tree.Tree;
 

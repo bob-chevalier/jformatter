@@ -1,7 +1,8 @@
-package com.staircaselabs.jformatter.formatters;
+package com.staircaselabs.jformatter.formatters.variable;
 
 import com.staircaselabs.jformatter.core.*;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.staircaselabs.jformatter.formatters.modifier.ModifierFormatter;
 import com.sun.source.tree.VariableTree;
 
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.isValid;

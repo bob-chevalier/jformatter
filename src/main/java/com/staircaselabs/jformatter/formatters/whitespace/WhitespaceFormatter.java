@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.formatters;
+package com.staircaselabs.jformatter.formatters.whitespace;
 
 import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.TextToken;

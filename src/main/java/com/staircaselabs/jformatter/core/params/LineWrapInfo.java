@@ -1,5 +1,6 @@
-package com.staircaselabs.jformatter.core;
+package com.staircaselabs.jformatter.core.params;
 
+import com.staircaselabs.jformatter.core.LineWrap;
 import com.sun.istack.internal.NotNull;
 import com.sun.source.tree.Tree.Kind;
 

@@ -1,6 +1,10 @@
-package com.staircaselabs.jformatter.core;
+package com.staircaselabs.jformatter.formatters.linewrap;
 
+import com.staircaselabs.jformatter.core.Input;
+import com.staircaselabs.jformatter.core.LineWrap;
+import com.staircaselabs.jformatter.core.LineWrapTag;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.staircaselabs.jformatter.core.params.Config;
 import com.sun.source.tree.Tree;
 
 import java.util.List;
@@ -21,7 +25,7 @@ public class MarkupTool {
     }
 
     //TODO determine if this is ever called
-    public Optional<String> tagLineWrapGroup( LineWrap wrapType, List<? extends Tree> list, String source ) {
+    public Optional<String> tagLineWrapGroup(LineWrap wrapType, List<? extends Tree> list, String source ) {
         if( list != null && !list.isEmpty() ) {
             // create a tag with a new group ID for the first tree in the list
             String groupId = tagLineWrap( wrapType, list.get( 0 ), source );

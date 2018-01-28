@@ -1,7 +1,14 @@
 package com.staircaselabs.jformatter;
 
 import com.staircaselabs.jformatter.core.FormatException;
-import com.staircaselabs.jformatter.formatters.*;
+import com.staircaselabs.jformatter.formatters.header.HeaderFormatter;
+import com.staircaselabs.jformatter.formatters.imports.SortedImportsFormatter;
+import com.staircaselabs.jformatter.formatters.layout.LayoutFormatter;
+import com.staircaselabs.jformatter.formatters.linewrap.LineBreakFormatter;
+import com.staircaselabs.jformatter.formatters.modifier.ModifierFormatter;
+import com.staircaselabs.jformatter.formatters.parentheses.ParenthesesFormatter;
+import com.staircaselabs.jformatter.formatters.variable.VariableFormatter;
+import com.staircaselabs.jformatter.formatters.whitespace.WhitespaceFormatter;
 
 import java.io.IOException;
 import java.nio.file.Files;

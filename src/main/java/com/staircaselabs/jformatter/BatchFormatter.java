@@ -2,9 +2,8 @@ package com.staircaselabs.jformatter;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.staircaselabs.jformatter.core.Config;
+import com.staircaselabs.jformatter.core.params.Config;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -21,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.LogManager;
 
 public final class BatchFormatter {
 

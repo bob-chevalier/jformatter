@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.formatters;
+package com.staircaselabs.jformatter.formatters.header;
 
 import static com.staircaselabs.jformatter.core.TokenUtils.findNextByExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.findPrevByExclusion;

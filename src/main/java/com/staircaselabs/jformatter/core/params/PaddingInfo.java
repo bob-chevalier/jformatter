@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.core;
+package com.staircaselabs.jformatter.core.params;
 
 import com.sun.istack.internal.NotNull;
 
