@@ -1,6 +1,7 @@
 package com.staircaselabs.jformatter.formatters.whitespace;
 
 import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.core.Formatter;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
@@ -15,14 +16,11 @@ import static com.staircaselabs.jformatter.core.TokenUtils.findNextByExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.findPrevByExclusion;
 import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 
-public class WhitespaceFormatter {
+public class WhitespaceFormatter implements Formatter {
 
-    private final boolean trimLeadingWhitespace;
+    private static final TokenType[] WHITESPACE_OR_EOF = { TokenType.WHITESPACE, TokenType.EOF };
 
-    public WhitespaceFormatter( boolean trimLeadingWhitespace ) {
-        this.trimLeadingWhitespace = trimLeadingWhitespace;
-    }
-
+    @Override
     public String format( String text ) throws FormatException {
         List<TextToken> tokens = tokenizeText( text );
         List<TextToken> validTokens = new ArrayList<>();
@@ -44,15 +42,14 @@ public class WhitespaceFormatter {
                 validTokens.add( tokens.get( newline ) );
             }
 
-            if( trimLeadingWhitespace ) {
-                // skip leading whitespace on following line
-                lineStart = findNextByExclusion(tokens, newline + 1, TokenType.WHITESPACE, TokenType.EOF);
-            } else {
-                lineStart = findNextByExclusion(tokens, newline + 1, TokenType.EOF);
-            }
+            lineStart = findNextByExclusion(tokens, newline + 1, getLeadingTokensToExclude());
         }
 
         return validTokens.stream().map( TextToken::toString ).collect( Collectors.joining() );
+    }
+
+    protected TokenType[] getLeadingTokensToExclude() {
+        return WHITESPACE_OR_EOF;
     }
 
 }

@@ -23,21 +23,21 @@ public class TestHeaderFormatter {
     @Test
     public void shouldRemoveExtraWhitespace() throws IOException, FormatException {
         String text = Helper.readFileToString( "src/test/data/header_formatter/HeaderExtraWhitespace.java" );
-        String newText = HeaderFormatter.format( text );
+        String newText = new HeaderFormatter().format( text );
         assertThat( newText ).isEqualTo( expectedWithHeader );
     }
 
     @Test
     public void shouldRemoveExtraWhitespaceWithNoHeader() throws IOException, FormatException {
         String text = Helper.readFileToString( "src/test/data/header_formatter/NoHeaderExtraWhitespace.java" );
-        String newText = HeaderFormatter.format( text );
+        String newText = new HeaderFormatter().format( text );
         assertThat( newText ).isEqualTo( expectedWithNoHeader );
     }
 
     @Test
     public void shouldAddNewlinesAfter() throws IOException, FormatException {
         String text = Helper.readFileToString( "src/test/data/header_formatter/HeaderNoNewlines.java" );
-        String newText = HeaderFormatter.format( text );
+        String newText = new HeaderFormatter().format( text );
         assertThat( newText ).isEqualTo( expectedWithHeader );
     }
 

@@ -9,10 +9,11 @@ import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 import java.util.List;
 
 import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.core.Formatter;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 
-public class HeaderFormatter {
+public class HeaderFormatter implements Formatter {
 
     private static final TokenType[] WS_NEWLINE_OR_COMMENT = {
             TokenType.COMMENT_BLOCK,
@@ -22,7 +23,8 @@ public class HeaderFormatter {
             TokenType.NEWLINE
     };
 
-    public static String format( String text ) throws FormatException {
+    @Override
+    public String format( String text ) throws FormatException {
         List<TextToken> tokens = tokenizeText( text );
 
         // find first non-whitespace, non-newline token

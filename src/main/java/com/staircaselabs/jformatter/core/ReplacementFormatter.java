@@ -4,10 +4,9 @@ import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilat
 import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 
 import java.util.List;
-
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
-public class ReplacementFormatter {
+public class ReplacementFormatter implements Formatter {
 
     private static final boolean DEBUGGING = true;
 
@@ -18,6 +17,7 @@ public class ReplacementFormatter {
         this.scanner = scanner;
     }
 
+    @Override
     public String format( String text ) throws FormatException {
 //        try {
             boolean rescanRequired;

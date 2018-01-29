@@ -1,6 +1,7 @@
 package com.staircaselabs.jformatter.formatters.linewrap;
 
 import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.core.Formatter;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.LineWrap;
 import com.staircaselabs.jformatter.core.LineWrapPriority.Strategy;
@@ -48,10 +49,11 @@ import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilat
 import static com.staircaselabs.jformatter.core.CompilationUnitUtils.isValid;
 import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 
-public class LineBreakFormatter {
+public class LineBreakFormatter implements Formatter {
 
     private static final Logger log = Logger.getLogger( LineBreakFormatter.class.getName() );
 
+    @Override
     public String format( String text ) throws FormatException {
         List<TextToken> tokens = tokenizeText( text );
         JCCompilationUnit unit = getCompilationUnit( text );
