@@ -1,7 +1,6 @@
 package com.staircaselabs.jformatter.config;
 
 import com.staircaselabs.jformatter.core.LineWrap;
-import com.sun.istack.internal.NotNull;
 import com.sun.source.tree.Tree.Kind;
 
 import java.util.HashMap;
@@ -21,25 +20,25 @@ public class LineWrapInfo {
     private final Set<Kind> wrappableMemberSelectTypes = new HashSet<>();
 
     private LineWrapInfo(
-            @NotNull Integer maxLineWidth,
-            @NotNull Boolean oneArrayElementPerLine,
-            @NotNull Boolean oneUnionElementPerLine,
-            @NotNull Boolean oneMethodArgPerLine,
-            @NotNull Boolean closingBracesOnNewLine,
-            @NotNull Boolean closingParensOnNewLine,
-            @NotNull Boolean allowLineWrapAtMethodInvocationMemberSelect,
-            @NotNull Boolean allowLineWrapAtNewClassMemberSelect,
-            @NotNull Boolean allowLineWrapAtIdentifierMemberSelect,
-            @NotNull Integer arrayLineWrapTabs,
-            @NotNull Integer assignmentLineWrapTabs,
-            @NotNull Integer extendsLineWrapTabs,
-            @NotNull Integer implementsLineWrapTabs,
-            @NotNull Integer memberSelectLineWrapTabs,
-            @NotNull Integer methodArgumentLineWrapTabs,
-            @NotNull Integer ternaryLineWrapTabs,
-            @NotNull Integer throwsLineWrapTabs,
-            @NotNull Integer unionLineWrapTabs,
-            @NotNull Integer unboundListItemLineWrapTabs
+            Integer maxLineWidth,
+            Boolean oneArrayElementPerLine,
+            Boolean oneUnionElementPerLine,
+            Boolean oneMethodArgPerLine,
+            Boolean closingBracesOnNewLine,
+            Boolean closingParensOnNewLine,
+            Boolean allowLineWrapAtMethodInvocationMemberSelect,
+            Boolean allowLineWrapAtNewClassMemberSelect,
+            Boolean allowLineWrapAtIdentifierMemberSelect,
+            Integer arrayLineWrapTabs,
+            Integer assignmentLineWrapTabs,
+            Integer extendsLineWrapTabs,
+            Integer implementsLineWrapTabs,
+            Integer memberSelectLineWrapTabs,
+            Integer methodArgumentLineWrapTabs,
+            Integer ternaryLineWrapTabs,
+            Integer throwsLineWrapTabs,
+            Integer unionLineWrapTabs,
+            Integer unboundListItemLineWrapTabs
     ) {
         this.maxLineWidth = maxLineWidth;
         this.oneArrayElementPerLine = oneArrayElementPerLine;

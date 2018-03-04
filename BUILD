@@ -1,11 +1,11 @@
 java_binary(
-    name = "jformatter",
+    name = "jformat",
     main_class = "com.staircaselabs.jformatter.BatchFormatter",
-    runtime_deps = [ ":jformatter-lib" ],
+    runtime_deps = [ ":jformatter" ],
 )
 
 java_library(
-    name = "jformatter-lib",
+    name = "jformatter",
     srcs = glob([ "src/main/java/com/staircaselabs/jformatter/*.java" ]),
     deps = [
         "@com_beust_jcommander//jar",
