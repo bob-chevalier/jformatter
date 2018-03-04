@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.core.params;
+package com.staircaselabs.jformatter.config;
 
 import java.util.Collections;
 

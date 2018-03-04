@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.tools.javac.parser.JavaTokenizer;
 import com.sun.tools.javac.parser.Scanner;
@@ -21,6 +20,7 @@ import com.sun.tools.javac.parser.Tokens.Token;
 import com.sun.tools.javac.parser.Tokens.TokenKind;
 import com.sun.tools.javac.util.Context;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.staircaselabs.jformatter.debug.FormatException;
 
 public final class TokenUtils {
 

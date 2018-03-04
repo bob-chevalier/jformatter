@@ -1,8 +1,8 @@
 package com.staircaselabs.jformatter.formatters.linewrap;
 
-import com.staircaselabs.jformatter.core.DotFile;
 import com.staircaselabs.jformatter.core.LineWrapPriority.Strategy;
 import com.staircaselabs.jformatter.core.TextToken;
+import com.staircaselabs.jformatter.debug.DotFile;
 
 import java.util.List;
 import java.util.stream.Collectors;

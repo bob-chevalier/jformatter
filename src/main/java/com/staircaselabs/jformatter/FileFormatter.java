@@ -1,6 +1,6 @@
 package com.staircaselabs.jformatter;
 
-import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.debug.FormatException;
 import com.staircaselabs.jformatter.formatters.Formatters;
 
 import java.io.IOException;

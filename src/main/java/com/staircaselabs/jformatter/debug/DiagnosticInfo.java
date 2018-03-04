@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.core;
+package com.staircaselabs.jformatter.debug;
 
 public class DiagnosticInfo {
 

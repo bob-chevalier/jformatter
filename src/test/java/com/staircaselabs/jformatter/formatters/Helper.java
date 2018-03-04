@@ -7,8 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.staircaselabs.jformatter.core.FormatException;
-
 public final class Helper {
 
     public static String readFileToString( String filepath ) throws IOException {

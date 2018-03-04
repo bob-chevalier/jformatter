@@ -1,16 +1,15 @@
 package com.staircaselabs.jformatter.formatters.linewrap;
 
+import com.staircaselabs.jformatter.config.Config;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.LineWrap;
 import com.staircaselabs.jformatter.core.LineWrapTag;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
-import com.staircaselabs.jformatter.core.params.Config;
 import com.sun.source.tree.Tree;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.IntStream;
 
 public class MarkupTool {
 

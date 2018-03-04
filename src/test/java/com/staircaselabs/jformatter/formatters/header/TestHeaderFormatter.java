@@ -2,7 +2,7 @@ package com.staircaselabs.jformatter.formatters.header;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.debug.FormatException;
 import java.io.IOException;
 
 import com.staircaselabs.jformatter.formatters.Helper;

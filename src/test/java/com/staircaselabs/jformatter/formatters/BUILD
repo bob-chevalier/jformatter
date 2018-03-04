@@ -8,6 +8,7 @@ java_library(
         "@com_google_truth//jar",
         "@com_google_guava//jar",
         "//src/main/java/com/staircaselabs/jformatter/core:core",
+        "//src/main/java/com/staircaselabs/jformatter/debug:debug",
         "//src/main/java/com/staircaselabs/jformatter/formatters:formatters",
     ],
 )

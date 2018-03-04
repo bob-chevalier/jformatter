@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.core.params;
+package com.staircaselabs.jformatter.config;
 
 import com.esotericsoftware.yamlbeans.YamlReader;
 import java.io.FileReader;

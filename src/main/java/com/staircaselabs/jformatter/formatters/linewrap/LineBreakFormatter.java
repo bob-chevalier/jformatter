@@ -1,6 +1,6 @@
 package com.staircaselabs.jformatter.formatters.linewrap;
 
-import com.staircaselabs.jformatter.core.FormatException;
+import com.staircaselabs.jformatter.config.Config;
 import com.staircaselabs.jformatter.core.Formatter;
 import com.staircaselabs.jformatter.core.Input;
 import com.staircaselabs.jformatter.core.LineWrap;
@@ -9,7 +9,7 @@ import com.staircaselabs.jformatter.core.LineWrapTag;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
 import com.staircaselabs.jformatter.core.TokenUtils;
-import com.staircaselabs.jformatter.core.params.Config;
+import com.staircaselabs.jformatter.debug.FormatException;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CaseTree;

@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.core.params;
+package com.staircaselabs.jformatter.config;
 
 import com.staircaselabs.jformatter.core.LineWrap;
 import com.sun.istack.internal.NotNull;

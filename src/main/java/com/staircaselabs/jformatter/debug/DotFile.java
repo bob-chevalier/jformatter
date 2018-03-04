@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.core;
+package com.staircaselabs.jformatter.debug;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,13 +1,12 @@
 package com.staircaselabs.jformatter.core;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.staircaselabs.jformatter.debug.FormatException;
 import com.sun.source.tree.Tree;
 
 public class Replacement {

@@ -8,10 +8,10 @@ import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 import static com.staircaselabs.jformatter.core.TokenUtils.stringifyTokens;
 import java.util.List;
 
-import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.Formatter;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
+import com.staircaselabs.jformatter.debug.FormatException;
 
 public class HeaderFormatter implements Formatter {
 

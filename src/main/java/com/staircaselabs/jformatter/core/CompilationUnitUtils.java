@@ -15,6 +15,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardLocation;
 
+import com.staircaselabs.jformatter.debug.FormatException;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.parser.JavacParser;

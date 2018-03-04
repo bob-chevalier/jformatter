@@ -1,4 +1,4 @@
-package com.staircaselabs.jformatter.core;
+package com.staircaselabs.jformatter.debug;
 
 import java.util.logging.Level;
 import java.util.logging.LogRecord;

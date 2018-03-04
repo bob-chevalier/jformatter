@@ -3,10 +3,12 @@ java_library(
     srcs = glob(["**/*.java"]),
     deps = [
         "//sub-modules:langtools",
-        "//src/main/java/com/staircaselabs/jformatter/core:core"
+        "//src/main/java/com/staircaselabs/jformatter/config:config",
+        "//src/main/java/com/staircaselabs/jformatter/core:core",
+        "//src/main/java/com/staircaselabs/jformatter/debug:debug",
     ],
     visibility = [
-        "//src/main/java/com/staircaselabs/jformatter:__pkg__",
+        "//:__pkg__",
         "//src/test/java/com/staircaselabs/jformatter/formatters:__pkg__",
     ],
 )

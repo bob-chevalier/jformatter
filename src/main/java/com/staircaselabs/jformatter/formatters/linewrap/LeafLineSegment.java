@@ -1,9 +1,9 @@
 package com.staircaselabs.jformatter.formatters.linewrap;
 
-import com.staircaselabs.jformatter.core.DotFile;
+import com.staircaselabs.jformatter.config.Config;
 import com.staircaselabs.jformatter.core.TextToken;
 import com.staircaselabs.jformatter.core.TextToken.TokenType;
-import com.staircaselabs.jformatter.core.params.Config;
+import com.staircaselabs.jformatter.debug.DotFile;
 
 import java.util.ArrayList;
 import java.util.List;

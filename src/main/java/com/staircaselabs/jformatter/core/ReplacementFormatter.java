@@ -4,6 +4,7 @@ import static com.staircaselabs.jformatter.core.CompilationUnitUtils.getCompilat
 import static com.staircaselabs.jformatter.core.TokenUtils.tokenizeText;
 
 import java.util.List;
+import com.staircaselabs.jformatter.debug.FormatException;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 
 public class ReplacementFormatter implements Formatter {

@@ -2,7 +2,7 @@ package com.staircaselabs.jformatter;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.staircaselabs.jformatter.core.params.Config;
+import com.staircaselabs.jformatter.config.Config;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;

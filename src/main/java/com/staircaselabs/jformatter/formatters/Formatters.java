@@ -1,7 +1,7 @@
 package com.staircaselabs.jformatter.formatters;
 
-import com.staircaselabs.jformatter.core.FormatException;
 import com.staircaselabs.jformatter.core.Formatter;
+import com.staircaselabs.jformatter.debug.FormatException;
 import com.staircaselabs.jformatter.formatters.header.HeaderFormatter;
 import com.staircaselabs.jformatter.formatters.imports.SortedImportsFormatter;
 import com.staircaselabs.jformatter.formatters.layout.LayoutFormatter;
